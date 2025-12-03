@@ -3,6 +3,7 @@ import RetreatCard from "@/components/RetreatCard";
 import HeroTextLoop from "@/components/HeroTextLoop";
 import { retreats } from "@/lib/data";
 import Image from "next/image";
+import { FaInstagram, FaWhatsapp } from "react-icons/fa";
 
 export default function Home() {
   return (
@@ -172,21 +173,34 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Newsletter CTA */}
+      {/* CTA */}
       <section className="px-4 md:px-12 max-w-3xl mx-auto w-full text-center space-y-8">
-        <h2 className="text-3xl font-bold">Únete al club de la desconexión</h2>
+        <h2 className="text-3xl font-bold">Recupera tu tiempo y tu atención</h2>
         <p className="text-black/70">
-          Recibe avisos de nuevos retiros y consejos de bienestar práctico. Sin
-          spam, solo calidad.
+          Únete a nuestra comunidad. Compartimos retiros exclusivos y
+          estrategias para mantener el equilibrio en un mundo hiperconectado.
+          Cero spam, 100% realidad.
         </p>
-        <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-          <input
-            type="email"
-            placeholder="tu@email.com"
-            className="flex-1 bg-transparent border-b border-black px-4 py-2 outline-none focus:border-gray transition-colors"
-          />
-          <Button>Suscribirse</Button>
-        </form>
+        <div className="flex flex-col sm:flex-row justify-center gap-4 pt-2 pb-6">
+          <Button
+            href="https://www.instagram.com/yay.experiences"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-linear-to-tr from-[#f09433] via-[#bc1888] to-[#cc2366] text-white border-none hover:opacity-90 hover:text-white gap-2 bg-transparent!"
+          >
+            <FaInstagram className="text-xl" />
+            Instagram
+          </Button>
+          <Button
+            href="https://chat.whatsapp.com/B70aKrnocWsIaka1TVc22e"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-[#25D366]! text-white border-none hover:bg-[#128C7E]! hover:text-white gap-2"
+          >
+            <FaWhatsapp className="text-xl" />
+            Comunidad WhatsApp
+          </Button>
+        </div>
       </section>
     </div>
   );
