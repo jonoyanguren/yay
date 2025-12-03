@@ -35,6 +35,7 @@ export default function Home() {
             <Button
               size="lg"
               variant="outline"
+              href="/concept"
               className="text-white border-white hover:bg-white hover:text-black"
             >
               Nuestro Concepto

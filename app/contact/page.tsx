@@ -1,4 +1,5 @@
 import Button from "@/components/ui/Button";
+import { FaInstagram, FaWhatsapp } from "react-icons/fa";
 
 export default function ContactPage() {
   return (
@@ -14,25 +15,27 @@ export default function ContactPage() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-8 items-stretch">
-        {/* Email Section */}
+        {/* Instagram Section */}
         <div className="bg-white p-8 rounded-2xl border border-gray/20 flex flex-col justify-between hover:border-black/20 transition-colors">
           <div className="space-y-4">
-            <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mb-4 text-xl">
-              ✉️
+            <div className="w-12 h-12 bg-linear-to-tr from-[#f09433] via-[#bc1888] to-[#cc2366] text-white rounded-full flex items-center justify-center mb-4 text-xl">
+              <FaInstagram />
             </div>
-            <h2 className="text-2xl font-bold">Email</h2>
+            <h2 className="text-2xl font-bold">Instagram</h2>
             <p className="text-gray text-sm leading-relaxed">
-              Para consultas generales, prensa o colaboraciones. Respondemos en
-              24-48h.
+              Descubre nuestros retiros desde dentro. Fotos, vídeos y el
+              ambiente real que se respira en cada experiencia.
             </p>
           </div>
           <div className="pt-8">
-            <a
-              href="mailto:hola@yayretreats.com"
-              className="text-lg font-medium border-b border-black pb-0.5 hover:text-gray hover:border-gray transition-colors"
+            <Button
+              href="https://www.instagram.com/yay.experiences"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full bg-linear-to-tr from-[#f09433] via-[#bc1888] to-[#cc2366] border-none text-white hover:opacity-90 hover:text-white"
             >
-              hola@yayretreats.com
-            </a>
+              Ver perfil
+            </Button>
           </div>
         </div>
 
@@ -40,7 +43,7 @@ export default function ContactPage() {
         <div className="bg-white p-8 rounded-2xl border border-transparent flex flex-col justify-between">
           <div className="space-y-4">
             <div className="w-12 h-12 bg-[#25D366] text-white rounded-full flex items-center justify-center mb-4 text-xl">
-              💬
+              <FaWhatsapp />
             </div>
             <h2 className="text-2xl font-bold">Comunidad</h2>
             <p className="text-black/70 text-sm leading-relaxed">
@@ -58,24 +61,6 @@ export default function ContactPage() {
               Unirme al grupo
             </Button>
           </div>
-        </div>
-      </div>
-
-      {/* Social Links */}
-      <div className="mt-16 text-center pt-16 border-t border-gray/10">
-        <h3 className="font-bold mb-6">Síguenos en redes</h3>
-        <div className="flex justify-center gap-8">
-          <a
-            href="https://www.instagram.com/yay.experiences"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray hover:text-black transition-colors"
-          >
-            Instagram &nearr;
-          </a>
-          <a href="#" className="text-gray hover:text-black transition-colors">
-            LinkedIn &nearr;
-          </a>
         </div>
       </div>
     </div>
