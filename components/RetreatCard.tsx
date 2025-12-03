@@ -35,7 +35,6 @@ export default function RetreatCard({ retreat }: RetreatCardProps) {
           </p>
           <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray/10">
             <span className="text-sm font-medium">{retreat.location}</span>
-            <span className="text-sm font-bold">{retreat.price}</span>
           </div>
         </div>
       </div>
