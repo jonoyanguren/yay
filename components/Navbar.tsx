@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Navbar() {
   return (
-    <nav className="w-full py-6 px-4 md:px-12 flex justify-between items-center bg-sand text-black sticky top-0 z-50/100 backdrop-blur-sm bg-sand/90">
+    <nav className="w-full py-6 px-4 md:px-12 flex justify-between items-center bg-sand text-black sticky top-0 z-50 backdrop-blur-sm bg-sand/90">
       <Link href="/" className="text-2xl font-bold tracking-tighter">
         YaY Retreats
       </Link>

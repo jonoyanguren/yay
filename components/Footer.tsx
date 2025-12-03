@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function Footer() {
   return (
     <footer className="bg-black text-white py-16 px-4 md:px-12">
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-12">
         <div className="col-span-1 md:col-span-2">
           <h3 className="text-2xl font-bold mb-4">YaY Retreats</h3>
           <p className="text-gray max-w-sm">
@@ -50,6 +50,33 @@ export default function Footer() {
               <Link href="#" className="hover:text-gray transition-colors">
                 Términos
               </Link>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="font-bold mb-4 text-sm uppercase tracking-wider text-gray">
+            Social
+          </h4>
+          <ul className="space-y-2 text-sm">
+            <li>
+              <a
+                href="https://www.instagram.com/yay.experiences"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-gray transition-colors"
+              >
+                Instagram
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://chat.whatsapp.com/B70aKrnocWsIaka1TVc22e"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-gray transition-colors"
+              >
+                Comunidad WhatsApp
+              </a>
             </li>
           </ul>
         </div>

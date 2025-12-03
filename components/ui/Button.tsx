@@ -5,6 +5,8 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   href?: string;
   variant?: "primary" | "outline" | "ghost";
   size?: "sm" | "md" | "lg";
+  target?: string;
+  rel?: string;
 }
 
 export default function Button({
@@ -13,6 +15,8 @@ export default function Button({
   variant = "primary",
   size = "md",
   className = "",
+  target,
+  rel,
   ...props
 }: ButtonProps) {
   const baseStyles =
@@ -34,7 +38,7 @@ export default function Button({
 
   if (href) {
     return (
-      <Link href={href} className={combinedClassName}>
+      <Link href={href} className={combinedClassName} target={target} rel={rel}>
         {children}
       </Link>
     );

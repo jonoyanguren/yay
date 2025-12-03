@@ -114,6 +114,10 @@ Sobre nosotros
 
 Contacto
 
+Instagram: https://www.instagram.com/yay.experiences
+
+WhatsApp Community: https://chat.whatsapp.com/B70aKrnocWsIaka1TVc22e
+
 Blog (opcional)
 
 Requisitos técnicos

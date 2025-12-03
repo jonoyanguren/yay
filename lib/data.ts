@@ -32,7 +32,7 @@ export const retreats: Retreat[] = [
       "Día 3: Silencio y estrellas",
       "Día 4: Regreso"
     ],
-    image: "/images/sahara.jpg",
+    image: "/assets/sahara.jpg",
     date: "Octubre 2025",
     price: "1200€"
   },
@@ -55,7 +55,7 @@ export const retreats: Retreat[] = [
       "Día 3: Costa Sur",
       "Día 4: Blue Lagoon"
     ],
-    image: "/images/nordic.jpg",
+    image: "/assets/noruega.jpg",
     date: "Noviembre 2025",
     price: "1800€"
   },
@@ -78,7 +78,7 @@ export const retreats: Retreat[] = [
       "Día 3: Volcán y tierra",
       "Día 4: Despedida"
     ],
-    image: "/images/tropical.jpg",
+    image: "/assets/caribe.jpg",
     date: "Septiembre 2025",
     price: "950€"
   }

@@ -2,13 +2,14 @@ import Button from "@/components/ui/Button";
 import RetreatCard from "@/components/RetreatCard";
 import HeroTextLoop from "@/components/HeroTextLoop";
 import { retreats } from "@/lib/data";
+import Image from "next/image";
 
 export default function Home() {
   return (
     <div className="flex flex-col gap-24 pb-24">
       {/* Hero Section */}
       <section className="relative h-[80vh] flex items-center justify-center px-4 bg-black text-white overflow-hidden">
-        <div className="absolute inset-0 z-0 opacity-40 bg-[url('/images/hero-placeholder.jpg')] bg-cover bg-center"></div>
+        <div className="absolute inset-0 z-0 opacity-40 bg-[url('/assets/me.jpg')] bg-cover bg-center"></div>
         <div className="relative z-10 max-w-4xl mx-auto text-center space-y-8">
           <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-tight">
             Desconecta{" "}
@@ -73,8 +74,13 @@ export default function Home() {
             </li>
           </ul>
         </div>
-        <div className="bg-gray/20 aspect-square md:aspect-4/5 rounded-lg">
-          {/* Image Placeholder */}
+        <div className="bg-gray/20 aspect-square md:aspect-4/5 rounded-lg overflow-hidden relative">
+          <Image
+            src="/assets/me2.jpg"
+            alt="Filosofía de descanso"
+            fill
+            className="object-cover"
+          />
         </div>
       </section>
 
