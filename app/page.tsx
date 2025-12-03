@@ -1,5 +1,6 @@
 import Button from "@/components/ui/Button";
 import RetreatCard from "@/components/RetreatCard";
+import HeroTextLoop from "@/components/HeroTextLoop";
 import { retreats } from "@/lib/data";
 
 export default function Home() {
@@ -10,12 +11,20 @@ export default function Home() {
         <div className="absolute inset-0 z-0 opacity-40 bg-[url('/images/hero-placeholder.jpg')] bg-cover bg-center"></div>
         <div className="relative z-10 max-w-4xl mx-auto text-center space-y-8">
           <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-tight">
-            Desconecta del ruido.
-            <br /> Conecta con la realidad.
+            Desconecta{" "}
+            <HeroTextLoop
+              words={[
+                "del ruido.",
+                "del estrés.",
+                "del agobio.",
+                "de la prisa.",
+              ]}
+            />
+            <br /> Conecta contigo mismo.
           </h1>
           <p className="text-xl md:text-2xl text-gray max-w-2xl mx-auto leading-relaxed">
             Retiros modernos enfocados en bienestar práctico, movimiento y
-            experiencias de calidad. Sin misticismo.
+            experiencias de calidad.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Button size="lg" href="#retreats">
@@ -64,7 +73,7 @@ export default function Home() {
             </li>
           </ul>
         </div>
-        <div className="bg-gray/20 aspect-square md:aspect-[4/5] rounded-lg">
+        <div className="bg-gray/20 aspect-square md:aspect-4/5 rounded-lg">
           {/* Image Placeholder */}
         </div>
       </section>
@@ -150,7 +159,7 @@ export default function Home() {
 
             <div className="space-y-4 flex flex-col justify-center">
               <p className="text-2xl font-serif italic text-white/80">
-                "Actividades diseñadas para volver al mundo físico."
+                &quot;Actividades diseñadas para volver al mundo físico.&quot;
               </p>
             </div>
           </div>
