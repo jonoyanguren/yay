@@ -26,9 +26,6 @@ export default function RetreatCard({ retreat }: RetreatCardProps) {
             <h3 className="text-xl font-bold group-hover:text-gray-dark transition-colors">
               {retreat.title}
             </h3>
-            <span className="text-xs font-medium bg-sand px-2 py-1 rounded-full">
-              {retreat.date}
-            </span>
           </div>
           <p className="text-sm text-black/60 mb-6 line-clamp-3 flex-1">
             {retreat.description}

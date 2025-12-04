@@ -18,7 +18,7 @@ export const retreats: Retreat[] = [
     slug: "sahara-calm",
     title: "Sahara Calm",
     location: "Desierto del Sahara, Marruecos",
-    description: "Retiro en el desierto para desconectar del ruido.",
+    description: "Retiro en el desierto para desconectar del ruido. Dormiremos bajo las estrellas y despertaremos con el silencio absoluto de las dunas.",
     fullDescription: "Vive la experiencia del silencio absoluto en las dunas del Sahara. Este retiro está diseñado para vaciar la mente y reconectar con lo esencial a través de la inmensidad del paisaje.",
     activities: [
       "Caminata meditativa en dunas",
@@ -41,7 +41,7 @@ export const retreats: Retreat[] = [
     slug: "nordic-bright",
     title: "Nordic Bright",
     location: "Islandia",
-    description: "Retiro bajo auroras boreales.",
+    description: "Retiro bajo auroras boreales. Exploraremos paisajes volcánicos, cascadas infinitas y nos relajaremos en aguas termales naturales.",
     fullDescription: "Un viaje a la tierra del hielo y el fuego. Disfruta de baños termales, paisajes volcánicos y la magia de las auroras boreales en un entorno de diseño nórdico.",
     activities: [
       "Baños termales",
@@ -64,7 +64,7 @@ export const retreats: Retreat[] = [
     slug: "tropical-relax",
     title: "Tropical Relax",
     location: "Islas Canarias, España",
-    description: "Retiro volcánico y tropical.",
+    description: "Retiro volcánico y tropical. Combinamos la energía de los volcanes con la calma del mar, buena comida local y movimiento consciente.",
     fullDescription: "Sol, mar y tierra volcánica. Un retiro enfocado en la vitalidad, la buena comida y el movimiento consciente en un clima privilegiado.",
     activities: [
       "Surf para principiantes",

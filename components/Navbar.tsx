@@ -4,7 +4,7 @@ export default function Navbar() {
   return (
     <nav className="w-full py-6 px-4 md:px-12 flex justify-between items-center text-black sticky top-0 z-50 backdrop-blur-sm bg-sand/90">
       <Link href="/" className="text-2xl font-bold tracking-tighter">
-        YaY Retreats
+        YaY Experiences
       </Link>
       <div className="hidden md:flex gap-8 text-sm font-medium">
         <Link href="/" className="hover:text-gray-dark transition-colors">
