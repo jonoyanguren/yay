@@ -21,8 +21,6 @@ export default function Home() {
           {/* Fallback for browsers that don't support video */}
           <div className="absolute inset-0 bg-[url('/assets/me.jpg')] bg-cover bg-center"></div>
         </video>
-        {/* Fallback image container if video fails to load or for mobile if needed */}
-        <div className="absolute inset-0 z-0 opacity-40 bg-[url('/assets/me.jpg')] bg-cover bg-center lg:hidden"></div>
 
         <div className="relative z-10 max-w-4xl mx-auto text-center space-y-8">
           <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-tight">
