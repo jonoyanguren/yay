@@ -85,13 +85,6 @@ export default async function RetreatPage({ params }: PageProps) {
         {/* Sidebar / Booking */}
         <div className="md:col-span-1">
           <div className="sticky top-24 p-6 bg-sand-light border border-gray/20 rounded-xl shadow-sm space-y-6">
-            <div>
-              <span className="text-sm text-gray-dark uppercase tracking-wide">
-                Precio por persona
-              </span>
-              <div className="text-3xl font-bold mt-1">{retreat.price}</div>
-            </div>
-
             <div className="space-y-2 text-sm">
               <div className="flex justify-between py-2 border-b border-gray/10">
                 <span className="text-black/60">Fechas</span>
