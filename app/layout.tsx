@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -30,6 +31,19 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-sand text-black min-h-screen flex flex-col`}
       >
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-FJ6KL0M75M"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-FJ6KL0M75M');
+          `}
+        </Script>
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />
