@@ -17,10 +17,13 @@ export default function ConceptPage() {
       {/* HERO SECTION */}
       <section className="relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden bg-black">
         <div className="relative z-10 container mx-auto px-4 md:px-12 text-center text-white max-w-4xl">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tighter">
+          <h1 className="text-5xl md:text-7xl font-bold mb-4 tracking-tighter">
             Nuestro concepto
           </h1>
-          <p className="text-xl md:text-3xl font-medium mb-8 text-white/90">
+          <p className="text-2xl md:text-3xl font-medium text-green mb-8">
+            Si no es YAY, no es.
+          </p>
+          <p className="text-xl md:text-2xl font-medium mb-8 text-white/90">
             Desconectar haciendo cosas que te hacen feliz.
           </p>
           <p className="text-lg md:text-xl leading-relaxed mb-12 max-w-2xl mx-auto text-white/80">
