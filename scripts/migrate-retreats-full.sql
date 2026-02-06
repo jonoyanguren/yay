@@ -1,0 +1,18 @@
+-- Run only if you already have the old retreats table (id, slug, title only).
+-- Adds columns so retreats can store full content. Then run: npm run seed
+
+ALTER TABLE retreats ADD COLUMN IF NOT EXISTS location TEXT NOT NULL DEFAULT '';
+ALTER TABLE retreats ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT '';
+ALTER TABLE retreats ADD COLUMN IF NOT EXISTS full_description TEXT NOT NULL DEFAULT '';
+ALTER TABLE retreats ADD COLUMN IF NOT EXISTS activities JSONB NOT NULL DEFAULT '[]';
+ALTER TABLE retreats ADD COLUMN IF NOT EXISTS program JSONB NOT NULL DEFAULT '[]';
+ALTER TABLE retreats ADD COLUMN IF NOT EXISTS image TEXT NOT NULL DEFAULT '';
+ALTER TABLE retreats ADD COLUMN IF NOT EXISTS date TEXT NOT NULL DEFAULT '';
+ALTER TABLE retreats ADD COLUMN IF NOT EXISTS price TEXT NOT NULL DEFAULT '';
+ALTER TABLE retreats ADD COLUMN IF NOT EXISTS arrival_intro TEXT;
+ALTER TABLE retreats ADD COLUMN IF NOT EXISTS arrival_options JSONB;
+ALTER TABLE retreats ADD COLUMN IF NOT EXISTS day_by_day JSONB;
+ALTER TABLE retreats ADD COLUMN IF NOT EXISTS includes JSONB;
+ALTER TABLE retreats ADD COLUMN IF NOT EXISTS not_includes JSONB;
+ALTER TABLE retreats ADD COLUMN IF NOT EXISTS extra_ideas JSONB;
+ALTER TABLE retreats ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT now();

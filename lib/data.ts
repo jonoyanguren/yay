@@ -1,23 +1,8 @@
-export interface Retreat {
-  id: string;
-  slug: string;
-  title: string;
-  location: string;
-  description: string;
-  fullDescription: string;
-  activities: string[];
-  program: string[];
-  image: string; // Placeholder for now
-  date: string;
-  price: string;
-  arrivalIntro?: string;
-  arrivalOptions?: { title: string; detail: string }[];
-  dayByDay?: { day: string; items: string[] }[];
-  includes?: string[];
-  notIncludes?: string[];
-  extraIdeas?: string[];
-}
+import type { Retreat } from "@/lib/db";
 
+export type { Retreat };
+
+/** Used only by scripts/seed.ts to populate the DB. App reads retreats from DB via lib/db. */
 export const retreats: Retreat[] = [
   {
     id: "1",

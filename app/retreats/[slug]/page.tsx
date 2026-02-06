@@ -1,4 +1,3 @@
-import { retreats } from "@/lib/data";
 import Button from "@/components/ui/Button";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -7,15 +6,34 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+async function getRetreats() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const res = await fetch(`${baseUrl}/api/retreats`, {
+    next: { revalidate: 60 },
+  });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+async function getRetreatBySlug(slug: string) {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const res = await fetch(`${baseUrl}/api/retreats/${slug}`, {
+    next: { revalidate: 60 },
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
 export async function generateStaticParams() {
-  return retreats.map((retreat) => ({
+  const retreats = await getRetreats();
+  return retreats.map((retreat: any) => ({
     slug: retreat.slug,
   }));
 }
 
 export default async function RetreatPage({ params }: PageProps) {
   const { slug } = await params;
-  const retreat = retreats.find((r) => r.slug === slug);
+  const retreat = await getRetreatBySlug(slug);
 
   if (!retreat) {
     notFound();
@@ -222,11 +240,15 @@ export default async function RetreatPage({ params }: PageProps) {
               </div>
             </div>
 
-            <Button className="w-full" size="lg" href="/contact">
-              Solicitar Plaza
+            <Button
+              className="w-full"
+              size="lg"
+              href={`/retreats/${retreat.slug}/book`}
+            >
+              Reservar plaza
             </Button>
             <p className="text-xs text-center text-black/40">
-              Sin compromiso. Te contactaremos para confirmar disponibilidad.
+              Elige habitación y extras; pago seguro con Stripe.
             </p>
           </div>
         </div>

@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Retreat {
+  id              String   @id @default(uuid())
+  slug            String   @unique
+  title           String
+  location        String   @default("")
+  description     String   @default("")
+  fullDescription String   @default("") @map("full_description")
+  activities      Json     @default("[]")
+  program         Json     @default("[]")
+  image           String   @default("")
+  date            String   @default("")
+  price           String   @default("")
+  published       Boolean  @default(false)
+  arrivalIntro    String?  @map("arrival_intro")
+  arrivalOptions  Json?    @map("arrival_options")
+  dayByDay        Json?    @map("day_by_day")
+  includes        Json?    @map("includes")
+  notIncludes     Json?    @map("not_includes")
+  extraIdeas      Json?    @map("extra_ideas")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  roomTypes       RetreatRoomType[]
+  extraActivities RetreatExtraActivity[]
+  bookings        Booking[]
+
+  @@map("retreats")
+}
+
+model RetreatRoomType {
+  id          String @id @default(uuid())
+  retreatId   String @map("retreat_id")
+  name        String
+  priceCents  Int    @map("price_cents")
+  maxQuantity Int    @map("max_quantity")
+
+  retreat   Retreat           @relation(fields: [retreatId], references: [id], onDelete: Cascade)
+  roomSlots BookingRoomSlot[]
+
+  @@map("retreat_room_types")
+}
+
+model RetreatExtraActivity {
+  id            String  @id @default(uuid())
+  retreatId     String  @map("retreat_id")
+  name          String
+  priceCents    Int     @map("price_cents")
+  allowMultiple Boolean @default(true) @map("allow_multiple")
+  maxQuantity   Int?    @map("max_quantity")
+
+  retreat Retreat        @relation(fields: [retreatId], references: [id], onDelete: Cascade)
+  extras  BookingExtra[]
+
+  @@map("retreat_extra_activities")
+}
+
+model Booking {
+  id              String   @id @default(uuid())
+  retreatId       String   @map("retreat_id")
+  stripeSessionId String?  @unique @map("stripe_session_id")
+  customerEmail   String   @map("customer_email")
+  customerName    String?  @map("customer_name")
+  status          String   @default("pending")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  retreat   Retreat           @relation(fields: [retreatId], references: [id])
+  roomSlots BookingRoomSlot[]
+  extras    BookingExtra[]
+
+  @@map("bookings")
+}
+
+model BookingRoomSlot {
+  id                String @id @default(uuid())
+  bookingId         String @map("booking_id")
+  retreatRoomTypeId String @map("retreat_room_type_id")
+  quantity          Int
+
+  booking         Booking         @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  retreatRoomType RetreatRoomType @relation(fields: [retreatRoomTypeId], references: [id])
+
+  @@map("booking_room_slots")
+}
+
+model BookingExtra {
+  id                     String @id @default(uuid())
+  bookingId              String @map("booking_id")
+  retreatExtraActivityId String @map("retreat_extra_activity_id")
+  quantity               Int
+
+  booking              Booking              @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  retreatExtraActivity RetreatExtraActivity @relation(fields: [retreatExtraActivityId], references: [id])
+
+  @@map("booking_extras")
+}

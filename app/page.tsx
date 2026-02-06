@@ -1,11 +1,20 @@
 import Button from "@/components/ui/Button";
 import RetreatCard from "@/components/RetreatCard";
 import HeroTextLoop from "@/components/HeroTextLoop";
-import { retreats } from "@/lib/data";
 import Image from "next/image";
 import { FaInstagram, FaWhatsapp } from "react-icons/fa";
 
-export default function Home() {
+async function getRetreats() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const res = await fetch(`${baseUrl}/api/retreats`, {
+    next: { revalidate: 60 },
+  });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export default async function Home() {
+  const retreats = await getRetreats();
   return (
     <div className="flex flex-col gap-24 pb-24">
       {/* Hero Section */}

@@ -29,6 +29,25 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
+## Reservas y pagos (Stripe + Prisma + Postgres)
+
+- **Base de datos**: El proyecto usa **Prisma** con Postgres. En Vercel crea un almacén (Prisma Postgres, Neon o Supabase) y enlázalo al proyecto para que inyecte `DATABASE_URL`. Luego:
+  - `npx prisma migrate dev --name init` (crea las tablas) o, si la BD ya existe, `npx prisma generate`.
+  - `npm run seed` para cargar retiros y opciones de reserva.
+- **Stripe**: Crea cuenta en [Stripe](https://stripe.com), obtén la Secret Key y el Publishable Key. Para el webhook en local usa Stripe CLI (`stripe listen --forward-to localhost:3000/api/webhooks/stripe`); en producción configura la URL en el dashboard y usa el signing secret que te den.
+
+### Variables de entorno
+
+| Variable | Uso |
+|----------|-----|
+| `DATABASE_URL` | Connection string de Postgres (Prisma). Inyectada por Vercel al enlazar el almacén. |
+| `STRIPE_SECRET_KEY` | Clave secreta de la API de Stripe. |
+| `STRIPE_WEBHOOK_SECRET` | Signing secret del webhook (diferente en local con CLI y en producción). |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | (Opcional) Si más adelante usas Stripe.js en cliente. |
+| `NEXT_PUBLIC_BASE_URL` o `VERCEL_URL` | URL base para success/cancel de Checkout (Vercel inyecta `VERCEL_URL`). |
+
+Copia `.env.example` a `.env.local` y rellena los valores.
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
