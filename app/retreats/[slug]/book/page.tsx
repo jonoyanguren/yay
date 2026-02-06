@@ -1,9 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import {
-  getRoomTypesWithAvailability,
-  getExtraActivities,
-} from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import BookingForm from "./BookingForm";
 
 interface PageProps {
@@ -17,6 +14,30 @@ async function getRetreatBySlug(slug: string) {
   });
   if (!res.ok) return null;
   return res.json();
+}
+
+async function getRoomTypesWithAvailability(retreatId: string) {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const res = await fetch(`${baseUrl}/api/retreats/${retreatId}/availability`, {
+    cache: "no-store",
+  });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+async function getExtraActivities(retreatId: string) {
+  const rows = await prisma.retreatExtraActivity.findMany({
+    where: { retreatId },
+    orderBy: { priceCents: "asc" },
+  });
+  return rows.map((r) => ({
+    id: r.id,
+    retreat_id: r.retreatId,
+    name: r.name,
+    price_cents: r.priceCents,
+    allow_multiple: "allowMultiple" in r ? (r as { allowMultiple: boolean }).allowMultiple : true,
+    max_quantity: (r as { maxQuantity: number | null }).maxQuantity ?? null,
+  }));
 }
 
 export default async function BookingPage({ params }: PageProps) {

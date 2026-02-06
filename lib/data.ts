@@ -1,8 +1,8 @@
-import type { Retreat } from "@/lib/db";
+import type { Retreat } from "@/lib/types";
 
 export type { Retreat };
 
-/** Used only by scripts/seed.ts to populate the DB. App reads retreats from DB via lib/db. */
+/** Used only by scripts/seed.ts to populate the DB. App reads retreats from DB via API routes. */
 export const retreats: Retreat[] = [
   {
     id: "1",

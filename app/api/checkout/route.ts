@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
-import {
-  createBooking,
-  addBookingRoomSlots,
-  addBookingExtras,
-  getAvailableForRoomType,
-} from "@/lib/db";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -59,7 +53,26 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const available = await getAvailableForRoomType(roomTypeId);
+  // Check availability
+  const availabilityRows = await prisma.$queryRaw<{ max_quantity: number; sold: string }[]>`
+    SELECT r.max_quantity,
+           COALESCE(SUM(brs.quantity) FILTER (WHERE b.status = 'paid'), 0)::text AS sold
+    FROM retreat_room_types r
+    LEFT JOIN booking_room_slots brs ON brs.retreat_room_type_id = r.id
+    LEFT JOIN bookings b ON b.id = brs.booking_id
+    WHERE r.id = ${roomTypeId}
+    GROUP BY r.id, r.max_quantity
+    LIMIT 1
+  `;
+  if (!availabilityRows[0]) {
+    return NextResponse.json(
+      { error: "Tipo de habitación no encontrado" },
+      { status: 404 }
+    );
+  }
+  const sold = parseInt(availabilityRows[0].sold, 10);
+  const available = Math.max(0, availabilityRows[0].max_quantity - sold);
+  
   if (roomQuantity > available) {
     return NextResponse.json(
       { error: "No hay suficientes plazas disponibles para esa habitación" },
@@ -114,25 +127,38 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const bookingId = await createBooking({
-    retreatId,
-    stripeSessionId: null,
-    customerEmail: customerEmail.trim(),
-    customerName: customerName?.trim() || null,
-    status: "pending",
+  // Create booking
+  const booking = await prisma.booking.create({
+    data: {
+      retreatId,
+      stripeSessionId: null,
+      customerEmail: customerEmail.trim(),
+      customerName: customerName?.trim() || null,
+      status: "pending",
+    },
   });
-  await addBookingRoomSlots([
-    { bookingId, retreatRoomTypeId: roomTypeId, quantity: roomQuantity },
-  ]);
-  await addBookingExtras(
-    (extras ?? [])
-      .filter((e) => e.quantity > 0)
-      .map((e) => ({
-        bookingId,
-        retreatExtraActivityId: e.id,
-        quantity: e.quantity,
-      }))
-  );
+  const bookingId = booking.id;
+
+  // Add room slots
+  await prisma.bookingRoomSlot.create({
+    data: {
+      bookingId,
+      retreatRoomTypeId: roomTypeId,
+      quantity: roomQuantity,
+    },
+  });
+
+  // Add extras
+  const extraData = (extras ?? [])
+    .filter((e) => e.quantity > 0)
+    .map((e) => ({
+      bookingId,
+      retreatExtraActivityId: e.id,
+      quantity: e.quantity,
+    }));
+  if (extraData.length > 0) {
+    await prisma.bookingExtra.createMany({ data: extraData });
+  }
 
   const baseUrl =
     process.env.VERCEL_URL

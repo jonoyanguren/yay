@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { RetreatRoomTypeWithAvailability } from "@/lib/db";
-import type { RetreatExtraActivityRow } from "@/lib/db";
+import type { RetreatRoomTypeWithAvailability } from "@/lib/types";
+import type { RetreatExtraActivityRow } from "@/lib/types";
 import Button from "@/components/ui/Button";
 
 function formatPrice(cents: number): string {

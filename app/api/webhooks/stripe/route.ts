@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { setBookingPaid } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -39,9 +39,14 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    const updated = await setBookingPaid(bookingId);
-    if (!updated) {
-      console.error("Booking not found or already paid:", bookingId);
+    
+    try {
+      await prisma.booking.update({
+        where: { id: bookingId },
+        data: { status: "paid" },
+      });
+    } catch (error) {
+      console.error("Error updating booking to paid:", bookingId, error);
     }
   }
 
