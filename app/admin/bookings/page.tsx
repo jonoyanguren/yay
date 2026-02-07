@@ -216,6 +216,31 @@ export default function BookingsPage() {
     }
   };
 
+  const handleSendEmail = async (bookingId: string, customerEmail: string) => {
+    if (!confirm(`¿Enviar email de confirmación a ${customerEmail}?`)) return;
+
+    const password = localStorage.getItem("adminPassword");
+    if (!password) return;
+
+    try {
+      const res = await fetch(`/api/admin/bookings/${bookingId}/send-email`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${password}`,
+        },
+      });
+
+      if (res.ok) {
+        alert("Email enviado correctamente ✓");
+      } else {
+        const data = await res.json();
+        alert(data.error || "Error enviando el email");
+      }
+    } catch (err) {
+      alert("Error enviando el email");
+    }
+  };
+
   const selectedRetreat = retreats.find((r) => r.id === newBooking.retreatId);
 
   const handleLogout = () => {
@@ -376,12 +401,15 @@ export default function BookingsPage() {
                   <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Fecha
                   </th>
+                  <th className="px-6 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Acciones
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredBookings.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
+                    <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
                       No hay reservas{filterStatus !== "all" && ` con estado "${filterStatus}"`}.
                     </td>
                   </tr>
@@ -443,6 +471,17 @@ export default function BookingsPage() {
                       </td>
                       <td className="px-6 py-4 text-sm text-slate-600">
                         {formatDate(booking.createdAt)}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => handleSendEmail(booking.id, booking.customerEmail)}
+                            className="px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
+                            title="Enviar email de confirmación"
+                          >
+                            📧 Enviar Email
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))

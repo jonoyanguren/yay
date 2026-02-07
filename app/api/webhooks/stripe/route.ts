@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
+import { sendBookingConfirmationEmail } from "@/lib/email";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -41,10 +42,71 @@ export async function POST(request: NextRequest) {
     }
     
     try {
+      // Update booking status
       await prisma.booking.update({
         where: { id: bookingId },
         data: { status: "paid" },
       });
+
+      // Fetch booking details for email
+      const booking = await prisma.booking.findUnique({
+        where: { id: bookingId },
+        include: {
+          retreat: {
+            select: {
+              title: true,
+              slug: true,
+            },
+          },
+          roomSlots: {
+            include: {
+              retreatRoomType: {
+                select: {
+                  name: true,
+                  priceCents: true,
+                },
+              },
+            },
+          },
+          extras: {
+            include: {
+              retreatExtraActivity: {
+                select: {
+                  name: true,
+                  priceCents: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (booking) {
+        // Calculate total
+        let totalAmount = 0;
+        booking.roomSlots.forEach(slot => {
+          totalAmount += slot.retreatRoomType.priceCents * slot.quantity;
+        });
+        booking.extras.forEach(extra => {
+          totalAmount += extra.retreatExtraActivity.priceCents * extra.quantity;
+        });
+
+        // Send confirmation email
+        await sendBookingConfirmationEmail({
+          to: booking.customerEmail,
+          customerName: booking.customerName || "Viajero",
+          retreatTitle: booking.retreat.title,
+          retreatSlug: booking.retreat.slug,
+          roomType: booking.roomSlots[0]?.retreatRoomType.name || "Habitación",
+          roomQuantity: booking.roomSlots[0]?.quantity || 1,
+          extras: booking.extras.map(e => ({
+            name: e.retreatExtraActivity.name,
+            quantity: e.quantity,
+          })),
+          totalAmount,
+          bookingDate: booking.createdAt.toISOString(),
+        });
+      }
     } catch (error) {
       console.error("Error updating booking to paid:", bookingId, error);
     }

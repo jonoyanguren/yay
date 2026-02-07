@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { sendBookingConfirmationEmail } from "@/lib/email";
 
 /**
  * GET /api/admin/bookings
@@ -149,6 +150,34 @@ export async function POST(request: Request) {
         },
       },
     });
+
+    // Send confirmation email if booking is paid
+    if (createdBooking && (status === "paid" || !status)) {
+      // Calculate total
+      let totalAmount = 0;
+      createdBooking.roomSlots.forEach((slot) => {
+        totalAmount += slot.retreatRoomType.priceCents * slot.quantity;
+      });
+      createdBooking.extras.forEach((extra) => {
+        totalAmount += extra.retreatExtraActivity.priceCents * extra.quantity;
+      });
+
+      // Send email (don't await - fire and forget)
+      sendBookingConfirmationEmail({
+        to: createdBooking.customerEmail,
+        customerName: createdBooking.customerName || "Viajero",
+        retreatTitle: createdBooking.retreat.title,
+        retreatSlug: createdBooking.retreat.slug,
+        roomType: createdBooking.roomSlots[0]?.retreatRoomType.name || "Habitación",
+        roomQuantity: createdBooking.roomSlots[0]?.quantity || 1,
+        extras: createdBooking.extras.map((e) => ({
+          name: e.retreatExtraActivity.name,
+          quantity: e.quantity,
+        })),
+        totalAmount,
+        bookingDate: createdBooking.createdAt.toISOString(),
+      }).catch(err => console.error("Error sending email:", err));
+    }
 
     return NextResponse.json(createdBooking);
   } catch (error) {
