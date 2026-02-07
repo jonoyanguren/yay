@@ -539,8 +539,6 @@ export default function BookingsPage() {
                     className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   >
                     <option value="">Seleccionar retiro...</option>
-                    {console.log("All retreats:", retreats.map(r => ({ title: r.title, published: r.published })))}
-                    {console.log("Published retreats:", retreats.filter(r => r.published).map(r => r.title))}
                     {retreats.filter(r => r.published).length === 0 && (
                       <option disabled>No hay retiros publicados disponibles</option>
                     )}

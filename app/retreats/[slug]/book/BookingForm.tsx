@@ -163,6 +163,17 @@ export default function BookingForm({
                             {extra.description && (
                               <span className="text-sm text-black/70 block mt-1">{extra.description}</span>
                             )}
+                            {extra.link && (
+                              <a 
+                                href={extra.link} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-sm text-green hover:underline mt-1 inline-block"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                🔗 Más información
+                              </a>
+                            )}
                           </div>
                           <span className="text-green font-semibold text-lg ml-4">
                             +{formatPrice(extra.price_cents)}
@@ -220,6 +231,16 @@ export default function BookingForm({
                             <span className="font-medium text-lg block">{extra.name}</span>
                             {extra.description && (
                               <span className="text-sm text-black/70 block mt-1">{extra.description}</span>
+                            )}
+                            {extra.link && (
+                              <a 
+                                href={extra.link} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-sm text-green hover:underline mt-1 inline-block"
+                              >
+                                🔗 Más información
+                              </a>
                             )}
                           </div>
                           <span className="text-green font-semibold text-lg ml-4">

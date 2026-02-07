@@ -81,9 +81,11 @@ export async function POST(request: Request) {
           ? {
               create: data.extraActivities.map((ea: any) => ({
                 name: ea.name,
+                description: ea.description,
                 priceCents: ea.priceCents,
                 allowMultiple: ea.allowMultiple,
                 maxQuantity: ea.maxQuantity,
+                link: ea.link,
               })),
             }
           : undefined,

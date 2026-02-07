@@ -121,7 +121,7 @@ export default async function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {retreats.map((retreat) => (
+          {retreats.map((retreat: any) => (
             <RetreatCard key={retreat.id} retreat={retreat} />
           ))}
         </div>

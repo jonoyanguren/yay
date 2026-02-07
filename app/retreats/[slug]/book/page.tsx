@@ -38,6 +38,7 @@ async function getExtraActivities(retreatId: string) {
     price_cents: r.priceCents,
     allow_multiple: "allowMultiple" in r ? (r as { allowMultiple: boolean }).allowMultiple : true,
     max_quantity: (r as { maxQuantity: number | null }).maxQuantity ?? null,
+    link: (r as { link: string | null }).link ?? null,
   }));
 }
 

@@ -34,6 +34,7 @@ interface ExtraActivity {
   priceCents: number;
   allowMultiple: boolean;
   maxQuantity: number | null;
+  link?: string;
   priceEuros?: number; // For display only
 }
 
@@ -85,7 +86,7 @@ export default function RetreatForm({ retreat, isEdit = false }: RetreatFormProp
   const [newNotInclude, setNewNotInclude] = useState("");
   const [newExtraIdea, setNewExtraIdea] = useState("");
   const [newRoomType, setNewRoomType] = useState({ name: "", description: "", priceCents: "", maxQuantity: "" });
-  const [newExtraActivity, setNewExtraActivity] = useState({ name: "", description: "", priceCents: "", allowMultiple: true, maxQuantity: "" });
+  const [newExtraActivity, setNewExtraActivity] = useState({ name: "", description: "", priceCents: "", allowMultiple: true, maxQuantity: "", link: "" });
 
   // Add/Remove functions
   const addActivity = () => {
@@ -201,9 +202,10 @@ export default function RetreatForm({ retreat, isEdit = false }: RetreatFormProp
           priceEuros,
           allowMultiple: newExtraActivity.allowMultiple,
           maxQuantity: newExtraActivity.maxQuantity ? parseInt(newExtraActivity.maxQuantity) : null,
+          link: newExtraActivity.link.trim() || undefined,
         },
       ]);
-      setNewExtraActivity({ name: "", description: "", priceCents: "", allowMultiple: true, maxQuantity: "" });
+      setNewExtraActivity({ name: "", description: "", priceCents: "", allowMultiple: true, maxQuantity: "", link: "" });
     }
   };
 
@@ -830,6 +832,13 @@ export default function RetreatForm({ retreat, isEdit = false }: RetreatFormProp
             rows={2}
             className="px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
           />
+          <input
+            type="url"
+            value={newExtraActivity.link}
+            onChange={(e) => setNewExtraActivity({...newExtraActivity, link: e.target.value})}
+            placeholder="Link (opcional) - Ej: https://ejemplo.com/info"
+            className="px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+          />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <input
               type="number"
@@ -875,6 +884,16 @@ export default function RetreatForm({ retreat, isEdit = false }: RetreatFormProp
                     <p className="font-semibold text-slate-800">{activity.name}</p>
                     {activity.description && (
                       <p className="text-sm text-slate-600 mt-1">{activity.description}</p>
+                    )}
+                    {activity.link && (
+                      <a 
+                        href={activity.link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-sm text-emerald-600 hover:text-emerald-700 hover:underline mt-1 inline-block"
+                      >
+                        🔗 Ver más información
+                      </a>
                     )}
                     <div className="flex gap-4 mt-2 text-sm text-slate-600">
                       <span className="font-medium">

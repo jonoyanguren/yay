@@ -96,9 +96,11 @@ export async function PATCH(
         deleteMany: {},
         create: data.extraActivities.map((ea: any) => ({
           name: ea.name,
+          description: ea.description,
           priceCents: ea.priceCents,
           allowMultiple: ea.allowMultiple,
           maxQuantity: ea.maxQuantity,
+          link: ea.link,
         })),
       };
     }

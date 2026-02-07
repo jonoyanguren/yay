@@ -57,6 +57,7 @@ model RetreatExtraActivity {
   priceCents    Int     @map("price_cents")
   allowMultiple Boolean @default(true) @map("allow_multiple")
   maxQuantity   Int?    @map("max_quantity")
+  link          String?
 
   retreat Retreat        @relation(fields: [retreatId], references: [id], onDelete: Cascade)
   extras  BookingExtra[]

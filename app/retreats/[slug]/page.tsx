@@ -102,7 +102,7 @@ export default async function RetreatPage({ params }: PageProps) {
                   {arrivalIntro}
                 </p>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {arrivalOptions.map((item) => (
+                  {arrivalOptions.map((item: any) => (
                     <div
                       key={item.title}
                       className="p-4 border border-gray/15 rounded-lg bg-white shadow-sm"
@@ -122,7 +122,7 @@ export default async function RetreatPage({ params }: PageProps) {
                   <div className="relative pl-8 md:pl-10">
                     <div className="absolute left-3 md:left-4 top-2 bottom-2 w-px bg-gray/15" />
                     <div className="space-y-5">
-                      {dayByDay.map((day) => (
+                      {dayByDay.map((day: any) => (
                         <div key={day.day} className="relative">
                           <span className="absolute -left-[9px] md:-left-[7px] top-3 w-4 h-4 rounded-full bg-black border-2 border-white shadow-[0_2px_6px_rgba(0,0,0,0.08)]" />
                           <div className="ml-4 md:ml-6 p-5 md:p-6 bg-white border border-gray/10 rounded-xl shadow-sm">
@@ -130,7 +130,7 @@ export default async function RetreatPage({ params }: PageProps) {
                               {day.day}
                             </p>
                             <ul className="space-y-2 text-black/80">
-                              {day.items.map((item) => (
+                              {day.items.map((item: any) => (
                                 <li key={item} className="flex gap-2">
                                   <span className="text-green font-bold">
                                     •
@@ -152,7 +152,7 @@ export default async function RetreatPage({ params }: PageProps) {
           <section>
             <h2 className="text-2xl font-bold mb-6">Actividades Destacadas</h2>
             <ul className="grid sm:grid-cols-2 gap-4">
-              {retreat.activities.map((activity, index) => (
+              {retreat.activities.map((activity: any, index: any) => (
                 <li
                   key={index}
                   className="flex items-start gap-3 p-4 bg-sand-light border border-gray/10 rounded-lg"
@@ -167,7 +167,7 @@ export default async function RetreatPage({ params }: PageProps) {
           <section>
             <h2 className="text-2xl font-bold mb-6">Programa</h2>
             <div className="space-y-4 border-l-2 border-gray/20 pl-6 ml-2">
-              {retreat.program.map((item, index) => (
+              {retreat.program.map((item: any, index: any) => (
                 <div key={index} className="relative">
                   <span className="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-black border-4 border-sand"></span>
                   <p className="text-lg">{item}</p>
@@ -181,7 +181,7 @@ export default async function RetreatPage({ params }: PageProps) {
               <div className="p-5 border border-gray/15 rounded-lg bg-white space-y-2">
                 <h3 className="text-xl font-semibold">Qué incluye</h3>
                 <ul className="space-y-2 text-black/80">
-                  {includes.map((item) => (
+                  {includes.map((item: any) => (
                     <li key={item} className="flex gap-2">
                       <span className="text-green font-bold">✓</span>
                       <span>{item}</span>
@@ -192,7 +192,7 @@ export default async function RetreatPage({ params }: PageProps) {
               <div className="p-5 border border-gray/15 rounded-lg bg-white space-y-2">
                 <h3 className="text-xl font-semibold">No incluye</h3>
                 <ul className="space-y-2 text-black/80">
-                  {notIncludes.map((item) => (
+                  {notIncludes.map((item: any) => (
                     <li key={item} className="flex gap-2">
                       <span className="text-black/40 font-bold">–</span>
                       <span>{item}</span>
@@ -207,7 +207,7 @@ export default async function RetreatPage({ params }: PageProps) {
             <section className="space-y-3">
               <h2 className="text-2xl font-bold">Otras ideas de tarde/noche</h2>
               <div className="flex flex-wrap gap-3">
-                {extraIdeas.map((item) => (
+                {extraIdeas.map((item: any) => (
                   <span
                     key={item}
                     className="px-3 py-2 bg-sand-light border border-gray/10 rounded-full text-sm"
