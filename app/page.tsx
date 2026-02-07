@@ -3,15 +3,43 @@ import RetreatCard from "@/components/RetreatCard";
 import HeroTextLoop from "@/components/HeroTextLoop";
 import Image from "next/image";
 import { FaInstagram, FaWhatsapp } from "react-icons/fa";
+import { prisma } from "@/lib/prisma";
 
 async function getRetreats() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-  const res = await fetch(`${baseUrl}/api/retreats`, {
-    next: { revalidate: 60 },
-  });
-  if (!res.ok) return [];
-  return res.json();
+  try {
+    const retreats = await prisma.retreat.findMany({
+      where: { published: true },
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        location: true,
+        description: true,
+        fullDescription: true,
+        activities: true,
+        program: true,
+        image: true,
+        date: true,
+        price: true,
+        arrivalIntro: true,
+        arrivalOptions: true,
+        dayByDay: true,
+        includes: true,
+        notIncludes: true,
+        extraIdeas: true,
+        published: true,
+        createdAt: true,
+      },
+    });
+    return retreats;
+  } catch (error) {
+    console.error("Error fetching retreats:", error);
+    return [];
+  }
 }
+
+export const revalidate = 60; // Revalidar cada 60 segundos
 
 export default async function Home() {
   const retreats = await getRetreats();

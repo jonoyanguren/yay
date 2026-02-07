@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -6,12 +7,23 @@ interface PageProps {
 }
 
 async function getRetreatBySlug(slug: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-  const res = await fetch(`${baseUrl}/api/retreats/${slug}`, {
-    cache: "no-store",
-  });
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const retreat = await prisma.retreat.findUnique({
+      where: { 
+        slug,
+        published: true,
+      },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+      },
+    });
+    return retreat;
+  } catch (error) {
+    console.error("Error fetching retreat:", error);
+    return null;
+  }
 }
 
 export default async function ThankYouPage({

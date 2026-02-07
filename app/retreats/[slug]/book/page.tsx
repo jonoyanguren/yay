@@ -7,22 +7,61 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-async function getRetreatBySlug(slug: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-  const res = await fetch(`${baseUrl}/api/retreats/${slug}`, {
-    cache: "no-store",
-  });
-  if (!res.ok) return null;
-  return res.json();
+type RoomTypeWithSold = {
+  id: string;
+  retreat_id: string;
+  name: string;
+  description: string | null;
+  price_cents: number;
+  max_quantity: number;
+  sold: number | string;
+};
+
+function toNumber(v: number | string): number {
+  return typeof v === "number" ? v : parseInt(String(v), 10) || 0;
 }
 
-async function getRoomTypesWithAvailability(retreatSlug: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-  const res = await fetch(`${baseUrl}/api/retreats/${retreatSlug}/availability`, {
-    cache: "no-store",
-  });
-  if (!res.ok) return [];
-  return res.json();
+async function getRetreatBySlug(slug: string) {
+  try {
+    const retreat = await prisma.retreat.findUnique({
+      where: { 
+        slug,
+        published: true,
+      },
+    });
+    return retreat;
+  } catch (error) {
+    console.error("Error fetching retreat:", error);
+    return null;
+  }
+}
+
+async function getRoomTypesWithAvailability(retreatId: string) {
+  try {
+    const rows = await prisma.$queryRaw<RoomTypeWithSold[]>`
+      SELECT r.id, r.retreat_id, r.name, r.description, r.price_cents, r.max_quantity,
+             COALESCE(SUM(brs.quantity) FILTER (WHERE b.status = 'paid'), 0)::int AS sold
+      FROM retreat_room_types r
+      LEFT JOIN booking_room_slots brs ON brs.retreat_room_type_id = r.id
+      LEFT JOIN bookings b ON b.id = brs.booking_id
+      WHERE r.retreat_id = ${retreatId}
+      GROUP BY r.id, r.retreat_id, r.name, r.description, r.price_cents, r.max_quantity
+      ORDER BY r.price_cents ASC
+    `;
+    
+    return rows.map((row: RoomTypeWithSold) => ({
+      id: row.id,
+      retreat_id: row.retreat_id,
+      name: row.name,
+      description: row.description,
+      price_cents: row.price_cents,
+      max_quantity: row.max_quantity,
+      available: Math.max(0, row.max_quantity - toNumber(row.sold)),
+    }));
+  } catch (error) {
+    console.error("Error fetching availability:", error);
+    return [];
+  }
 }
 
 async function getExtraActivities(retreatId: string) {
@@ -51,7 +90,7 @@ export default async function BookingPage({ params }: PageProps) {
   }
 
   const [roomTypes, extras] = await Promise.all([
-    getRoomTypesWithAvailability(retreat.slug),
+    getRoomTypesWithAvailability(retreat.id),
     getExtraActivities(retreat.id),
   ]);
 
