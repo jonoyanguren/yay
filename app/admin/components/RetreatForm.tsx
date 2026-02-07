@@ -243,7 +243,7 @@ export default function RetreatForm({ retreat, isEdit = false }: RetreatFormProp
       };
 
       const url = isEdit
-        ? `/api/admin/retreats/${retreat.id}`
+        ? `/api/admin/retreats/${retreat.slug}`
         : `/api/admin/retreats`;
       
       const method = isEdit ? "PATCH" : "POST";

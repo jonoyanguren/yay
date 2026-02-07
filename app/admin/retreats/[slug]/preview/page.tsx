@@ -28,7 +28,7 @@ interface Retreat {
 
 export default function PreviewPage() {
   const params = useParams();
-  const id = params?.id as string;
+  const id = params?.slug as string;
   const [retreat, setRetreat] = useState<Retreat | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -302,7 +302,7 @@ export default function PreviewPage() {
               </div>
               
               <Link
-                href={`/admin/retreats/${id}/edit`}
+                href={`/admin/retreats/${retreat.slug}/edit`}
                 className="block w-full text-center bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
               >
                 Edit Retreat

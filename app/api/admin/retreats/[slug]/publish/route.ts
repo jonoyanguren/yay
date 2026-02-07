@@ -4,22 +4,22 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 
 /**
- * POST /api/admin/retreats/[id]/publish
+ * POST /api/admin/retreats/[slug]/publish
  * Toggles the published status of a retreat
  */
 export async function POST(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {
-    const { id } = await params;
+    const { slug } = await params;
     
     // Get current retreat to toggle published status
     const currentRetreat = await prisma.retreat.findUnique({
-      where: { id },
+      where: { slug },
       select: { published: true, slug: true },
     });
 
@@ -32,7 +32,7 @@ export async function POST(
 
     // Toggle published status
     const retreat = await prisma.retreat.update({
-      where: { id },
+      where: { slug },
       data: { published: !currentRetreat.published },
     });
 

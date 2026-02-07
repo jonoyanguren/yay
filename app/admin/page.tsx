@@ -48,14 +48,14 @@ export default function AdminPage() {
     fetchRetreats();
   }, []);
 
-  const handleDelete = async (id: string, title: string) => {
+  const handleDelete = async (slug: string, title: string) => {
     if (!confirm(`Are you sure you want to delete "${title}"?`)) return;
 
     const password = localStorage.getItem("adminPassword");
     if (!password) return;
 
     try {
-      const res = await fetch(`/api/admin/retreats/${id}`, {
+      const res = await fetch(`/api/admin/retreats/${slug}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${password}`,
@@ -63,7 +63,7 @@ export default function AdminPage() {
       });
 
       if (res.ok) {
-        setRetreats(retreats.filter((r) => r.id !== id));
+        setRetreats(retreats.filter((r) => r.slug !== slug));
       } else {
         alert("Error deleting retreat");
       }
@@ -72,12 +72,12 @@ export default function AdminPage() {
     }
   };
 
-  const handleTogglePublish = async (id: string) => {
+  const handleTogglePublish = async (slug: string) => {
     const password = localStorage.getItem("adminPassword");
     if (!password) return;
 
     try {
-      const res = await fetch(`/api/admin/retreats/${id}/publish`, {
+      const res = await fetch(`/api/admin/retreats/${slug}/publish`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${password}`,
@@ -88,7 +88,7 @@ export default function AdminPage() {
         const updatedRetreat = await res.json();
         setRetreats(
           retreats.map((r) =>
-            r.id === id ? { ...r, published: updatedRetreat.published } : r
+            r.slug === slug ? { ...r, published: updatedRetreat.published } : r
           )
         );
       } else {
@@ -205,7 +205,7 @@ export default function AdminPage() {
                           </Link>
                         ) : (
                           <Link
-                            href={`/admin/retreats/${retreat.id}/preview`}
+                            href={`/admin/retreats/${retreat.slug}/preview`}
                             target="_blank"
                             className="px-3 py-1.5 text-xs font-medium text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-md transition-colors"
                           >
@@ -213,13 +213,13 @@ export default function AdminPage() {
                           </Link>
                         )}
                         <Link
-                          href={`/admin/retreats/${retreat.id}/edit`}
+                          href={`/admin/retreats/${retreat.slug}/edit`}
                           className="px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
                         >
                           Edit
                         </Link>
                         <button
-                          onClick={() => handleTogglePublish(retreat.id)}
+                          onClick={() => handleTogglePublish(retreat.slug)}
                           className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                             retreat.published
                               ? "text-amber-700 bg-amber-50 hover:bg-amber-100"
@@ -229,7 +229,7 @@ export default function AdminPage() {
                           {retreat.published ? "Unpublish" : "Publish"}
                         </button>
                         <button
-                          onClick={() => handleDelete(retreat.id, retreat.title)}
+                          onClick={() => handleDelete(retreat.slug, retreat.title)}
                           className="px-3 py-1.5 text-xs font-medium text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-md transition-colors"
                         >
                           Delete

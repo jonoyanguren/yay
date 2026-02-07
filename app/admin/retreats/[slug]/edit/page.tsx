@@ -7,7 +7,7 @@ import RetreatForm from "../../../components/RetreatForm";
 
 export default function EditRetreatPage() {
   const params = useParams();
-  const id = params.id as string;
+  const id = params.slug as string;
   
   const [retreat, setRetreat] = useState(null);
   const [isLoading, setIsLoading] = useState(true);

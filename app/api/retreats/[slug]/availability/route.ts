@@ -15,15 +15,28 @@ function toNumber(v: number | string): number {
 }
 
 /**
- * GET /api/retreats/[id]/availability
- * Returns room types with availability for a retreat
+ * GET /api/retreats/[slug]/availability
+ * Returns room types with availability for a retreat by slug
  */
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { id: retreatId } = await params;
+    const { slug } = await params;
+    
+    // First get the retreat ID from slug
+    const retreat = await prisma.retreat.findUnique({
+      where: { slug },
+      select: { id: true },
+    });
+
+    if (!retreat) {
+      return NextResponse.json(
+        { error: "Retreat not found" },
+        { status: 404 }
+      );
+    }
     
     const rows = await prisma.$queryRaw<RoomTypeWithSold[]>`
       SELECT r.id, r.retreat_id, r.name, r.price_cents, r.max_quantity,
@@ -31,7 +44,7 @@ export async function GET(
       FROM retreat_room_types r
       LEFT JOIN booking_room_slots brs ON brs.retreat_room_type_id = r.id
       LEFT JOIN bookings b ON b.id = brs.booking_id
-      WHERE r.retreat_id = ${retreatId}
+      WHERE r.retreat_id = ${retreat.id}
       GROUP BY r.id, r.retreat_id, r.name, r.price_cents, r.max_quantity
       ORDER BY r.price_cents ASC
     `;

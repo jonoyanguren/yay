@@ -4,21 +4,21 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 
 /**
- * GET /api/admin/retreats/[id]
- * Returns a single retreat by ID
+ * GET /api/admin/retreats/[slug]
+ * Returns a single retreat by slug
  */
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {
-    const { id } = await params;
+    const { slug } = await params;
     
     const retreat = await prisma.retreat.findUnique({
-      where: { id },
+      where: { slug },
       include: {
         roomTypes: true,
         extraActivities: true,
@@ -43,18 +43,18 @@ export async function GET(
 }
 
 /**
- * PATCH /api/admin/retreats/[id]
+ * PATCH /api/admin/retreats/[slug]
  * Updates a retreat
  */
 export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {
-    const { id } = await params;
+    const { slug } = await params;
     const data = await request.json();
 
     // Update retreat with nested relations
@@ -104,7 +104,7 @@ export async function PATCH(
     }
 
     const retreat = await prisma.retreat.update({
-      where: { id },
+      where: { slug },
       data: updateData,
       include: {
         roomTypes: true,
@@ -143,21 +143,21 @@ export async function PATCH(
 }
 
 /**
- * DELETE /api/admin/retreats/[id]
+ * DELETE /api/admin/retreats/[slug]
  * Deletes a retreat
  */
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {
-    const { id } = await params;
+    const { slug } = await params;
     
     await prisma.retreat.delete({
-      where: { id },
+      where: { slug },
     });
 
     // Revalidate public pages

@@ -16,9 +16,9 @@ async function getRetreatBySlug(slug: string) {
   return res.json();
 }
 
-async function getRoomTypesWithAvailability(retreatId: string) {
+async function getRoomTypesWithAvailability(retreatSlug: string) {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-  const res = await fetch(`${baseUrl}/api/retreats/${retreatId}/availability`, {
+  const res = await fetch(`${baseUrl}/api/retreats/${retreatSlug}/availability`, {
     cache: "no-store",
   });
   if (!res.ok) return [];
@@ -49,7 +49,7 @@ export default async function BookingPage({ params }: PageProps) {
   }
 
   const [roomTypes, extras] = await Promise.all([
-    getRoomTypesWithAvailability(retreat.id),
+    getRoomTypesWithAvailability(retreat.slug),
     getExtraActivities(retreat.id),
   ]);
 
