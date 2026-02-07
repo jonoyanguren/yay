@@ -1,34 +1,40 @@
 import Button from "@/components/ui/Button";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-async function getRetreats() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-  const res = await fetch(`${baseUrl}/api/retreats`, {
-    next: { revalidate: 60 },
-  });
-  if (!res.ok) return [];
-  return res.json();
+interface ArrivalOption {
+  title: string;
+  detail: string;
 }
 
-async function getRetreatBySlug(slug: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-  const res = await fetch(`${baseUrl}/api/retreats/${slug}`, {
-    next: { revalidate: 60 },
-  });
-  if (!res.ok) return null;
-  return res.json();
+interface DayItem {
+  day: string;
+  items: string[];
 }
 
 export async function generateStaticParams() {
-  const retreats = await getRetreats();
-  return retreats.map((retreat: any) => ({
+  const retreats = await prisma.retreat.findMany({
+    where: { published: true },
+    select: { slug: true },
+  });
+  
+  return retreats.map((retreat) => ({
     slug: retreat.slug,
   }));
+}
+
+async function getRetreatBySlug(slug: string) {
+  return await prisma.retreat.findUnique({
+    where: { 
+      slug,
+      published: true,
+    },
+  });
 }
 
 export default async function RetreatPage({ params }: PageProps) {
@@ -39,15 +45,17 @@ export default async function RetreatPage({ params }: PageProps) {
     notFound();
   }
 
-  const arrivalOptions = retreat.arrivalOptions ?? [];
+  const arrivalOptions = (Array.isArray(retreat.arrivalOptions) ? retreat.arrivalOptions : []) as unknown as ArrivalOption[];
   const arrivalIntro =
     retreat.arrivalIntro ??
     "Llega como quieras: te ayudamos a coordinar vuelos, coche o transfer para que encaje con el grupo y con tus horarios.";
 
-  const dayByDay = retreat.dayByDay ?? [];
-  const includes = retreat.includes ?? [];
-  const notIncludes = retreat.notIncludes ?? [];
-  const extraIdeas = retreat.extraIdeas ?? [];
+  const dayByDay = (Array.isArray(retreat.dayByDay) ? retreat.dayByDay : []) as unknown as DayItem[];
+  const includes = (Array.isArray(retreat.includes) ? retreat.includes : []) as string[];
+  const notIncludes = (Array.isArray(retreat.notIncludes) ? retreat.notIncludes : []) as string[];
+  const extraIdeas = (Array.isArray(retreat.extraIdeas) ? retreat.extraIdeas : []) as string[];
+  const activities = (Array.isArray(retreat.activities) ? retreat.activities : []) as string[];
+  const program = (Array.isArray(retreat.program) ? retreat.program : []) as string[];
 
   return (
     <div className="pb-24">
@@ -102,7 +110,7 @@ export default async function RetreatPage({ params }: PageProps) {
                   {arrivalIntro}
                 </p>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {arrivalOptions.map((item: any) => (
+                  {arrivalOptions.map((item) => (
                     <div
                       key={item.title}
                       className="p-4 border border-gray/15 rounded-lg bg-white shadow-sm"
@@ -122,7 +130,7 @@ export default async function RetreatPage({ params }: PageProps) {
                   <div className="relative pl-8 md:pl-10">
                     <div className="absolute left-3 md:left-4 top-2 bottom-2 w-px bg-gray/15" />
                     <div className="space-y-5">
-                      {dayByDay.map((day: any) => (
+                      {dayByDay.map((day) => (
                         <div key={day.day} className="relative">
                           <span className="absolute -left-[9px] md:-left-[7px] top-3 w-4 h-4 rounded-full bg-black border-2 border-white shadow-[0_2px_6px_rgba(0,0,0,0.08)]" />
                           <div className="ml-4 md:ml-6 p-5 md:p-6 bg-white border border-gray/10 rounded-xl shadow-sm">
@@ -130,7 +138,7 @@ export default async function RetreatPage({ params }: PageProps) {
                               {day.day}
                             </p>
                             <ul className="space-y-2 text-black/80">
-                              {day.items.map((item: any) => (
+                              {day.items.map((item) => (
                                 <li key={item} className="flex gap-2">
                                   <span className="text-green font-bold">
                                     •
@@ -152,7 +160,7 @@ export default async function RetreatPage({ params }: PageProps) {
           <section>
             <h2 className="text-2xl font-bold mb-6">Actividades Destacadas</h2>
             <ul className="grid sm:grid-cols-2 gap-4">
-              {retreat.activities.map((activity: any, index: any) => (
+              {activities.map((activity, index) => (
                 <li
                   key={index}
                   className="flex items-start gap-3 p-4 bg-sand-light border border-gray/10 rounded-lg"
@@ -167,7 +175,7 @@ export default async function RetreatPage({ params }: PageProps) {
           <section>
             <h2 className="text-2xl font-bold mb-6">Programa</h2>
             <div className="space-y-4 border-l-2 border-gray/20 pl-6 ml-2">
-              {retreat.program.map((item: any, index: any) => (
+              {program.map((item, index) => (
                 <div key={index} className="relative">
                   <span className="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-black border-4 border-sand"></span>
                   <p className="text-lg">{item}</p>
@@ -181,7 +189,7 @@ export default async function RetreatPage({ params }: PageProps) {
               <div className="p-5 border border-gray/15 rounded-lg bg-white space-y-2">
                 <h3 className="text-xl font-semibold">Qué incluye</h3>
                 <ul className="space-y-2 text-black/80">
-                  {includes.map((item: any) => (
+                  {includes.map((item) => (
                     <li key={item} className="flex gap-2">
                       <span className="text-green font-bold">✓</span>
                       <span>{item}</span>
@@ -192,7 +200,7 @@ export default async function RetreatPage({ params }: PageProps) {
               <div className="p-5 border border-gray/15 rounded-lg bg-white space-y-2">
                 <h3 className="text-xl font-semibold">No incluye</h3>
                 <ul className="space-y-2 text-black/80">
-                  {notIncludes.map((item: any) => (
+                  {notIncludes.map((item) => (
                     <li key={item} className="flex gap-2">
                       <span className="text-black/40 font-bold">–</span>
                       <span>{item}</span>
@@ -207,7 +215,7 @@ export default async function RetreatPage({ params }: PageProps) {
             <section className="space-y-3">
               <h2 className="text-2xl font-bold">Otras ideas de tarde/noche</h2>
               <div className="flex flex-wrap gap-3">
-                {extraIdeas.map((item: any) => (
+                {extraIdeas.map((item) => (
                   <span
                     key={item}
                     className="px-3 py-2 bg-sand-light border border-gray/10 rounded-full text-sm"
