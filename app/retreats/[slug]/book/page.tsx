@@ -53,7 +53,7 @@ async function getRoomTypesWithAvailability(retreatId: string) {
       id: row.id,
       retreat_id: row.retreat_id,
       name: row.name,
-      description: row.description,
+      description: row.description ?? undefined,
       price_cents: row.price_cents,
       max_quantity: row.max_quantity,
       available: Math.max(0, row.max_quantity - toNumber(row.sold)),

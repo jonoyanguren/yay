@@ -39,7 +39,7 @@ async function getRetreats() {
   }
 }
 
-export const revalidate = 60; // Revalidar cada 60 segundos
+export const revalidate = 60;
 
 export default async function Home() {
   const retreats = await getRetreats();
