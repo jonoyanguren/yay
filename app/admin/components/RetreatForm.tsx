@@ -21,6 +21,7 @@ interface DayByDay {
 interface RoomType {
   id?: string;
   name: string;
+  description?: string;
   priceCents: number;
   maxQuantity: number;
   priceEuros?: number; // For display only
@@ -29,6 +30,7 @@ interface RoomType {
 interface ExtraActivity {
   id?: string;
   name: string;
+  description?: string;
   priceCents: number;
   allowMultiple: boolean;
   maxQuantity: number | null;
@@ -82,8 +84,8 @@ export default function RetreatForm({ retreat, isEdit = false }: RetreatFormProp
   const [newInclude, setNewInclude] = useState("");
   const [newNotInclude, setNewNotInclude] = useState("");
   const [newExtraIdea, setNewExtraIdea] = useState("");
-  const [newRoomType, setNewRoomType] = useState({ name: "", priceCents: "", maxQuantity: "" });
-  const [newExtraActivity, setNewExtraActivity] = useState({ name: "", priceCents: "", allowMultiple: true, maxQuantity: "" });
+  const [newRoomType, setNewRoomType] = useState({ name: "", description: "", priceCents: "", maxQuantity: "" });
+  const [newExtraActivity, setNewExtraActivity] = useState({ name: "", description: "", priceCents: "", allowMultiple: true, maxQuantity: "" });
 
   // Add/Remove functions
   const addActivity = () => {
@@ -172,12 +174,13 @@ export default function RetreatForm({ retreat, isEdit = false }: RetreatFormProp
         ...roomTypes,
         {
           name: newRoomType.name.trim(),
+          description: newRoomType.description.trim() || "",
           priceCents,
           priceEuros,
           maxQuantity: parseInt(newRoomType.maxQuantity),
         },
       ]);
-      setNewRoomType({ name: "", priceCents: "", maxQuantity: "" });
+      setNewRoomType({ name: "", description: "", priceCents: "", maxQuantity: "" });
     }
   };
 
@@ -193,13 +196,14 @@ export default function RetreatForm({ retreat, isEdit = false }: RetreatFormProp
         ...extraActivities,
         {
           name: newExtraActivity.name.trim(),
+          description: newExtraActivity.description.trim() || "",
           priceCents,
           priceEuros,
           allowMultiple: newExtraActivity.allowMultiple,
           maxQuantity: newExtraActivity.maxQuantity ? parseInt(newExtraActivity.maxQuantity) : null,
         },
       ]);
-      setNewExtraActivity({ name: "", priceCents: "", allowMultiple: true, maxQuantity: "" });
+      setNewExtraActivity({ name: "", description: "", priceCents: "", allowMultiple: true, maxQuantity: "" });
     }
   };
 
@@ -231,11 +235,13 @@ export default function RetreatForm({ retreat, isEdit = false }: RetreatFormProp
         arrivalIntro: formData.arrivalIntro || null,
         roomTypes: roomTypes.map(rt => ({
           name: rt.name,
+          description: rt.description || "",
           priceCents: rt.priceCents,
           maxQuantity: rt.maxQuantity,
         })),
         extraActivities: extraActivities.map(ea => ({
           name: ea.name,
+          description: ea.description || "",
           priceCents: ea.priceCents,
           allowMultiple: ea.allowMultiple,
           maxQuantity: ea.maxQuantity,
@@ -730,7 +736,7 @@ export default function RetreatForm({ retreat, isEdit = false }: RetreatFormProp
       <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-100">
         <h2 className="text-xl font-bold mb-5 text-slate-800">Tipos de Habitación</h2>
         <p className="text-sm text-slate-600 mb-4">Define las opciones de alojamiento y sus precios</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+        <div className="grid grid-cols-1 gap-3 mb-4">
           <input
             type="text"
             value={newRoomType.name}
@@ -738,23 +744,32 @@ export default function RetreatForm({ retreat, isEdit = false }: RetreatFormProp
             placeholder="Nombre (Ej: Habitación compartida)"
             className="px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
           />
-          <input
-            type="number"
-            step="0.01"
-            min="0"
-            value={newRoomType.priceCents}
-            onChange={(e) => setNewRoomType({...newRoomType, priceCents: e.target.value})}
-            placeholder="Precio en € (Ej: 450.00)"
+          <textarea
+            value={newRoomType.description}
+            onChange={(e) => setNewRoomType({...newRoomType, description: e.target.value})}
+            placeholder="Descripción (Ej: Habitación amplia con cama doble y vistas al mar)"
+            rows={2}
             className="px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
           />
-          <input
-            type="number"
-            min="1"
-            value={newRoomType.maxQuantity}
-            onChange={(e) => setNewRoomType({...newRoomType, maxQuantity: e.target.value})}
-            placeholder="Cantidad máxima"
-            className="px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={newRoomType.priceCents}
+              onChange={(e) => setNewRoomType({...newRoomType, priceCents: e.target.value})}
+              placeholder="Precio en € (Ej: 450.00)"
+              className="px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+            />
+            <input
+              type="number"
+              min="1"
+              value={newRoomType.maxQuantity}
+              onChange={(e) => setNewRoomType({...newRoomType, maxQuantity: e.target.value})}
+              placeholder="Cantidad máxima"
+              className="px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+            />
+          </div>
         </div>
         <button
           type="button"
@@ -770,6 +785,9 @@ export default function RetreatForm({ retreat, isEdit = false }: RetreatFormProp
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <p className="font-semibold text-slate-800">{room.name}</p>
+                    {room.description && (
+                      <p className="text-sm text-slate-600 mt-1">{room.description}</p>
+                    )}
                     <div className="flex gap-4 mt-2 text-sm text-slate-600">
                       <span className="font-medium">
                         💰 {(room.priceEuros ?? room.priceCents / 100).toFixed(2)}€
@@ -803,6 +821,13 @@ export default function RetreatForm({ retreat, isEdit = false }: RetreatFormProp
             value={newExtraActivity.name}
             onChange={(e) => setNewExtraActivity({...newExtraActivity, name: e.target.value})}
             placeholder="Nombre (Ej: Masaje relajante)"
+            className="px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+          />
+          <textarea
+            value={newExtraActivity.description}
+            onChange={(e) => setNewExtraActivity({...newExtraActivity, description: e.target.value})}
+            placeholder="Descripción (Ej: Masaje de 60 minutos con aceites esenciales)"
+            rows={2}
             className="px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
           />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -848,6 +873,9 @@ export default function RetreatForm({ retreat, isEdit = false }: RetreatFormProp
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <p className="font-semibold text-slate-800">{activity.name}</p>
+                    {activity.description && (
+                      <p className="text-sm text-slate-600 mt-1">{activity.description}</p>
+                    )}
                     <div className="flex gap-4 mt-2 text-sm text-slate-600">
                       <span className="font-medium">
                         💰 {(activity.priceEuros ?? activity.priceCents / 100).toFixed(2)}€

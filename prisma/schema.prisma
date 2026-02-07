@@ -36,11 +36,12 @@ model Retreat {
 }
 
 model RetreatRoomType {
-  id          String @id @default(uuid())
-  retreatId   String @map("retreat_id")
+  id          String  @id @default(uuid())
+  retreatId   String  @map("retreat_id")
   name        String
-  priceCents  Int    @map("price_cents")
-  maxQuantity Int    @map("max_quantity")
+  description String? @default("")
+  priceCents  Int     @map("price_cents")
+  maxQuantity Int     @map("max_quantity")
 
   retreat   Retreat           @relation(fields: [retreatId], references: [id], onDelete: Cascade)
   roomSlots BookingRoomSlot[]
@@ -52,6 +53,7 @@ model RetreatExtraActivity {
   id            String  @id @default(uuid())
   retreatId     String  @map("retreat_id")
   name          String
+  description   String? @default("")
   priceCents    Int     @map("price_cents")
   allowMultiple Boolean @default(true) @map("allow_multiple")
   maxQuantity   Int?    @map("max_quantity")

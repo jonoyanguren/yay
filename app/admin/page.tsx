@@ -120,6 +120,12 @@ export default function AdminPage() {
           <h1 className="text-4xl font-bold text-gray-800">Retreat Dashboard</h1>
           <div className="flex gap-3">
             <Link
+              href="/admin/bookings"
+              className="bg-violet-600 text-white px-5 py-2.5 rounded-lg hover:bg-violet-700 transition-colors font-medium text-sm"
+            >
+              📋 Ver Reservas
+            </Link>
+            <Link
               href="/admin/retreats/new"
               className="bg-emerald-600 text-white px-5 py-2.5 rounded-lg hover:bg-emerald-700 transition-colors font-medium text-sm"
             >

@@ -66,15 +66,15 @@ async function seed() {
     });
     await prisma.retreatRoomType.createMany({
       data: [
-        { retreatId: saharaId, name: "Habitación doble compartida", priceCents: 89000, maxQuantity: 8 },
-        { retreatId: saharaId, name: "Habitación individual", priceCents: 120000, maxQuantity: 4 },
-        { retreatId: saharaId, name: "Cúpula premium", priceCents: 150000, maxQuantity: 2 },
+        { retreatId: saharaId, name: "Habitación doble compartida", description: "Habitación amplia con 2 camas individuales, baño privado y vistas al oasis", priceCents: 89000, maxQuantity: 8 },
+        { retreatId: saharaId, name: "Habitación individual", description: "Habitación privada con cama king size, baño en suite y terraza con vistas al desierto", priceCents: 120000, maxQuantity: 4 },
+        { retreatId: saharaId, name: "Cúpula premium", description: "Alojamiento exclusivo en cúpula geodésica con jacuzzi privado y experiencia glamping de lujo", priceCents: 150000, maxQuantity: 2 },
       ],
     });
     await prisma.retreatExtraActivity.createMany({
       data: [
-        { retreatId: saharaId, name: "Sesión de fotografía en el desierto", priceCents: 10000, allowMultiple: false },
-        { retreatId: saharaId, name: "Masaje relajante (1h)", priceCents: 5500, allowMultiple: true },
+        { retreatId: saharaId, name: "Sesión de fotografía en el desierto", description: "Sesión fotográfica profesional de 2 horas durante el atardecer en las dunas", priceCents: 10000, allowMultiple: false },
+        { retreatId: saharaId, name: "Masaje relajante (1h)", description: "Masaje terapéutico de cuerpo completo con aceites naturales del Sahara", priceCents: 5500, allowMultiple: true },
       ],
     });
   }
@@ -87,13 +87,13 @@ async function seed() {
     });
     await prisma.retreatRoomType.createMany({
       data: [
-        { retreatId: tropicalId, name: "Habitación doble", priceCents: 45000, maxQuantity: 6 },
-        { retreatId: tropicalId, name: "Habitación individual", priceCents: 62000, maxQuantity: 2 },
+        { retreatId: tropicalId, name: "Habitación doble", description: "Habitación doble con balcón privado y vistas al mar tropical", priceCents: 45000, maxQuantity: 6 },
+        { retreatId: tropicalId, name: "Habitación individual", description: "Suite individual con terraza privada frente al océano", priceCents: 62000, maxQuantity: 2 },
       ],
     });
     await prisma.retreatExtraActivity.createMany({
       data: [
-        { retreatId: tropicalId, name: "Sesión de surf privada", priceCents: 3500, allowMultiple: true },
+        { retreatId: tropicalId, name: "Sesión de surf privada", description: "Clase de surf personalizada de 90 minutos con instructor certificado", priceCents: 3500, allowMultiple: true },
       ],
     });
   }

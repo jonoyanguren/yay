@@ -5,6 +5,7 @@ type RoomTypeWithSold = {
   id: string;
   retreat_id: string;
   name: string;
+  description: string | null;
   price_cents: number;
   max_quantity: number;
   sold: number | string;
@@ -39,13 +40,13 @@ export async function GET(
     }
     
     const rows = await prisma.$queryRaw<RoomTypeWithSold[]>`
-      SELECT r.id, r.retreat_id, r.name, r.price_cents, r.max_quantity,
+      SELECT r.id, r.retreat_id, r.name, r.description, r.price_cents, r.max_quantity,
              COALESCE(SUM(brs.quantity) FILTER (WHERE b.status = 'paid'), 0)::int AS sold
       FROM retreat_room_types r
       LEFT JOIN booking_room_slots brs ON brs.retreat_room_type_id = r.id
       LEFT JOIN bookings b ON b.id = brs.booking_id
       WHERE r.retreat_id = ${retreat.id}
-      GROUP BY r.id, r.retreat_id, r.name, r.price_cents, r.max_quantity
+      GROUP BY r.id, r.retreat_id, r.name, r.description, r.price_cents, r.max_quantity
       ORDER BY r.price_cents ASC
     `;
     
@@ -53,6 +54,7 @@ export async function GET(
       id: row.id,
       retreat_id: row.retreat_id,
       name: row.name,
+      description: row.description,
       price_cents: row.price_cents,
       max_quantity: row.max_quantity,
       available: Math.max(0, row.max_quantity - toNumber(row.sold)),

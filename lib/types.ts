@@ -27,6 +27,7 @@ export type RetreatRoomTypeRow = {
   id: string;
   retreat_id: string;
   name: string;
+  description?: string;
   price_cents: number;
   max_quantity: number;
 };
@@ -35,6 +36,7 @@ export type RetreatExtraActivityRow = {
   id: string;
   retreat_id: string;
   name: string;
+  description?: string;
   price_cents: number;
   allow_multiple: boolean;
   max_quantity: number | null;

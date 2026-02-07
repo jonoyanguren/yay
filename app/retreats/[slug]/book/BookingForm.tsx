@@ -30,7 +30,6 @@ export default function BookingForm({
   const [selectedRoomTypeId, setSelectedRoomTypeId] = useState<string>(
     roomTypes[0]?.id ?? ""
   );
-  const [roomQuantity, setRoomQuantity] = useState(1);
   const [extraQuantities, setExtraQuantities] = useState<
     Record<string, number>
   >(() => Object.fromEntries(extras.map((e) => [e.id, 0])));
@@ -40,7 +39,7 @@ export default function BookingForm({
   const [error, setError] = useState<string | null>(null);
 
   const selectedRoom = roomTypes.find((r) => r.id === selectedRoomTypeId);
-  const roomTotal = selectedRoom ? selectedRoom.price_cents * roomQuantity : 0;
+  const roomTotal = selectedRoom ? selectedRoom.price_cents : 0;
   const extrasTotal = extras.reduce(
     (sum, e) => sum + e.price_cents * (extraQuantities[e.id] ?? 0),
     0
@@ -54,8 +53,8 @@ export default function BookingForm({
       setError("Elige una habitación e indica tu email.");
       return;
     }
-    if (selectedRoom && roomQuantity > selectedRoom.available) {
-      setError("No hay tantas plazas disponibles para esa opción.");
+    if (selectedRoom && selectedRoom.available < 1) {
+      setError("No hay plazas disponibles para esa opción.");
       return;
     }
     setLoading(true);
@@ -67,7 +66,7 @@ export default function BookingForm({
           retreatId,
           slug: retreatSlug,
           roomTypeId: selectedRoomTypeId,
-          roomQuantity,
+          roomQuantity: 1,
           extras: extras
             .filter((e) => (extraQuantities[e.id] ?? 0) > 0)
             .map((e) => ({ id: e.id, quantity: extraQuantities[e.id] })),
@@ -113,7 +112,10 @@ export default function BookingForm({
               />
               <div className="flex flex-col flex-1">
                 <span className="font-semibold text-lg">{room.name}</span>
-                <span className="text-xl mt-1 font-semibold text-green">
+                {room.description && (
+                  <span className="text-sm text-black/70 mt-1">{room.description}</span>
+                )}
+                <span className="text-xl mt-2 font-semibold text-green">
                   {formatPrice(room.price_cents)}
                 </span>
                 <span className="text-sm text-black/60 mt-1">
@@ -123,25 +125,6 @@ export default function BookingForm({
             </label>
           ))}
         </div>
-        {selectedRoom && selectedRoom.available > 0 && (
-          <div className="mt-6 flex items-center gap-3">
-            <label className="text-sm font-medium">Cantidad</label>
-            <select
-              value={roomQuantity}
-              onChange={(e) => setRoomQuantity(Number(e.target.value))}
-              className="rounded-lg border border-gray/20 px-4 py-2.5 text-sm"
-            >
-              {Array.from(
-                { length: selectedRoom.available },
-                (_, i) => i + 1
-              ).map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
       </section>
 
       {extras.length > 0 && (
@@ -173,11 +156,18 @@ export default function BookingForm({
                         }
                         className="h-5 w-5 flex-shrink-0 rounded border-2 border-gray/30 accent-black cursor-pointer"
                       />
-                      <div className="flex-1 flex items-center justify-between">
-                        <span className="font-medium text-lg">{extra.name}</span>
-                        <span className="text-green font-semibold text-lg">
-                          +{formatPrice(extra.price_cents)}
-                        </span>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <span className="font-medium text-lg block">{extra.name}</span>
+                            {extra.description && (
+                              <span className="text-sm text-black/70 block mt-1">{extra.description}</span>
+                            )}
+                          </div>
+                          <span className="text-green font-semibold text-lg ml-4">
+                            +{formatPrice(extra.price_cents)}
+                          </span>
+                        </div>
                       </div>
                     </label>
                   ) : (
@@ -224,11 +214,18 @@ export default function BookingForm({
                           +
                         </button>
                       </div>
-                      <div className="flex-1 flex items-center justify-between">
-                        <span className="font-medium text-lg">{extra.name}</span>
-                        <span className="text-green font-semibold text-lg">
-                          +{formatPrice(extra.price_cents)}
-                        </span>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <span className="font-medium text-lg block">{extra.name}</span>
+                            {extra.description && (
+                              <span className="text-sm text-black/70 block mt-1">{extra.description}</span>
+                            )}
+                          </div>
+                          <span className="text-green font-semibold text-lg ml-4">
+                            +{formatPrice(extra.price_cents)}
+                          </span>
+                        </div>
                       </div>
                     </>
                   )}

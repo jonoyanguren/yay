@@ -53,3 +53,109 @@ export async function GET(request: Request) {
     );
   }
 }
+
+/**
+ * POST /api/admin/bookings
+ * Creates a new booking manually
+ */
+export async function POST(request: Request) {
+  const authError = await requireAuth(request);
+  if (authError) return authError;
+
+  try {
+    const data = await request.json();
+    const {
+      retreatId,
+      customerEmail,
+      customerName,
+      roomTypeId,
+      roomQuantity,
+      extras,
+      status,
+    } = data;
+
+    if (!retreatId || !customerEmail || !roomTypeId || !roomQuantity) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Create booking
+    const booking = await prisma.booking.create({
+      data: {
+        retreatId,
+        customerEmail: customerEmail.trim(),
+        customerName: customerName?.trim() || null,
+        status: status || "paid",
+        stripeSessionId: null,
+      },
+    });
+
+    // Add room slots
+    await prisma.bookingRoomSlot.create({
+      data: {
+        bookingId: booking.id,
+        retreatRoomTypeId: roomTypeId,
+        quantity: roomQuantity,
+      },
+    });
+
+    // Add extras if any
+    if (extras && extras.length > 0) {
+      const extraData = extras
+        .filter((e: any) => e.quantity > 0)
+        .map((e: any) => ({
+          bookingId: booking.id,
+          retreatExtraActivityId: e.id,
+          quantity: e.quantity,
+        }));
+      
+      if (extraData.length > 0) {
+        await prisma.bookingExtra.createMany({ data: extraData });
+      }
+    }
+
+    // Fetch the created booking with all relations
+    const createdBooking = await prisma.booking.findUnique({
+      where: { id: booking.id },
+      include: {
+        retreat: {
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+          },
+        },
+        roomSlots: {
+          include: {
+            retreatRoomType: {
+              select: {
+                name: true,
+                priceCents: true,
+              },
+            },
+          },
+        },
+        extras: {
+          include: {
+            retreatExtraActivity: {
+              select: {
+                name: true,
+                priceCents: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(createdBooking);
+  } catch (error) {
+    console.error("Error creating booking:", error);
+    return NextResponse.json(
+      { error: "Error creating booking" },
+      { status: 500 }
+    );
+  }
+}
