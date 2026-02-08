@@ -1,9 +1,9 @@
-import type { Retreat } from "@/lib/types";
+import type { Retreat, RetreatSeedData } from "@/lib/types";
 
 export type { Retreat };
 
 /** Used only by scripts/seed.ts to populate the DB. App reads retreats from DB via API routes. */
-export const retreats: Retreat[] = [
+export const retreats: RetreatSeedData[] = [
   {
     id: "1",
     slug: "sahara-calm",

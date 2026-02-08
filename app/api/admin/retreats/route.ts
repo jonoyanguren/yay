@@ -2,7 +2,6 @@ import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { RetreatExtraActivityRow } from "@/lib/types";
 
 /**
  * GET /api/admin/retreats
@@ -83,14 +82,22 @@ export async function POST(request: Request) {
           : undefined,
         extraActivities: data.extraActivities
           ? {
-              create: data.extraActivities.map((ea: RetreatExtraActivityRow) => ({
+              create: data.extraActivities.map((ea: {
+                name: string;
+                description?: string;
+                images?: string[];
+                priceCents: number;
+                allowMultiple: boolean;
+                maxQuantity: number | null;
+                link?: string | null;
+              }) => ({
                 name: ea.name,
-                description: ea.description,
+                description: ea.description || "",
                 images: ea.images || [],
                 priceCents: ea.priceCents,
                 allowMultiple: ea.allowMultiple,
                 maxQuantity: ea.maxQuantity,
-                link: ea.link,
+                link: ea.link ?? null,
               })),
             }
           : undefined,
