@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import ImageGallery from "@/components/ImageGallery";
 import type { RetreatRoomTypeWithAvailability } from "@/lib/types";
 import type { RetreatExtraActivityRow } from "@/lib/types";
 import Button from "@/components/ui/Button";
@@ -23,12 +24,11 @@ type Props = {
 export default function BookingForm({
   retreatId,
   retreatSlug,
-  retreatTitle,
   roomTypes,
   extras,
 }: Props) {
   const [selectedRoomTypeId, setSelectedRoomTypeId] = useState<string>(
-    roomTypes[0]?.id ?? ""
+    roomTypes[0]?.id ?? "",
   );
   const [extraQuantities, setExtraQuantities] = useState<
     Record<string, number>
@@ -42,7 +42,7 @@ export default function BookingForm({
   const roomTotal = selectedRoom ? selectedRoom.price_cents : 0;
   const extrasTotal = extras.reduce(
     (sum, e) => sum + e.price_cents * (extraQuantities[e.id] ?? 0),
-    0
+    0,
   );
   const totalCents = roomTotal + extrasTotal;
 
@@ -96,7 +96,7 @@ export default function BookingForm({
           {roomTypes.map((room) => (
             <label
               key={room.id}
-              className={`relative flex items-center gap-5 p-6 rounded-xl border-2 cursor-pointer transition-colors ${
+              className={`relative flex items-start gap-5 p-6 rounded-xl border-2 cursor-pointer transition-colors ${
                 selectedRoomTypeId === room.id
                   ? "border-black bg-sand-light"
                   : "border-gray/15 bg-white hover:border-gray/30"
@@ -108,12 +108,26 @@ export default function BookingForm({
                 value={room.id}
                 checked={selectedRoomTypeId === room.id}
                 onChange={() => setSelectedRoomTypeId(room.id)}
-                className="h-5 w-5 flex-shrink-0 accent-black cursor-pointer"
+                className="h-5 w-5 shrink-0 accent-black cursor-pointer mt-1"
               />
+
               <div className="flex flex-col flex-1">
-                <span className="font-semibold text-lg">{room.name}</span>
+                <div className="flex justify-between items-center gap-4">
+                  <span className="font-semibold text-lg">{room.name}</span>
+                  {room.images && room.images.length > 0 && (
+                    <ImageGallery
+                      images={room.images}
+                      altPrefix={room.name}
+                      variant="button"
+                      buttonLabel="Ver fotos"
+                      className="shrink-0"
+                    />
+                  )}
+                </div>
                 {room.description && (
-                  <span className="text-sm text-black/70 mt-1">{room.description}</span>
+                  <span className="text-sm text-black/70 mt-1 block">
+                    {room.description}
+                  </span>
                 )}
                 <span className="text-xl mt-2 font-semibold text-green">
                   {formatPrice(room.price_cents)}
@@ -137,7 +151,7 @@ export default function BookingForm({
               return (
                 <div
                   key={extra.id}
-                  className={`flex items-center gap-5 p-6 rounded-xl border-2 transition-colors ${
+                  className={`flex items-start gap-5 p-6 rounded-xl border-2 transition-colors ${
                     isSingle && qty > 0
                       ? "border-black bg-sand-light"
                       : "border-gray/15 bg-white hover:border-gray/30"
@@ -154,36 +168,49 @@ export default function BookingForm({
                             [extra.id]: e.target.checked ? 1 : 0,
                           }))
                         }
-                        className="h-5 w-5 flex-shrink-0 rounded border-2 border-gray/30 accent-black cursor-pointer"
+                        className="h-5 w-5 shrink-0 rounded border-2 border-gray/30 accent-black cursor-pointer"
                       />
                       <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <span className="font-medium text-lg block">{extra.name}</span>
-                            {extra.description && (
-                              <span className="text-sm text-black/70 block mt-1">{extra.description}</span>
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="font-medium text-lg">
+                            {extra.name}
+                          </span>
+                          <span className="flex items-center gap-3 shrink-0">
+                            {extra.images && extra.images.length > 0 && (
+                              <ImageGallery
+                                images={extra.images}
+                                altPrefix={extra.name}
+                                variant="button"
+                                buttonLabel="Ver fotos"
+                                className="shrink-0"
+                              />
                             )}
-                            {extra.link && (
-                              <a 
-                                href={extra.link} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-sm text-green hover:underline mt-1 inline-block"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                🔗 Más información
-                              </a>
-                            )}
-                          </div>
-                          <span className="text-green font-semibold text-lg ml-4">
-                            +{formatPrice(extra.price_cents)}
+                            <span className="text-green font-semibold text-lg">
+                              +{formatPrice(extra.price_cents)}
+                            </span>
                           </span>
                         </div>
+                        {extra.description && (
+                          <span className="text-sm text-black/70 block mt-1">
+                            {extra.description}
+                          </span>
+                        )}
+                        {extra.link && (
+                          <a
+                            href={extra.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-green hover:underline mt-1 inline-block"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            🔗 Más información
+                          </a>
+                        )}
                       </div>
                     </label>
                   ) : (
                     <>
-                      <div className="flex items-center gap-0 rounded-full border-2 border-gray/20 bg-white flex-shrink-0">
+                      <div className="flex items-center gap-0 rounded-full border-2 border-gray/20 bg-white shrink-0">
                         <button
                           type="button"
                           onClick={() =>
@@ -191,7 +218,7 @@ export default function BookingForm({
                               ...prev,
                               [extra.id]: Math.max(
                                 0,
-                                (prev[extra.id] ?? 0) - 1
+                                (prev[extra.id] ?? 0) - 1,
                               ),
                             }))
                           }
@@ -213,7 +240,7 @@ export default function BookingForm({
                                 ...prev,
                                 [extra.id]: Math.min(
                                   cap,
-                                  (prev[extra.id] ?? 0) + 1
+                                  (prev[extra.id] ?? 0) + 1,
                                 ),
                               };
                             })
@@ -226,27 +253,40 @@ export default function BookingForm({
                         </button>
                       </div>
                       <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <span className="font-medium text-lg block">{extra.name}</span>
-                            {extra.description && (
-                              <span className="text-sm text-black/70 block mt-1">{extra.description}</span>
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="font-medium text-lg">
+                            {extra.name}
+                          </span>
+                          <span className="flex items-center gap-3 shrink-0">
+                            {extra.images && extra.images.length > 0 && (
+                              <ImageGallery
+                                images={extra.images}
+                                altPrefix={extra.name}
+                                variant="button"
+                                buttonLabel="Ver fotos"
+                                className="shrink-0"
+                              />
                             )}
-                            {extra.link && (
-                              <a 
-                                href={extra.link} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-sm text-green hover:underline mt-1 inline-block"
-                              >
-                                🔗 Más información
-                              </a>
-                            )}
-                          </div>
-                          <span className="text-green font-semibold text-lg ml-4">
-                            +{formatPrice(extra.price_cents)}
+                            <span className="text-green font-semibold text-lg">
+                              +{formatPrice(extra.price_cents)}
+                            </span>
                           </span>
                         </div>
+                        {extra.description && (
+                          <span className="text-sm text-black/70 block mt-1">
+                            {extra.description}
+                          </span>
+                        )}
+                        {extra.link && (
+                          <a
+                            href={extra.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-green hover:underline mt-1 inline-block"
+                          >
+                            🔗 Más información
+                          </a>
+                        )}
                       </div>
                     </>
                   )}

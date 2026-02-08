@@ -12,6 +12,7 @@ type RoomTypeWithSold = {
   retreat_id: string;
   name: string;
   description: string | null;
+  images: string[];
   price_cents: number;
   max_quantity: number;
   sold: number | string;
@@ -24,7 +25,7 @@ function toNumber(v: number | string): number {
 async function getRetreatBySlug(slug: string) {
   try {
     const retreat = await prisma.retreat.findUnique({
-      where: { 
+      where: {
         slug,
         published: true,
       },
@@ -39,21 +40,22 @@ async function getRetreatBySlug(slug: string) {
 async function getRoomTypesWithAvailability(retreatId: string) {
   try {
     const rows = await prisma.$queryRaw<RoomTypeWithSold[]>`
-      SELECT r.id, r.retreat_id, r.name, r.description, r.price_cents, r.max_quantity,
+      SELECT r.id, r.retreat_id, r.name, r.description, r.images, r.price_cents, r.max_quantity,
              COALESCE(SUM(brs.quantity) FILTER (WHERE b.status = 'paid'), 0)::int AS sold
       FROM retreat_room_types r
       LEFT JOIN booking_room_slots brs ON brs.retreat_room_type_id = r.id
       LEFT JOIN bookings b ON b.id = brs.booking_id
       WHERE r.retreat_id = ${retreatId}
-      GROUP BY r.id, r.retreat_id, r.name, r.description, r.price_cents, r.max_quantity
+      GROUP BY r.id, r.retreat_id, r.name, r.description, r.images, r.price_cents, r.max_quantity
       ORDER BY r.price_cents ASC
     `;
-    
+
     return rows.map((row: RoomTypeWithSold) => ({
       id: row.id,
       retreat_id: row.retreat_id,
       name: row.name,
       description: row.description ?? undefined,
+      images: row.images || [],
       price_cents: row.price_cents,
       max_quantity: row.max_quantity,
       available: Math.max(0, row.max_quantity - toNumber(row.sold)),
@@ -74,8 +76,12 @@ async function getExtraActivities(retreatId: string) {
     retreat_id: r.retreatId,
     name: r.name,
     description: r.description,
+    images: (r as { images: string[] }).images || [],
     price_cents: r.priceCents,
-    allow_multiple: "allowMultiple" in r ? (r as { allowMultiple: boolean }).allowMultiple : true,
+    allow_multiple:
+      "allowMultiple" in r
+        ? (r as { allowMultiple: boolean }).allowMultiple
+        : true,
     max_quantity: (r as { maxQuantity: number | null }).maxQuantity ?? null,
     link: (r as { link: string | null }).link ?? null,
   }));

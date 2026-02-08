@@ -1,4 +1,5 @@
 import Button from "@/components/ui/Button";
+import ImageGallery from "@/components/ImageGallery";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
@@ -56,6 +57,8 @@ export default async function RetreatPage({ params }: PageProps) {
   const extraIdeas = (Array.isArray(retreat.extraIdeas) ? retreat.extraIdeas : []) as string[];
   const activities = (Array.isArray(retreat.activities) ? retreat.activities : []) as string[];
   const program = (Array.isArray(retreat.program) ? retreat.program : []) as string[];
+  const imageUrl = retreat.images?.[0] || retreat.image || "/assets/placeholder.jpg";
+  const galleryImages = retreat.images || [];
 
   return (
     <div className="pb-24">
@@ -63,7 +66,7 @@ export default async function RetreatPage({ params }: PageProps) {
       <div
         className="h-[60vh] bg-gray/20 relative flex items-end pb-12 px-4 md:px-12"
         style={{
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.5)), url(${retreat.image})`,
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.5)), url(${imageUrl})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
@@ -86,6 +89,25 @@ export default async function RetreatPage({ params }: PageProps) {
           </p>
         </div>
       </div>
+
+      {/* Galería de imágenes - ancho completo */}
+      {galleryImages.length > 0 && (
+        <section className="mt-16 md:mt-24 w-full">
+          <div className="px-4 md:px-12 max-w-6xl mx-auto">
+            <ImageGallery
+              images={galleryImages}
+              altPrefix={retreat.title}
+              variant="full"
+              title="Galería"
+              imageCountLabel={
+                galleryImages.length === 1
+                  ? "1 imagen"
+                  : `${galleryImages.length} imágenes`
+              }
+            />
+          </div>
+        </section>
+      )}
 
       <div className="px-4 md:px-12 max-w-6xl mx-auto mt-12 grid md:grid-cols-3 gap-12 md:gap-24">
         {/* Main Content */}

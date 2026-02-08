@@ -1,3 +1,5 @@
+import { Booking } from "@prisma/client";
+
 /** Re-export revalidateTag for convenience */
 export { revalidateTag } from "next/cache";
 
@@ -13,6 +15,7 @@ export type Retreat = {
   activities: string[];
   program: string[];
   image: string;
+  images: string[];
   date: string;
   price: string;
   arrivalIntro?: string | null;
@@ -21,6 +24,10 @@ export type Retreat = {
   includes?: string[] | null;
   notIncludes?: string[] | null;
   extraIdeas?: string[] | null;
+  published: boolean;
+  roomTypes: RetreatRoomTypeRow[];
+  extraActivities: RetreatExtraActivityRow[];
+  bookings: Booking[];
 };
 
 export type RetreatRoomTypeRow = {
@@ -28,6 +35,7 @@ export type RetreatRoomTypeRow = {
   retreat_id: string;
   name: string;
   description?: string;
+  images: string[];
   price_cents: number;
   max_quantity: number;
 };
@@ -37,6 +45,7 @@ export type RetreatExtraActivityRow = {
   retreat_id: string;
   name: string;
   description?: string | null;
+  images: string[];
   price_cents: number;
   allow_multiple: boolean;
   max_quantity: number | null;

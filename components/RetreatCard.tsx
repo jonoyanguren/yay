@@ -7,6 +7,8 @@ interface RetreatCardProps {
 }
 
 export default function RetreatCard({ retreat }: RetreatCardProps) {
+  const imageUrl = retreat.images?.[0] || retreat.image || "/assets/placeholder.jpg";
+  
   return (
     <Link
       href={`/retreats/${retreat.slug}`}
@@ -15,7 +17,7 @@ export default function RetreatCard({ retreat }: RetreatCardProps) {
       <div className="bg-sand-light h-full hover:border-gray-dark/20 transition-all duration-300 flex flex-col">
         <div className="aspect-4/3 bg-gray/20 relative">
           <Image
-            src={retreat.image}
+            src={imageUrl}
             alt={retreat.title}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"

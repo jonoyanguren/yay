@@ -17,6 +17,7 @@ model Retreat {
   activities      Json     @default("[]")
   program         Json     @default("[]")
   image           String   @default("")
+  images          String[] @default([])
   date            String   @default("")
   price           String   @default("")
   published       Boolean  @default(false)
@@ -36,12 +37,13 @@ model Retreat {
 }
 
 model RetreatRoomType {
-  id          String  @id @default(uuid())
-  retreatId   String  @map("retreat_id")
+  id          String   @id @default(uuid())
+  retreatId   String   @map("retreat_id")
   name        String
-  description String? @default("")
-  priceCents  Int     @map("price_cents")
-  maxQuantity Int     @map("max_quantity")
+  description String?  @default("")
+  images      String[] @default([])
+  priceCents  Int      @map("price_cents")
+  maxQuantity Int      @map("max_quantity")
 
   retreat   Retreat           @relation(fields: [retreatId], references: [id], onDelete: Cascade)
   roomSlots BookingRoomSlot[]
@@ -50,13 +52,14 @@ model RetreatRoomType {
 }
 
 model RetreatExtraActivity {
-  id            String  @id @default(uuid())
-  retreatId     String  @map("retreat_id")
+  id            String   @id @default(uuid())
+  retreatId     String   @map("retreat_id")
   name          String
-  description   String? @default("")
-  priceCents    Int     @map("price_cents")
-  allowMultiple Boolean @default(true) @map("allow_multiple")
-  maxQuantity   Int?    @map("max_quantity")
+  description   String?  @default("")
+  images        String[] @default([])
+  priceCents    Int      @map("price_cents")
+  allowMultiple Boolean  @default(true) @map("allow_multiple")
+  maxQuantity   Int?     @map("max_quantity")
   link          String?
 
   retreat Retreat        @relation(fields: [retreatId], references: [id], onDelete: Cascade)

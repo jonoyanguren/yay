@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import Button from "@/components/ui/Button";
+import ImageGallery from "@/components/ImageGallery";
 
 interface Retreat {
   id: string;
@@ -15,6 +15,7 @@ interface Retreat {
   activities: string[];
   program: string[];
   image: string;
+  images: string[];
   date: string;
   price: string;
   published: boolean;
@@ -92,6 +93,8 @@ export default function PreviewPage() {
   const includes = retreat.includes ?? [];
   const notIncludes = retreat.notIncludes ?? [];
   const extraIdeas = retreat.extraIdeas ?? [];
+  const imageUrl = retreat.images?.[0] || retreat.image || "/assets/placeholder.jpg";
+  const galleryImages = retreat.images || [];
 
   return (
     <>
@@ -107,7 +110,7 @@ export default function PreviewPage() {
         <div
           className="h-[60vh] bg-gray/20 relative flex items-end pb-12 px-4 md:px-12"
           style={{
-            backgroundImage: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.5)), url(${retreat.image})`,
+            backgroundImage: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.5)), url(${imageUrl})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
@@ -130,6 +133,25 @@ export default function PreviewPage() {
             </p>
           </div>
         </div>
+
+        {/* Galería de imágenes - ancho completo */}
+        {galleryImages.length > 0 && (
+          <section className="mt-16 md:mt-24 w-full">
+            <div className="px-4 md:px-12 max-w-6xl mx-auto">
+              <ImageGallery
+                images={galleryImages}
+                altPrefix={retreat.title}
+                variant="full"
+                title="Galería"
+                imageCountLabel={
+                  galleryImages.length === 1
+                    ? "1 imagen"
+                    : `${galleryImages.length} imágenes`
+                }
+              />
+            </div>
+          </section>
+        )}
 
         <div className="px-4 md:px-12 max-w-6xl mx-auto mt-12 grid md:grid-cols-3 gap-12 md:gap-24">
           {/* Main Content */}
@@ -159,7 +181,9 @@ export default function PreviewPage() {
                         key={item.title}
                         className="p-4 border border-gray/15 rounded-lg bg-white shadow-sm"
                       >
-                        <p className="text-sm font-semibold mb-2">{item.title}</p>
+                        <p className="text-sm font-semibold mb-2">
+                          {item.title}
+                        </p>
                         <p className="text-sm leading-relaxed text-black/80">
                           {item.detail}
                         </p>
@@ -202,7 +226,9 @@ export default function PreviewPage() {
             )}
 
             <section>
-              <h2 className="text-2xl font-bold mb-6">Actividades Destacadas</h2>
+              <h2 className="text-2xl font-bold mb-6">
+                Actividades Destacadas
+              </h2>
               <ul className="grid sm:grid-cols-2 gap-4">
                 {retreat.activities.map((activity, index) => (
                   <li
@@ -257,7 +283,9 @@ export default function PreviewPage() {
 
             {extraIdeas.length > 0 && (
               <section className="space-y-3">
-                <h2 className="text-2xl font-bold">Otras ideas de tarde/noche</h2>
+                <h2 className="text-2xl font-bold">
+                  Otras ideas de tarde/noche
+                </h2>
                 <div className="flex flex-wrap gap-3">
                   {extraIdeas.map((item) => (
                     <span
@@ -300,7 +328,7 @@ export default function PreviewPage() {
                   Booking is disabled
                 </p>
               </div>
-              
+
               <Link
                 href={`/admin/retreats/${retreat.slug}/edit`}
                 className="block w-full text-center bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
