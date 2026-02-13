@@ -31,11 +31,11 @@ export type Retreat = {
   bookings: Booking[];
 };
 
-/** Shape used in lib/data.ts for seed; seed script does not use images, roomTypes, extraActivities, bookings. */
+/** Shape used in lib/data.ts for seed; seed script does not use these fields. */
 export type RetreatSeedData = Omit<
   Retreat,
-  "images" | "published" | "roomTypes" | "extraActivities" | "bookings"
-> & { maxPeople?: number };
+  "images" | "published" | "roomTypes" | "extraActivities" | "bookings" | "maxPeople"
+>;
 
 export type RetreatRoomTypeRow = {
   id: string;
