@@ -170,6 +170,13 @@ export async function PATCH(
       include: { roomTypes: true, extraActivities: true },
     });
 
+    if (!retreat) {
+      return NextResponse.json(
+        { error: "Retreat not found" },
+        { status: 404 },
+      );
+    }
+
     // Revalidate public pages
     revalidatePath("/");
     revalidatePath("/retreats");
