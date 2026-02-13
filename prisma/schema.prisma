@@ -20,6 +20,7 @@ model Retreat {
   images          String[] @default([])
   date            String   @default("")
   price           String   @default("")
+  maxPeople       Int      @default(12) @map("max_people")
   published       Boolean  @default(false)
   arrivalIntro    String?  @map("arrival_intro")
   arrivalOptions  Json?    @map("arrival_options")

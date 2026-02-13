@@ -20,8 +20,10 @@ async function getRetreats() {
         activities: true,
         program: true,
         image: true,
+        images: true,
         date: true,
         price: true,
+        maxPeople: true,
         arrivalIntro: true,
         arrivalOptions: true,
         dayByDay: true,
@@ -32,7 +34,18 @@ async function getRetreats() {
         createdAt: true,
       },
     });
-    return retreats;
+    const paidCounts = await prisma.booking.groupBy({
+      by: ["retreatId"],
+      where: { status: "paid" },
+      _count: true,
+    });
+    const countByRetreat = Object.fromEntries(
+      paidCounts.map((c) => [c.retreatId, c._count])
+    );
+    return retreats.map((r) => ({
+      ...r,
+      spotsLeft: Math.max(0, (r.maxPeople ?? 12) - (countByRetreat[r.id] ?? 0)),
+    }));
   } catch (error) {
     console.error("Error fetching retreats:", error);
     return [];

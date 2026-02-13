@@ -3,12 +3,14 @@ import Image from "next/image";
 import { Retreat } from "@/lib/data";
 
 interface RetreatCardProps {
-  retreat: Retreat;
+  retreat: Retreat & { spotsLeft?: number };
 }
 
 export default function RetreatCard({ retreat }: RetreatCardProps) {
-  const imageUrl = retreat.images?.[0] || retreat.image || "/assets/placeholder.jpg";
-  
+  const imageUrl =
+    retreat.images?.[0] || retreat.image || "/assets/placeholder.jpg";
+  const spotsLeft = retreat.spotsLeft;
+
   return (
     <Link
       href={`/retreats/${retreat.slug}`}
@@ -22,6 +24,11 @@ export default function RetreatCard({ retreat }: RetreatCardProps) {
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
+          {typeof spotsLeft === "number" && (
+            <span className="absolute top-3 right-3 px-3 py-1.5 rounded-full text-sm font-bold bg-emerald-500 text-white shadow-md">
+              {spotsLeft} {spotsLeft === 1 ? "plaza" : "plazas"} disponibles
+            </span>
+          )}
         </div>
         <div className="p-6 flex-1 flex flex-col">
           <div className="flex justify-between items-start mb-4">

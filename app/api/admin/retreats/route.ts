@@ -62,6 +62,7 @@ export async function POST(request: Request) {
         images: data.images || [],
         date: data.date || "",
         price: data.price || "",
+        maxPeople: data.maxPeople ?? 12,
         published: data.published || false,
         arrivalIntro: data.arrivalIntro || null,
         arrivalOptions: data.arrivalOptions || null,

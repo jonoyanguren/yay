@@ -59,6 +59,7 @@ export default function RetreatForm({
     fullDescription: retreat?.fullDescription || "",
     date: retreat?.date || "",
     price: retreat?.price || "",
+    maxPeople: retreat?.maxPeople ?? 12,
     published: retreat?.published || false,
     arrivalIntro: retreat?.arrivalIntro || "",
   });
@@ -288,6 +289,7 @@ export default function RetreatForm({
     try {
       const data = {
         ...formData,
+        maxPeople: Number(formData.maxPeople) || 12,
         images: retreatImages,
         activities,
         program,
@@ -439,6 +441,23 @@ export default function RetreatForm({
               placeholder="Ej: Desde 450€"
               className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-slate-700">
+              Máx. personas
+            </label>
+            <input
+              type="number"
+              name="maxPeople"
+              min={1}
+              value={formData.maxPeople}
+              onChange={handleChange}
+              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+            />
+            <p className="text-xs text-slate-500 mt-1.5">
+              Número máximo de plazas del retiro
+            </p>
           </div>
         </div>
 

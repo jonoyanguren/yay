@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { FaEye, FaPencilAlt, FaTrash } from "react-icons/fa";
 
 interface Retreat {
   id: string;
@@ -200,45 +201,62 @@ export default function AdminPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end items-center gap-3">
                         {retreat.published ? (
                           <Link
                             href={`/retreats/${retreat.slug}`}
                             target="_blank"
-                            className="px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-md transition-colors"
+                            rel="noopener noreferrer"
+                            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                            title="View"
                           >
-                            View
+                            <FaEye className="w-4 h-4" />
                           </Link>
                         ) : (
                           <Link
                             href={`/admin/retreats/${retreat.slug}/preview`}
                             target="_blank"
-                            className="px-3 py-1.5 text-xs font-medium text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-md transition-colors"
+                            rel="noopener noreferrer"
+                            className="p-2 text-violet-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors"
+                            title="Preview"
                           >
-                            Preview
+                            <FaEye className="w-4 h-4" />
                           </Link>
                         )}
                         <Link
                           href={`/admin/retreats/${retreat.slug}/edit`}
-                          className="px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
+                          className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                          title="Edit"
                         >
-                          Edit
+                          <FaPencilAlt className="w-4 h-4" />
                         </Link>
                         <button
+                          type="button"
                           onClick={() => handleTogglePublish(retreat.slug)}
-                          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                            retreat.published
-                              ? "text-amber-700 bg-amber-50 hover:bg-amber-100"
-                              : "text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
-                          }`}
+                          className="shrink-0"
+                          title={retreat.published ? "Unpublish" : "Publish"}
                         >
-                          {retreat.published ? "Unpublish" : "Publish"}
+                          <span
+                            role="switch"
+                            aria-checked={retreat.published}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:ring-offset-2 ${
+                              retreat.published ? "bg-emerald-400" : "bg-slate-200"
+                            }`}
+                          >
+                            <span
+                              className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${
+                                retreat.published ? "translate-x-6" : "translate-x-1"
+                              }`}
+                            />
+                          </span>
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleDelete(retreat.slug, retreat.title)}
-                          className="px-3 py-1.5 text-xs font-medium text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-md transition-colors"
+                          className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50/70 rounded-lg transition-colors"
+                          title="Delete"
                         >
-                          Delete
+                          <FaTrash className="w-4 h-4" />
                         </button>
                       </div>
                     </td>

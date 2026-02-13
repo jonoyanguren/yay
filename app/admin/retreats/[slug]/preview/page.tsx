@@ -18,6 +18,7 @@ interface Retreat {
   images: string[];
   date: string;
   price: string;
+  maxPeople?: number;
   published: boolean;
   arrivalIntro?: string;
   arrivalOptions?: { title: string; detail: string }[];
@@ -316,7 +317,7 @@ export default function PreviewPage() {
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray/10">
                   <span className="text-black/60">Grupo</span>
-                  <span className="font-medium">Max 12 personas</span>
+                  <span className="font-medium">Max {retreat.maxPeople ?? 12} personas</span>
                 </div>
               </div>
 

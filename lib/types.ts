@@ -18,6 +18,7 @@ export type Retreat = {
   images: string[];
   date: string;
   price: string;
+  maxPeople: number;
   arrivalIntro?: string | null;
   arrivalOptions?: { title: string; detail: string }[] | null;
   dayByDay?: { day: string; items: string[] }[] | null;
@@ -34,7 +35,7 @@ export type Retreat = {
 export type RetreatSeedData = Omit<
   Retreat,
   "images" | "published" | "roomTypes" | "extraActivities" | "bookings"
->;
+> & { maxPeople?: number };
 
 export type RetreatRoomTypeRow = {
   id: string;

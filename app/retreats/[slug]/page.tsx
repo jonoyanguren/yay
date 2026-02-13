@@ -23,7 +23,7 @@ export async function generateStaticParams() {
     where: { published: true },
     select: { slug: true },
   });
-  
+
   return retreats.map((retreat) => ({
     slug: retreat.slug,
   }));
@@ -31,7 +31,7 @@ export async function generateStaticParams() {
 
 async function getRetreatBySlug(slug: string) {
   return await prisma.retreat.findUnique({
-    where: { 
+    where: {
       slug,
       published: true,
     },
@@ -46,18 +46,39 @@ export default async function RetreatPage({ params }: PageProps) {
     notFound();
   }
 
-  const arrivalOptions = (Array.isArray(retreat.arrivalOptions) ? retreat.arrivalOptions : []) as unknown as ArrivalOption[];
+  const paidCount = await prisma.booking.count({
+    where: { retreatId: retreat.id, status: "paid" },
+  });
+  const maxPeople = retreat.maxPeople ?? 12;
+  const spotsLeft = Math.max(0, maxPeople - paidCount);
+
+  const arrivalOptions = (Array.isArray(retreat.arrivalOptions)
+    ? retreat.arrivalOptions
+    : []) as unknown as ArrivalOption[];
   const arrivalIntro =
     retreat.arrivalIntro ??
     "Llega como quieras: te ayudamos a coordinar vuelos, coche o transfer para que encaje con el grupo y con tus horarios.";
 
-  const dayByDay = (Array.isArray(retreat.dayByDay) ? retreat.dayByDay : []) as unknown as DayItem[];
-  const includes = (Array.isArray(retreat.includes) ? retreat.includes : []) as string[];
-  const notIncludes = (Array.isArray(retreat.notIncludes) ? retreat.notIncludes : []) as string[];
-  const extraIdeas = (Array.isArray(retreat.extraIdeas) ? retreat.extraIdeas : []) as string[];
-  const activities = (Array.isArray(retreat.activities) ? retreat.activities : []) as string[];
-  const program = (Array.isArray(retreat.program) ? retreat.program : []) as string[];
-  const imageUrl = retreat.images?.[0] || retreat.image || "/assets/placeholder.jpg";
+  const dayByDay = (Array.isArray(retreat.dayByDay)
+    ? retreat.dayByDay
+    : []) as unknown as DayItem[];
+  const includes = (
+    Array.isArray(retreat.includes) ? retreat.includes : []
+  ) as string[];
+  const notIncludes = (
+    Array.isArray(retreat.notIncludes) ? retreat.notIncludes : []
+  ) as string[];
+  const extraIdeas = (
+    Array.isArray(retreat.extraIdeas) ? retreat.extraIdeas : []
+  ) as string[];
+  const activities = (
+    Array.isArray(retreat.activities) ? retreat.activities : []
+  ) as string[];
+  const program = (
+    Array.isArray(retreat.program) ? retreat.program : []
+  ) as string[];
+  const imageUrl =
+    retreat.images?.[0] || retreat.image || "/assets/placeholder.jpg";
   const galleryImages = retreat.images || [];
 
   return (
@@ -114,6 +135,9 @@ export default async function RetreatPage({ params }: PageProps) {
         <div className="md:col-span-2 space-y-12">
           <section>
             <h2 className="text-2xl font-bold mb-4">La Experiencia</h2>
+            <p className="text-black/70 mb-4">
+              Quedan <strong>{spotsLeft} plazas</strong> de {maxPeople} para este retiro.
+            </p>
             <p className="text-lg leading-relaxed text-black/80 whitespace-pre-line">
               {retreat.fullDescription}
             </p>
@@ -194,18 +218,6 @@ export default async function RetreatPage({ params }: PageProps) {
             </ul>
           </section>
 
-          <section>
-            <h2 className="text-2xl font-bold mb-6">Programa</h2>
-            <div className="space-y-4 border-l-2 border-gray/20 pl-6 ml-2">
-              {program.map((item, index) => (
-                <div key={index} className="relative">
-                  <span className="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-black border-4 border-sand"></span>
-                  <p className="text-lg">{item}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
           {(includes.length > 0 || notIncludes.length > 0) && (
             <section className="grid md:grid-cols-2 gap-6">
               <div className="p-5 border border-gray/15 rounded-lg bg-white space-y-2">
@@ -266,7 +278,13 @@ export default async function RetreatPage({ params }: PageProps) {
               </div>
               <div className="flex justify-between py-2 border-b border-gray/10">
                 <span className="text-black/60">Grupo</span>
-                <span className="font-medium">Max 12 personas</span>
+                <span className="font-medium">Max {maxPeople} personas</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-gray/10">
+                <span className="text-black/60">Plazas</span>
+                <span className="font-medium">
+                  Quedan {spotsLeft} de {maxPeople} plazas
+                </span>
               </div>
             </div>
 

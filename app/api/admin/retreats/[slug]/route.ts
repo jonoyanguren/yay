@@ -70,6 +70,7 @@ export async function PATCH(
       ...(data.images !== undefined && { images: data.images }),
       ...(data.date !== undefined && { date: data.date }),
       ...(data.price !== undefined && { price: data.price }),
+      ...(data.maxPeople !== undefined && { maxPeople: data.maxPeople }),
       ...(data.published !== undefined && { published: data.published }),
       ...(data.arrivalIntro !== undefined && {
         arrivalIntro: data.arrivalIntro,
@@ -83,43 +84,90 @@ export async function PATCH(
       ...(data.extraIdeas !== undefined && { extraIdeas: data.extraIdeas }),
     };
 
-    // Handle roomTypes update (delete all and recreate)
-    if (data.roomTypes !== undefined) {
-      updateData.roomTypes = {
-        deleteMany: {},
-        create: data.roomTypes.map((rt: any) => ({
-          name: rt.name,
-          description: rt.description || "",
-          images: rt.images || [],
-          priceCents: rt.priceCents,
-          maxQuantity: rt.maxQuantity,
-        })),
-      };
+    const existingRetreat = await prisma.retreat.findUnique({
+      where: { slug },
+      include: { roomTypes: true, extraActivities: true },
+    });
+    if (!existingRetreat) {
+      return NextResponse.json({ error: "Retreat not found" }, { status: 404 });
     }
 
-    // Handle extraActivities update (delete all and recreate)
+    await prisma.retreat.update({
+      where: { slug },
+      data: updateData,
+    });
+
+    // Room types: update existing (by id) or create new. No deletes.
+    if (data.roomTypes !== undefined) {
+      const existingRoomIds = new Set(existingRetreat.roomTypes.map((e) => e.id));
+      for (const rt of data.roomTypes as Array<{
+        id?: string;
+        name: string;
+        description?: string;
+        images?: string[];
+        priceCents: number;
+        maxQuantity: number;
+      }>) {
+        const payload = {
+          name: rt.name,
+          description: rt.description ?? "",
+          images: rt.images ?? [],
+          priceCents: rt.priceCents,
+          maxQuantity: rt.maxQuantity,
+        };
+        if (rt.id && existingRoomIds.has(rt.id)) {
+          await prisma.retreatRoomType.update({
+            where: { id: rt.id },
+            data: payload,
+          });
+        } else {
+          await prisma.retreatRoomType.create({
+            data: { retreatId: existingRetreat.id, ...payload },
+          });
+        }
+      }
+    }
+
+    // Extra activities: update existing (by id) or create new. No deletes.
     if (data.extraActivities !== undefined) {
-      updateData.extraActivities = {
-        deleteMany: {},
-        create: data.extraActivities.map((ea: any) => ({
+      const existingExtraIds = new Set(
+        existingRetreat.extraActivities.map((e) => e.id)
+      );
+      for (const ea of data.extraActivities as Array<{
+        id?: string;
+        name: string;
+        description?: string;
+        images?: string[];
+        priceCents: number;
+        allowMultiple: boolean;
+        maxQuantity: number | null;
+        link?: string | null;
+      }>) {
+        const payload = {
           name: ea.name,
-          description: ea.description,
-          images: ea.images || [],
+          description: ea.description ?? "",
+          images: ea.images ?? [],
           priceCents: ea.priceCents,
           allowMultiple: ea.allowMultiple,
           maxQuantity: ea.maxQuantity,
-          link: ea.link,
-        })),
-      };
+          link: ea.link ?? null,
+        };
+        if (ea.id && existingExtraIds.has(ea.id)) {
+          await prisma.retreatExtraActivity.update({
+            where: { id: ea.id },
+            data: payload,
+          });
+        } else {
+          await prisma.retreatExtraActivity.create({
+            data: { retreatId: existingRetreat.id, ...payload },
+          });
+        }
+      }
     }
 
-    const retreat = await prisma.retreat.update({
+    const retreat = await prisma.retreat.findUnique({
       where: { slug },
-      data: updateData,
-      include: {
-        roomTypes: true,
-        extraActivities: true,
-      },
+      include: { roomTypes: true, extraActivities: true },
     });
 
     // Revalidate public pages
