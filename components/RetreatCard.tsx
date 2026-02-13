@@ -10,6 +10,7 @@ export default function RetreatCard({ retreat }: RetreatCardProps) {
   const imageUrl =
     retreat.images?.[0] || retreat.image || "/assets/placeholder.jpg";
   const spotsLeft = retreat.spotsLeft;
+  const isExternal = imageUrl.startsWith("http://") || imageUrl.startsWith("https://");
 
   return (
     <Link
@@ -23,6 +24,8 @@ export default function RetreatCard({ retreat }: RetreatCardProps) {
             alt={retreat.title}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            unoptimized={isExternal}
           />
           {typeof spotsLeft === "number" && (
             <span className="absolute top-3 right-3 px-3 py-1.5 rounded-full text-sm font-bold bg-emerald-500 text-white shadow-md">
