@@ -24,6 +24,7 @@ export async function GET(
             id: true,
             title: true,
             slug: true,
+            reservationDepositCents: true,
           },
         },
         roomSlots: {
@@ -84,7 +85,7 @@ export async function PATCH(
     const updateData: any = {};
     
     if (data.status !== undefined) {
-      if (!["pending", "paid", "cancelled"].includes(data.status)) {
+      if (!["pending", "deposit", "paid", "cancelled"].includes(data.status)) {
         return NextResponse.json(
           { error: "Invalid status value" },
           { status: 400 }
@@ -102,6 +103,7 @@ export async function PATCH(
             id: true,
             title: true,
             slug: true,
+            reservationDepositCents: true,
           },
         },
         roomSlots: {

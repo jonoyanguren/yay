@@ -20,6 +20,7 @@ export async function GET(request: Request) {
             id: true,
             title: true,
             slug: true,
+            reservationDepositCents: true,
           },
         },
         roomSlots: {
@@ -82,6 +83,16 @@ export async function POST(request: Request) {
       );
     }
 
+    if (
+      status !== undefined &&
+      !["pending", "deposit", "paid", "cancelled"].includes(status)
+    ) {
+      return NextResponse.json(
+        { error: "Invalid status value" },
+        { status: 400 }
+      );
+    }
+
     // Create booking
     const booking = await prisma.booking.create({
       data: {
@@ -117,38 +128,41 @@ export async function POST(request: Request) {
       }
     }
 
-    // Fetch the created booking with all relations
-    const createdBooking = await prisma.booking.findUnique({
-      where: { id: booking.id },
-      include: {
-        retreat: {
-          select: {
-            id: true,
-            title: true,
-            slug: true,
-          },
+    const bookingInclude = {
+      retreat: {
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          reservationDepositCents: true,
         },
-        roomSlots: {
-          include: {
-            retreatRoomType: {
-              select: {
-                name: true,
-                priceCents: true,
-              },
-            },
-          },
-        },
-        extras: {
-          include: {
-            retreatExtraActivity: {
-              select: {
-                name: true,
-                priceCents: true,
-              },
+      },
+      roomSlots: {
+        include: {
+          retreatRoomType: {
+            select: {
+              name: true,
+              priceCents: true,
             },
           },
         },
       },
+      extras: {
+        include: {
+          retreatExtraActivity: {
+            select: {
+              name: true,
+              priceCents: true,
+            },
+          },
+        },
+      },
+    } as const;
+
+    // Fetch the created booking with all relations
+    let createdBooking = await prisma.booking.findUnique({
+      where: { id: booking.id },
+      include: bookingInclude,
     });
 
     // Send confirmation email if booking is paid
@@ -160,6 +174,15 @@ export async function POST(request: Request) {
       });
       createdBooking.extras.forEach((extra) => {
         totalAmount += extra.retreatExtraActivity.priceCents * extra.quantity;
+      });
+
+      createdBooking = await prisma.booking.update({
+        where: { id: createdBooking.id },
+        data: {
+          stripeAmountTotalCents: totalAmount,
+          stripePaymentType: "manual_full",
+        },
+        include: bookingInclude,
       });
 
       // Send email (don't await - fire and forget)
@@ -175,6 +198,8 @@ export async function POST(request: Request) {
           quantity: e.quantity,
         })),
         totalAmount,
+        chargedAmount: totalAmount,
+        pendingAmount: 0,
         bookingDate: createdBooking.createdAt.toISOString(),
       }).catch(err => console.error("Error sending email:", err));
     }

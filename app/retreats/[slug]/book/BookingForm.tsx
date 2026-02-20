@@ -17,6 +17,8 @@ type Props = {
   retreatId: string;
   retreatSlug: string;
   retreatTitle: string;
+  reservationDepositCents: number;
+  chargeFullAmount: boolean;
   roomTypes: RetreatRoomTypeWithAvailability[];
   extras: RetreatExtraActivityRow[];
 };
@@ -24,6 +26,8 @@ type Props = {
 export default function BookingForm({
   retreatId,
   retreatSlug,
+  reservationDepositCents,
+  chargeFullAmount,
   roomTypes,
   extras,
 }: Props) {
@@ -37,6 +41,8 @@ export default function BookingForm({
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [acceptedCancellationPolicy, setAcceptedCancellationPolicy] =
+    useState(false);
 
   const selectedRoom = roomTypes.find((r) => r.id === selectedRoomTypeId);
   const roomTotal = selectedRoom ? selectedRoom.price_cents : 0;
@@ -44,7 +50,10 @@ export default function BookingForm({
     (sum, e) => sum + e.price_cents * (extraQuantities[e.id] ?? 0),
     0,
   );
-  const totalCents = roomTotal + extrasTotal;
+  const bookingTotalCents = roomTotal + extrasTotal;
+  const totalCents = chargeFullAmount
+    ? bookingTotalCents
+    : Math.min(reservationDepositCents, bookingTotalCents);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,8 +88,17 @@ export default function BookingForm({
         setError(data.error ?? "Error al crear la reserva");
         return;
       }
-      if (data.url) window.location.href = data.url;
-      else setError("No se recibió URL de pago");
+      if (data.url) {
+        const popup = window.open(data.url, "_blank");
+        if (popup) {
+          popup.opener = null;
+          popup.focus();
+        } else {
+          window.location.href = data.url;
+        }
+      } else {
+        setError("No se recibió URL de pago");
+      }
     } catch {
       setError("Error de conexión. Inténtalo de nuevo.");
     } finally {
@@ -152,7 +170,7 @@ export default function BookingForm({
                 <div
                   key={extra.id}
                   className={`flex items-start gap-5 p-6 rounded-xl border-2 transition-colors ${
-                    isSingle && qty > 0
+                    qty > 0
                       ? "border-black bg-sand-light"
                       : "border-gray/15 bg-white hover:border-gray/30"
                   }`}
@@ -298,11 +316,42 @@ export default function BookingForm({
       )}
 
       <section className="p-8 rounded-xl bg-sand-light border-2 border-gray/20">
-        <div className="flex justify-between items-center mb-8">
-          <span className="text-xl font-semibold">Total</span>
-          <span className="text-3xl font-bold text-green">
-            {formatPrice(totalCents)}
-          </span>
+        <div className="space-y-3 mb-8">
+          <div className="flex justify-between items-center">
+            <span className="text-xl font-semibold">Total de la reserva</span>
+            <span className="text-3xl font-bold text-green">
+              {formatPrice(bookingTotalCents)}
+            </span>
+          </div>
+          {!chargeFullAmount && (
+            <>
+              <div className="flex justify-between items-center">
+                <span className="text-xl font-semibold">A pagar ahora (reserva)</span>
+                <span className="text-3xl font-bold text-green">
+                  {formatPrice(totalCents)}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-black/60">Pendiente</span>
+                <span className="text-sm font-medium text-black/70">
+                  {formatPrice(Math.max(0, bookingTotalCents - totalCents))}
+                </span>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="mb-6 rounded-lg bg-white/70 border border-gray/20 p-4 space-y-2">
+          <p className="text-sm text-black/70">
+            {chargeFullAmount
+              ? "Este retiro se cobra al completo en un único pago."
+              : "Este pago confirma tu plaza. Hoy se cobra el menor importe entre la señal y el total de tu reserva."}
+          </p>
+          {!chargeFullAmount && (
+            <p className="text-sm text-black/70">
+              El importe pendiente se cobrará por factura aproximadamente 1 mes
+              antes del retiro.
+            </p>
+          )}
         </div>
         <div className="space-y-5">
           <div>
@@ -327,6 +376,32 @@ export default function BookingForm({
             />
           </div>
         </div>
+        <div className="mt-6 rounded-lg bg-white/70 border border-gray/20 p-4 space-y-3">
+          <p className="text-sm font-medium text-black">Política de cancelación</p>
+          <p className="text-sm text-black/70">
+            Si cancelas con menos de 1 mes de antelación, la reserva abonada no
+            podrá devolverse.
+          </p>
+          <p className="text-sm text-black/70">
+            Si cancelas con 3 meses o más de antelación, devolvemos parte de la
+            reserva para ayudarte con el cambio de planes.
+          </p>
+          <p className="text-sm text-black/70">
+            Estas condiciones nos permiten organizar el retiro con tiempo y
+            cuidar cada detalle de la experiencia del grupo.
+          </p>
+          <label className="flex items-start gap-3 pt-1 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={acceptedCancellationPolicy}
+              onChange={(e) => setAcceptedCancellationPolicy(e.target.checked)}
+              className="mt-1 h-4 w-4 rounded border-gray/30 accent-black cursor-pointer"
+            />
+            <span className="text-sm text-black/80">
+              He leído y acepto la política de cancelación.
+            </span>
+          </label>
+        </div>
         {error && (
           <p className="mt-4 text-sm text-red-600" role="alert">
             {error}
@@ -336,7 +411,7 @@ export default function BookingForm({
           type="submit"
           size="lg"
           className="w-full mt-8"
-          disabled={loading || totalCents <= 0}
+          disabled={loading || totalCents <= 0 || !acceptedCancellationPolicy}
         >
           {loading ? "Preparando pago…" : "Pagar con Stripe"}
         </Button>

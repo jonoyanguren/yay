@@ -11,10 +11,15 @@ interface Booking {
   status: string;
   createdAt: string;
   stripeSessionId: string | null;
+  stripeCustomerId: string | null;
+  stripeAmountTotalCents: number | null;
+  stripePaymentType: string | null;
   retreat: {
     id: string;
     title: string;
     slug: string;
+    reservationDepositCents: number;
+    chargeFullAmount?: boolean;
   };
   roomSlots: Array<{
     quantity: number;
@@ -82,6 +87,18 @@ function calculateTotal(booking: Booking): number {
   return total;
 }
 
+function getChargedCents(booking: Booking): number {
+  if (booking.stripeAmountTotalCents != null) return booking.stripeAmountTotalCents;
+  if (booking.status === "pending" || booking.status === "cancelled") return 0;
+  if (!booking.stripeSessionId) return calculateTotal(booking);
+  if (booking.retreat.chargeFullAmount ?? false) return calculateTotal(booking);
+  return Math.min(booking.retreat.reservationDepositCents, calculateTotal(booking));
+}
+
+function getPendingCents(booking: Booking): number {
+  return Math.max(0, calculateTotal(booking) - getChargedCents(booking));
+}
+
 export default function BookingsPage() {
   const router = useRouter();
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -97,7 +114,7 @@ export default function BookingsPage() {
     roomTypeId: "",
     roomQuantity: 1,
     extras: [] as { id: string; quantity: number }[],
-    status: "paid" as "paid" | "pending",
+    status: "paid" as "paid" | "deposit" | "pending" | "cancelled",
   });
 
   const fetchBookings = async () => {
@@ -262,12 +279,27 @@ export default function BookingsPage() {
 
   const stats = {
     total: bookings.length,
+    deposit: bookings.filter(b => b.status === "deposit").length,
     paid: bookings.filter(b => b.status === "paid").length,
     pending: bookings.filter(b => b.status === "pending").length,
     cancelled: bookings.filter(b => b.status === "cancelled").length,
-    revenue: bookings
+    estimatedRevenue: bookings
       .filter(b => b.status === "paid")
       .reduce((sum, b) => sum + calculateTotal(b), 0),
+    realRevenue: bookings
+      .filter(b => b.status === "paid")
+      .reduce((sum, b) => sum + getChargedCents(b), 0),
+    reservationOnlyRevenue: bookings
+      .filter(
+        (b) =>
+          b.status === "paid" &&
+          getChargedCents(b) > 0 &&
+          getChargedCents(b) < calculateTotal(b),
+      )
+      .reduce((sum, b) => sum + getChargedCents(b), 0),
+    pendingInvoiceAmount: bookings
+      .filter((b) => b.status === "paid")
+      .reduce((sum, b) => sum + getPendingCents(b), 0),
   };
 
   return (
@@ -308,10 +340,14 @@ export default function BookingsPage() {
         )}
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-8 gap-4 mb-8">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
             <p className="text-sm text-slate-600 mb-1">Total Reservas</p>
             <p className="text-3xl font-bold text-slate-900">{stats.total}</p>
+          </div>
+          <div className="bg-cyan-50 p-6 rounded-xl shadow-sm border border-cyan-100">
+            <p className="text-sm text-cyan-700 mb-1">Señal</p>
+            <p className="text-3xl font-bold text-cyan-700">{stats.deposit}</p>
           </div>
           <div className="bg-emerald-50 p-6 rounded-xl shadow-sm border border-emerald-100">
             <p className="text-sm text-emerald-700 mb-1">Pagadas</p>
@@ -326,8 +362,25 @@ export default function BookingsPage() {
             <p className="text-3xl font-bold text-slate-600">{stats.cancelled}</p>
           </div>
           <div className="bg-violet-50 p-6 rounded-xl shadow-sm border border-violet-100">
-            <p className="text-sm text-violet-700 mb-1">Ingresos</p>
-            <p className="text-2xl font-bold text-violet-700">{formatPrice(stats.revenue)}</p>
+            <p className="text-sm text-violet-700 mb-1">Ingresos estimados</p>
+            <p className="text-2xl font-bold text-violet-700">
+              {formatPrice(stats.estimatedRevenue)}
+            </p>
+          </div>
+          <div className="bg-blue-50 p-6 rounded-xl shadow-sm border border-blue-100">
+            <p className="text-sm text-blue-700 mb-1">Cobrado real (Stripe)</p>
+            <p className="text-2xl font-bold text-blue-700">
+              {formatPrice(stats.realRevenue)}
+            </p>
+          </div>
+          <div className="bg-orange-50 p-6 rounded-xl shadow-sm border border-orange-100">
+            <p className="text-sm text-orange-700 mb-1">Solo señal cobrada</p>
+            <p className="text-2xl font-bold text-orange-700">
+              {formatPrice(stats.reservationOnlyRevenue)}
+            </p>
+            <p className="text-xs text-orange-700/80 mt-1">
+              Pendiente de facturar: {formatPrice(stats.pendingInvoiceAmount)}
+            </p>
           </div>
         </div>
 
@@ -342,6 +395,16 @@ export default function BookingsPage() {
             }`}
           >
             Todas ({stats.total})
+          </button>
+          <button
+            onClick={() => setFilterStatus("deposit")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              filterStatus === "deposit"
+                ? "bg-cyan-600 text-white"
+                : "bg-white text-slate-600 hover:bg-slate-100"
+            }`}
+          >
+            Señal ({stats.deposit})
           </button>
           <button
             onClick={() => setFilterStatus("paid")}
@@ -393,7 +456,10 @@ export default function BookingsPage() {
                     Habitación
                   </th>
                   <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                    Total
+                    Importe
+                  </th>
+                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Pendiente
                   </th>
                   <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Estado
@@ -409,7 +475,7 @@ export default function BookingsPage() {
               <tbody className="divide-y divide-slate-100">
                 {filteredBookings.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
+                    <td colSpan={8} className="px-6 py-12 text-center text-slate-500">
                       No hay reservas{filterStatus !== "all" && ` con estado "${filterStatus}"`}.
                     </td>
                   </tr>
@@ -439,15 +505,37 @@ export default function BookingsPage() {
                             </div>
                           ))}
                           {booking.extras.length > 0 && (
-                            <div className="text-xs text-slate-500 mt-1">
-                              + {booking.extras.length} extra{booking.extras.length > 1 ? "s" : ""}
+                            <div className="text-xs text-slate-500 mt-1 space-y-1">
+                              {booking.extras.map((extra, idx) => (
+                                <div key={idx}>
+                                  + {extra.quantity}x {extra.retreatExtraActivity.name}
+                                </div>
+                              ))}
                             </div>
                           )}
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="font-semibold text-slate-900">
-                          {formatPrice(calculateTotal(booking))}
+                          Estimado: {formatPrice(calculateTotal(booking))}
+                        </div>
+                        <div className="text-xs text-slate-500 mt-1">
+                          Cobrado: {formatPrice(getChargedCents(booking))}
+                        </div>
+                        {booking.stripePaymentType === "reservation_fee" && (
+                          <div className="text-xs text-orange-700 mt-1">
+                            Solo señal
+                          </div>
+                        )}
+                        {booking.stripeCustomerId && (
+                          <div className="text-xs text-slate-400 mt-1">
+                            Cliente Stripe: {booking.stripeCustomerId}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="font-semibold text-slate-900">
+                          {formatPrice(getPendingCents(booking))}
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -459,11 +547,14 @@ export default function BookingsPage() {
                           className={`px-3 py-1.5 text-xs font-medium rounded-lg border-2 transition-colors cursor-pointer ${
                             booking.status === "paid"
                               ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                              : booking.status === "deposit"
+                              ? "bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100"
                               : booking.status === "pending"
                               ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
                               : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
                           }`}
                         >
+                          <option value="deposit">Señal</option>
                           <option value="paid">Pagada</option>
                           <option value="pending">Pendiente</option>
                           <option value="cancelled">Cancelada</option>
@@ -632,13 +723,15 @@ export default function BookingsPage() {
                     onChange={(e) =>
                       setNewBooking({
                         ...newBooking,
-                        status: e.target.value as "paid" | "pending",
+                        status: e.target.value as "paid" | "deposit" | "pending" | "cancelled",
                       })
                     }
                     className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   >
+                    <option value="deposit">Señal</option>
                     <option value="paid">Pagada</option>
                     <option value="pending">Pendiente</option>
+                    <option value="cancelled">Cancelada</option>
                   </select>
                 </div>
 

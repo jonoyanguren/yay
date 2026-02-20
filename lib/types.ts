@@ -18,6 +18,8 @@ export type Retreat = {
   images: string[];
   date: string;
   price: string;
+  reservationDepositCents: number;
+  chargeFullAmount: boolean;
   maxPeople: number;
   arrivalIntro?: string | null;
   arrivalOptions?: { title: string; detail: string }[] | null;
@@ -34,7 +36,14 @@ export type Retreat = {
 /** Shape used in lib/data.ts for seed; seed script does not use these fields. */
 export type RetreatSeedData = Omit<
   Retreat,
-  "images" | "published" | "roomTypes" | "extraActivities" | "bookings" | "maxPeople"
+  | "images"
+  | "published"
+  | "roomTypes"
+  | "extraActivities"
+  | "bookings"
+  | "maxPeople"
+  | "reservationDepositCents"
+  | "chargeFullAmount"
 >;
 
 export type RetreatRoomTypeRow = {
@@ -68,7 +77,7 @@ export type BookingInsert = {
   stripeSessionId: string | null;
   customerEmail: string;
   customerName: string | null;
-  status: "pending" | "paid" | "cancelled";
+  status: "pending" | "deposit" | "paid" | "cancelled";
 };
 
 export type BookingRoomSlotInsert = {

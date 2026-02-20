@@ -14,7 +14,7 @@ export async function GET(
     
     const rows = await prisma.$queryRaw<{ max_quantity: number; sold: string }[]>`
       SELECT r.max_quantity,
-             COALESCE(SUM(brs.quantity) FILTER (WHERE b.status = 'paid'), 0)::text AS sold
+             COALESCE(SUM(brs.quantity) FILTER (WHERE b.status IN ('deposit', 'paid')), 0)::text AS sold
       FROM retreat_room_types r
       LEFT JOIN booking_room_slots brs ON brs.retreat_room_type_id = r.id
       LEFT JOIN bookings b ON b.id = brs.booking_id

@@ -4,10 +4,26 @@
  */
 import { prisma } from "../lib/prisma";
 import { retreats } from "../lib/data";
+import { RESERVATION_PAYMENT_CENTS } from "../lib/stripe-config";
+
+const reservationDepositBySlug: Record<string, number> = {
+  "sahara-calm": 60000,
+  "tropical-relax": 30000,
+  "atlantic-reset": 35000,
+  "indian-ocean-reset": 50000,
+};
+
+const chargeFullAmountBySlug: Record<string, boolean> = {
+  "atlantic-reset": true,
+};
 
 async function seed() {
   console.log("Seeding retreats (full content)...");
   for (const r of retreats) {
+    const reservationDepositCents =
+      reservationDepositBySlug[r.slug] ?? RESERVATION_PAYMENT_CENTS;
+    const chargeFullAmount = chargeFullAmountBySlug[r.slug] ?? false;
+
     await prisma.retreat.upsert({
       where: { slug: r.slug },
       create: {
@@ -21,6 +37,8 @@ async function seed() {
         image: r.image,
         date: r.date,
         price: r.price,
+        reservationDepositCents,
+        chargeFullAmount,
         published: true, // Published by default
         arrivalIntro: r.arrivalIntro ?? null,
         arrivalOptions: r.arrivalOptions ?? undefined,
@@ -39,6 +57,8 @@ async function seed() {
         image: r.image,
         date: r.date,
         price: r.price,
+        reservationDepositCents,
+        chargeFullAmount,
         published: true, // Keep published on update
         arrivalIntro: r.arrivalIntro ?? null,
         arrivalOptions: r.arrivalOptions ?? undefined,
@@ -141,6 +161,95 @@ async function seed() {
           await prisma.retreatExtraActivity.update({
             where: { id: extra.id },
             data: { link: "https://www.example.com/surf-school" }
+          });
+        }
+      }
+    }
+  }
+
+  const atlanticId = bySlug["atlantic-reset"];
+  if (atlanticId) {
+    // Only seed if room types don't exist yet
+    const existingRoomTypes = await prisma.retreatRoomType.findFirst({
+      where: { retreatId: atlanticId },
+    });
+
+    if (!existingRoomTypes) {
+      await prisma.retreatRoomType.createMany({
+        data: [
+          {
+            retreatId: atlanticId,
+            name: "Habitación individual",
+            description:
+              "Habitación privada para descansar con calma después de las actividades.",
+            priceCents: 20000,
+            maxQuantity: 6,
+          },
+          {
+            retreatId: atlanticId,
+            name: "Habitación compartida",
+            description:
+              "Habitación compartida cómoda, ideal para venir con amigo/a o conocer al grupo.",
+            priceCents: 15000,
+            maxQuantity: 8,
+          },
+        ],
+      });
+    }
+
+    // Check if extras exist
+    const existingExtras = await prisma.retreatExtraActivity.findMany({
+      where: { retreatId: atlanticId },
+    });
+
+    if (existingExtras.length === 0) {
+      await prisma.retreatExtraActivity.createMany({
+        data: [
+          {
+            retreatId: atlanticId,
+            name: "Spa",
+            description:
+              "Acceso a circuito spa para recuperación y descanso profundo.",
+            priceCents: 4500,
+            allowMultiple: false,
+            link: "https://www.example.com/spa-cantabria",
+          },
+          {
+            retreatId: atlanticId,
+            name: "Masaje",
+            description: "Masaje relajante de 60 minutos.",
+            priceCents: 5500,
+            allowMultiple: true,
+            link: "https://www.example.com/masajes-cantabria",
+          },
+          {
+            retreatId: atlanticId,
+            name: "Sesión de fotos",
+            description:
+              "Sesión de fotos en costa y entorno natural del retiro.",
+            priceCents: 7500,
+            allowMultiple: false,
+            link: "https://www.example.com/fotos-cantabria",
+          },
+        ],
+      });
+    } else {
+      // Update existing extras with links
+      for (const extra of existingExtras) {
+        if (extra.name.toLowerCase().includes("spa")) {
+          await prisma.retreatExtraActivity.update({
+            where: { id: extra.id },
+            data: { link: "https://www.example.com/spa-cantabria" },
+          });
+        } else if (extra.name.toLowerCase().includes("masaje")) {
+          await prisma.retreatExtraActivity.update({
+            where: { id: extra.id },
+            data: { link: "https://www.example.com/masajes-cantabria" },
+          });
+        } else if (extra.name.toLowerCase().includes("foto")) {
+          await prisma.retreatExtraActivity.update({
+            where: { id: extra.id },
+            data: { link: "https://www.example.com/fotos-cantabria" },
           });
         }
       }

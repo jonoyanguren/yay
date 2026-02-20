@@ -6,6 +6,8 @@ interface BookingConfirmationEmailProps {
   roomQuantity: number;
   extras: Array<{ name: string; quantity: number }>;
   totalAmount: number;
+  chargedAmount: number;
+  pendingAmount: number;
   bookingDate: string;
 }
 
@@ -17,6 +19,8 @@ export function BookingConfirmationEmail({
   roomQuantity,
   extras,
   totalAmount,
+  chargedAmount,
+  pendingAmount,
   bookingDate,
 }: BookingConfirmationEmailProps) {
   const formatPrice = (cents: number) => {
@@ -99,9 +103,21 @@ export function BookingConfirmationEmail({
                         </td>
                       </tr>
                       <tr>
-                        <td style="color: #111; font-size: 16px; font-weight: 600; padding: 8px 0;">Total:</td>
-                        <td style="color: #10b981; font-size: 20px; font-weight: 700; text-align: right; padding: 8px 0;">
+                        <td style="color: #111; font-size: 15px; font-weight: 600; padding: 8px 0;">Total reserva:</td>
+                        <td style="color: #111; font-size: 15px; font-weight: 600; text-align: right; padding: 8px 0;">
                           ${formatPrice(totalAmount)}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="color: #111; font-size: 15px; font-weight: 600; padding: 8px 0;">Pagado ahora:</td>
+                        <td style="color: #10b981; font-size: 18px; font-weight: 700; text-align: right; padding: 8px 0;">
+                          ${formatPrice(chargedAmount)}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="color: #6b7280; font-size: 14px; padding: 8px 0;">Pendiente:</td>
+                        <td style="color: #6b7280; font-size: 14px; font-weight: 600; text-align: right; padding: 8px 0;">
+                          ${formatPrice(pendingAmount)}
                         </td>
                       </tr>
                     </table>
@@ -116,6 +132,26 @@ export function BookingConfirmationEmail({
                     <p style="margin: 0; font-size: 14px; color: #1e40af; line-height: 1.5;">
                       <strong>ℹ️ Próximos pasos:</strong><br>
                       Te contactaremos pronto con más información sobre el retiro y detalles logísticos.
+                      ${pendingAmount > 0 ? " El saldo pendiente se gestionará por factura aproximadamente 1 mes antes del retiro." : ""}
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fffbeb; border-radius: 8px; border-left: 4px solid #f59e0b; margin-bottom: 30px;">
+                <tr>
+                  <td style="padding: 16px 20px;">
+                    <p style="margin: 0 0 8px 0; font-size: 14px; color: #92400e; line-height: 1.5;">
+                      <strong>📌 Política de cancelación</strong>
+                    </p>
+                    <p style="margin: 0 0 8px 0; font-size: 13px; color: #92400e; line-height: 1.5;">
+                      Si cancelas con menos de 1 mes de antelación, el importe de la reserva no se devuelve.
+                    </p>
+                    <p style="margin: 0 0 8px 0; font-size: 13px; color: #92400e; line-height: 1.5;">
+                      Si cancelas con 3 meses o más de antelación, devolvemos una parte del importe abonado en la reserva.
+                    </p>
+                    <p style="margin: 0; font-size: 13px; color: #92400e; line-height: 1.5;">
+                      Estas condiciones nos ayudan a organizar la logística con tiempo y cuidar la experiencia del grupo.
                     </p>
                   </td>
                 </tr>

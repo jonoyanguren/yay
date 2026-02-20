@@ -62,6 +62,11 @@ export async function POST(request: Request) {
         images: data.images || [],
         date: data.date || "",
         price: data.price || "",
+        reservationDepositCents:
+          data.reservationDepositCents != null
+            ? Math.max(0, Number(data.reservationDepositCents) || 0)
+            : 60000,
+        chargeFullAmount: Boolean(data.chargeFullAmount),
         maxPeople: data.maxPeople ?? 12,
         published: data.published || false,
         arrivalIntro: data.arrivalIntro || null,
@@ -102,7 +107,7 @@ export async function POST(request: Request) {
               })),
             }
           : undefined,
-      },
+      } as any,
       include: {
         roomTypes: true,
         extraActivities: true,

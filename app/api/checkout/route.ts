@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
+import { RESERVATION_PAYMENT_CENTS } from "@/lib/stripe-config";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -38,6 +39,20 @@ export async function POST(request: NextRequest) {
     customerEmail,
     customerName,
   } = body;
+  const retreat = await prisma.retreat.findUnique({
+    where: { id: retreatId },
+  });
+  if (!retreat) {
+    return NextResponse.json({ error: "Retiro no encontrado" }, { status: 404 });
+  }
+  const retreatReservationDepositCents = Number(
+    (retreat as Record<string, unknown>).reservationDepositCents ??
+      RESERVATION_PAYMENT_CENTS,
+  );
+  const retreatChargeFullAmount = Boolean(
+    (retreat as Record<string, unknown>).chargeFullAmount ?? false,
+  );
+
 
   if (
     !retreatId ||
@@ -56,7 +71,7 @@ export async function POST(request: NextRequest) {
   // Check availability
   const availabilityRows = await prisma.$queryRaw<{ max_quantity: number; sold: string }[]>`
     SELECT r.max_quantity,
-           COALESCE(SUM(brs.quantity) FILTER (WHERE b.status = 'paid'), 0)::text AS sold
+           COALESCE(SUM(brs.quantity) FILTER (WHERE b.status IN ('deposit', 'paid')), 0)::text AS sold
     FROM retreat_room_types r
     LEFT JOIN booking_room_slots brs ON brs.retreat_room_type_id = r.id
     LEFT JOIN bookings b ON b.id = brs.booking_id
@@ -91,41 +106,40 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const extraIds = (extras ?? []).filter((e) => e.quantity > 0).map((e) => e.id);
-  const extraMap = new Map<string, { name: string; price_cents: number }>();
+  const requestedExtras = (extras ?? []).filter((e) => e.quantity > 0);
+  const extraIds = requestedExtras.map((e) => e.id);
+  const validExtras = new Map<string, { priceCents: number }>();
   if (extraIds.length > 0) {
     const extraRows = await prisma.retreatExtraActivity.findMany({
       where: { retreatId, id: { in: extraIds } },
-      select: { id: true, name: true, priceCents: true },
+      select: { id: true, priceCents: true },
     });
-    extraRows.forEach((r) =>
-      extraMap.set(r.id, { name: r.name, price_cents: r.priceCents })
-    );
+    extraRows.forEach((r) => validExtras.set(r.id, { priceCents: r.priceCents }));
   }
+
+  const estimatedRoomTotalCents = roomType.priceCents * roomQuantity;
+  const estimatedExtrasTotalCents = requestedExtras.reduce((sum, e) => {
+    const extra = validExtras.get(e.id);
+    if (!extra) return sum;
+    return sum + extra.priceCents * e.quantity;
+  }, 0);
+  const estimatedTotalCents = estimatedRoomTotalCents + estimatedExtrasTotalCents;
+  const reservationChargeCents = retreatChargeFullAmount
+    ? estimatedTotalCents
+    : Math.min(retreatReservationDepositCents, estimatedTotalCents);
 
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
     {
-      quantity: roomQuantity,
+      quantity: 1,
       price_data: {
         currency: "eur",
-        unit_amount: roomType.priceCents,
-        product_data: { name: roomType.name },
+        unit_amount: reservationChargeCents,
+        product_data: {
+          name: retreatChargeFullAmount ? "Pago completo" : "Reserva (señal)",
+        },
       },
     },
   ];
-  for (const e of extras ?? []) {
-    if (e.quantity <= 0) continue;
-    const ex = extraMap.get(e.id);
-    if (!ex) continue;
-    lineItems.push({
-      quantity: e.quantity,
-      price_data: {
-        currency: "eur",
-        unit_amount: ex.price_cents,
-        product_data: { name: ex.name },
-      },
-    });
-  }
 
   // Create booking
   const booking = await prisma.booking.create({
@@ -149,8 +163,8 @@ export async function POST(request: NextRequest) {
   });
 
   // Add extras
-  const extraData = (extras ?? [])
-    .filter((e) => e.quantity > 0)
+  const extraData = requestedExtras
+    .filter((e) => validExtras.has(e.id))
     .map((e) => ({
       bookingId,
       retreatExtraActivityId: e.id,
@@ -168,8 +182,16 @@ export async function POST(request: NextRequest) {
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     line_items: lineItems,
+    customer_creation: "always",
     customer_email: customerEmail.trim(),
-    metadata: { bookingId },
+    metadata: {
+      bookingId,
+      paymentType: "reservation_fee",
+      chargeMode: retreatChargeFullAmount ? "full" : "deposit",
+      reservationAmountCents: String(reservationChargeCents),
+      reservationDepositCents: String(retreatReservationDepositCents),
+      estimatedTotalCents: String(estimatedTotalCents),
+    },
     success_url: `${baseUrl}/retreats/${slug}/book/thank-you?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}/retreats/${slug}/book`,
   });

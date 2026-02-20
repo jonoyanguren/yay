@@ -25,6 +25,7 @@ export async function POST(
           select: {
             title: true,
             slug: true,
+            reservationDepositCents: true,
           },
         },
         roomSlots: {
@@ -66,6 +67,15 @@ export async function POST(
       totalAmount += extra.retreatExtraActivity.priceCents * extra.quantity;
     });
 
+    const chargedAmount =
+      booking.stripeAmountTotalCents ??
+      (booking.status === "paid"
+        ? totalAmount
+        : booking.status === "deposit"
+          ? Math.min(booking.retreat.reservationDepositCents, totalAmount)
+          : 0);
+    const pendingAmount = Math.max(0, totalAmount - chargedAmount);
+
     // Send confirmation email
     const result = await sendBookingConfirmationEmail({
       to: booking.customerEmail,
@@ -79,6 +89,8 @@ export async function POST(
         quantity: e.quantity,
       })),
       totalAmount,
+      chargedAmount,
+      pendingAmount,
       bookingDate: booking.createdAt.toISOString(),
     });
 

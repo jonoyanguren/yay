@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import BookingForm from "./BookingForm";
+import { RESERVATION_PAYMENT_CENTS } from "@/lib/stripe-config";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -41,7 +42,7 @@ async function getRoomTypesWithAvailability(retreatId: string) {
   try {
     const rows = await prisma.$queryRaw<RoomTypeWithSold[]>`
       SELECT r.id, r.retreat_id, r.name, r.description, r.images, r.price_cents, r.max_quantity,
-             COALESCE(SUM(brs.quantity) FILTER (WHERE b.status = 'paid'), 0)::int AS sold
+             COALESCE(SUM(brs.quantity) FILTER (WHERE b.status IN ('deposit', 'paid')), 0)::int AS sold
       FROM retreat_room_types r
       LEFT JOIN booking_room_slots brs ON brs.retreat_room_type_id = r.id
       LEFT JOIN bookings b ON b.id = brs.booking_id
@@ -90,6 +91,14 @@ async function getExtraActivities(retreatId: string) {
 export default async function BookingPage({ params }: PageProps) {
   const { slug } = await params;
   const retreat = await getRetreatBySlug(slug);
+  const reservationDepositCents = Number(
+    (retreat as Record<string, unknown>).reservationDepositCents ??
+      RESERVATION_PAYMENT_CENTS,
+  );
+  const chargeFullAmount = Boolean(
+    (retreat as Record<string, unknown>).chargeFullAmount ?? false,
+  );
+
 
   if (!retreat) {
     notFound();
@@ -137,6 +146,8 @@ export default async function BookingPage({ params }: PageProps) {
           retreatId={retreat.id}
           retreatSlug={retreat.slug}
           retreatTitle={retreat.title}
+          reservationDepositCents={reservationDepositCents}
+          chargeFullAmount={chargeFullAmount}
           roomTypes={roomTypes}
           extras={extras}
         />

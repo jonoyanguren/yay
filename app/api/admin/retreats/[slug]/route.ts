@@ -70,6 +70,15 @@ export async function PATCH(
       ...(data.images !== undefined && { images: data.images }),
       ...(data.date !== undefined && { date: data.date }),
       ...(data.price !== undefined && { price: data.price }),
+      ...(data.reservationDepositCents !== undefined && {
+        reservationDepositCents: Math.max(
+          0,
+          Number(data.reservationDepositCents) || 0,
+        ),
+      }),
+      ...(data.chargeFullAmount !== undefined && {
+        chargeFullAmount: Boolean(data.chargeFullAmount),
+      }),
       ...(data.maxPeople !== undefined && { maxPeople: data.maxPeople }),
       ...(data.published !== undefined && { published: data.published }),
       ...(data.arrivalIntro !== undefined && {

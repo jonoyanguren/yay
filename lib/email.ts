@@ -11,6 +11,8 @@ interface SendBookingConfirmationParams {
   roomQuantity: number;
   extras: Array<{ name: string; quantity: number }>;
   totalAmount: number;
+  chargedAmount: number;
+  pendingAmount: number;
   bookingDate: string;
 }
 
@@ -23,6 +25,8 @@ export async function sendBookingConfirmationEmail({
   roomQuantity,
   extras,
   totalAmount,
+  chargedAmount,
+  pendingAmount,
   bookingDate,
 }: SendBookingConfirmationParams) {
   if (!process.env.RESEND_API_KEY) {
@@ -40,6 +44,8 @@ export async function sendBookingConfirmationEmail({
     roomQuantity,
     extras,
     totalAmount,
+    chargedAmount,
+    pendingAmount,
     bookingDate,
   });
 

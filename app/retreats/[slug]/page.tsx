@@ -47,7 +47,7 @@ export default async function RetreatPage({ params }: PageProps) {
   }
 
   const paidCount = await prisma.booking.count({
-    where: { retreatId: retreat.id, status: "paid" },
+    where: { retreatId: retreat.id, status: { in: ["deposit", "paid"] } },
   });
   const maxPeople = retreat.maxPeople ?? 12;
   const spotsLeft = Math.max(0, maxPeople - paidCount);

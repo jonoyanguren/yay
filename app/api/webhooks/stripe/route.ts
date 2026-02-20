@@ -6,6 +6,28 @@ import { sendBookingConfirmationEmail } from "@/lib/email";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
+function getCustomerId(session: Stripe.Checkout.Session): string | null {
+  return typeof session.customer === "string" ? session.customer : null;
+}
+
+function calculateBookingTotalCents(booking: {
+  roomSlots: Array<{ quantity: number; retreatRoomType: { priceCents: number } }>;
+  extras: Array<{
+    quantity: number;
+    retreatExtraActivity: { priceCents: number };
+  }>;
+}): number {
+  const roomTotal = booking.roomSlots.reduce(
+    (sum, slot) => sum + slot.retreatRoomType.priceCents * slot.quantity,
+    0,
+  );
+  const extrasTotal = booking.extras.reduce(
+    (sum, extra) => sum + extra.retreatExtraActivity.priceCents * extra.quantity,
+    0,
+  );
+  return roomTotal + extrasTotal;
+}
+
 export async function POST(request: NextRequest) {
   if (!webhookSecret) {
     console.error("STRIPE_WEBHOOK_SECRET not set");
@@ -30,8 +52,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  if (event.type === "checkout.session.completed") {
+  if (
+    event.type === "checkout.session.completed" ||
+    event.type === "checkout.session.async_payment_succeeded"
+  ) {
     const session = event.data.object as Stripe.Checkout.Session;
+    if (session.payment_status !== "paid") {
+      return NextResponse.json({ received: true });
+    }
+
     const bookingId = session.metadata?.bookingId;
     if (!bookingId) {
       console.error("checkout.session.completed missing metadata.bookingId");
@@ -42,13 +71,6 @@ export async function POST(request: NextRequest) {
     }
     
     try {
-      // Update booking status
-      await prisma.booking.update({
-        where: { id: bookingId },
-        data: { status: "paid" },
-      });
-
-      // Fetch booking details for email
       const booking = await prisma.booking.findUnique({
         where: { id: bookingId },
         include: {
@@ -82,13 +104,20 @@ export async function POST(request: NextRequest) {
       });
 
       if (booking) {
-        // Calculate total
-        let totalAmount = 0;
-        booking.roomSlots.forEach(slot => {
-          totalAmount += slot.retreatRoomType.priceCents * slot.quantity;
-        });
-        booking.extras.forEach(extra => {
-          totalAmount += extra.retreatExtraActivity.priceCents * extra.quantity;
+        const totalAmount = calculateBookingTotalCents(booking);
+        const chargedAmount = session.amount_total ?? 0;
+        const bookingStatus = chargedAmount >= totalAmount ? "paid" : "deposit";
+        const pendingAmount = Math.max(0, totalAmount - chargedAmount);
+
+        // Update booking status and Stripe payment data
+        await prisma.booking.update({
+          where: { id: bookingId },
+          data: {
+            status: bookingStatus,
+            stripeCustomerId: getCustomerId(session),
+            stripeAmountTotalCents: session.amount_total ?? null,
+            stripePaymentType: session.metadata?.paymentType ?? null,
+          },
         });
 
         // Send confirmation email
@@ -104,6 +133,8 @@ export async function POST(request: NextRequest) {
             quantity: e.quantity,
           })),
           totalAmount,
+          chargedAmount,
+          pendingAmount,
           bookingDate: booking.createdAt.toISOString(),
         });
       }

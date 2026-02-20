@@ -36,7 +36,7 @@ async function getRetreats() {
     });
     const paidCounts = await prisma.booking.groupBy({
       by: ["retreatId"],
-      where: { status: "paid" },
+      where: { status: { in: ["deposit", "paid"] } },
       _count: true,
     });
     const countByRetreat = Object.fromEntries(

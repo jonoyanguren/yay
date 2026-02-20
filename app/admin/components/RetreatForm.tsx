@@ -59,6 +59,8 @@ export default function RetreatForm({
     fullDescription: retreat?.fullDescription || "",
     date: retreat?.date || "",
     price: retreat?.price || "",
+    reservationDepositCents: retreat?.reservationDepositCents ?? 60000,
+    chargeFullAmount: retreat?.chargeFullAmount || false,
     maxPeople: retreat?.maxPeople ?? 12,
     published: retreat?.published || false,
     arrivalIntro: retreat?.arrivalIntro || "",
@@ -290,6 +292,11 @@ export default function RetreatForm({
       const data = {
         ...formData,
         maxPeople: Number(formData.maxPeople) || 12,
+        reservationDepositCents: Math.max(
+          0,
+          Number(formData.reservationDepositCents) || 0,
+        ),
+        chargeFullAmount: formData.chargeFullAmount,
         images: retreatImages,
         activities,
         program,
@@ -441,6 +448,47 @@ export default function RetreatForm({
               placeholder="Ej: Desde 450€"
               className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-slate-700">
+              Reserva / señal (€)
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={(formData.reservationDepositCents / 100).toString()}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  reservationDepositCents: Math.round(
+                    (Number(e.target.value) || 0) * 100,
+                  ),
+                }))
+              }
+              placeholder="Ej: 600"
+              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+            />
+            <p className="text-xs text-slate-500 mt-1.5">
+              Importe máximo de reserva para este retiro (se cobra min(reserva,
+              total)).
+            </p>
+            <label className="mt-3 flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                name="chargeFullAmount"
+                checked={formData.chargeFullAmount}
+                onChange={handleChange}
+                className="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500"
+              />
+              <span className="ml-2 text-sm font-medium text-slate-700">
+                Cobrar total (sin reserva)
+              </span>
+            </label>
+            <p className="text-xs text-slate-500 mt-1.5">
+              Si está activo, se cobrará el 100% del retiro en Checkout.
+            </p>
           </div>
 
           <div>

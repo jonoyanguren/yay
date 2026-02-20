@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS retreats (
   image TEXT NOT NULL DEFAULT '',
   date TEXT NOT NULL DEFAULT '',
   price TEXT NOT NULL DEFAULT '',
+  reservation_deposit_cents INTEGER NOT NULL DEFAULT 60000 CHECK (reservation_deposit_cents >= 0),
+  charge_full_amount BOOLEAN NOT NULL DEFAULT false,
   arrival_intro TEXT,
   arrival_options JSONB,
   day_by_day JSONB,
@@ -44,9 +46,12 @@ CREATE TABLE IF NOT EXISTS bookings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   retreat_id UUID NOT NULL REFERENCES retreats(id),
   stripe_session_id TEXT UNIQUE,
+  stripe_customer_id TEXT,
+  stripe_amount_total_cents INTEGER,
+  stripe_payment_type TEXT,
   customer_email TEXT NOT NULL,
   customer_name TEXT,
-  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'paid', 'cancelled')),
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'deposit', 'paid', 'cancelled')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
