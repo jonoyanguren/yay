@@ -8,8 +8,7 @@ import { prisma } from "@/lib/prisma";
 async function getRetreats() {
   try {
     const retreats = await prisma.retreat.findMany({
-      where: { published: true },
-      orderBy: { createdAt: "asc" },
+      orderBy: [{ published: "desc" }, { createdAt: "asc" }],
       select: {
         id: true,
         slug: true,
