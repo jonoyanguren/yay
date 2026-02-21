@@ -10,7 +10,7 @@ export default function AboutPage() {
       <div className="space-y-8 text-lg md:text-xl leading-relaxed text-black/80">
         <p>
           YaY Retreats nació de una necesidad personal: desconectar del estrés
-          digital sin tener que "conectar" con energías místicas.
+          digital sin tener que &quot;conectar&quot; con energías místicas.
         </p>
         <p>
           Nos gustan los retiros, pero no nos sentimos identificados con la
