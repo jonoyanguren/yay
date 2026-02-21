@@ -1,5 +1,8 @@
+"use client";
+
 import Button from "@/components/ui/Button";
 import { FaInstagram, FaWhatsapp } from "react-icons/fa";
+import { trackMetaCustom } from "@/lib/meta-pixel";
 
 export default function ContactPage() {
   return (
@@ -33,6 +36,11 @@ export default function ContactPage() {
               target="_blank"
               rel="noopener noreferrer"
               className="w-full bg-linear-to-tr from-[#f09433] via-[#bc1888] to-[#cc2366] border-none text-white hover:opacity-90 hover:text-white"
+              onClick={() =>
+                trackMetaCustom("ContactInstagramClick", {
+                  source: "contact_page",
+                })
+              }
             >
               Ver perfil
             </Button>
@@ -57,6 +65,11 @@ export default function ContactPage() {
               className="w-full bg-[#25D366] border-[#25D366] text-white hover:bg-[#128C7E] hover:text-white"
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() =>
+                trackMetaCustom("ContactWhatsAppCommunityClick", {
+                  source: "contact_page",
+                })
+              }
             >
               Unirme al grupo
             </Button>

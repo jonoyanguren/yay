@@ -1,13 +1,24 @@
 import React from "react";
 import Link from "next/link";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  href?: string;
+type CommonProps = {
   variant?: "primary" | "outline" | "ghost";
   size?: "sm" | "md" | "lg";
-  target?: string;
-  rel?: string;
-}
+  className?: string;
+  children: React.ReactNode;
+};
+
+type LinkButtonProps = CommonProps &
+  Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
+    href: string;
+  };
+
+type NativeButtonProps = CommonProps &
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    href?: undefined;
+  };
+
+type ButtonProps = LinkButtonProps | NativeButtonProps;
 
 export default function Button({
   children,
@@ -38,7 +49,13 @@ export default function Button({
 
   if (href) {
     return (
-      <Link href={href} className={combinedClassName} target={target} rel={rel}>
+      <Link
+        href={href}
+        className={combinedClassName}
+        target={target}
+        rel={rel}
+        {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
+      >
         {children}
       </Link>
     );

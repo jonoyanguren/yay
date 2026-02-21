@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 import { RESERVATION_PAYMENT_CENTS } from "@/lib/stripe-config";
+import { sendMetaLeadEvent } from "@/lib/meta-conversions";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -199,6 +200,20 @@ export async function POST(request: NextRequest) {
   await prisma.booking.update({
     where: { id: bookingId },
     data: { stripeSessionId: session.id },
+  });
+
+  const clientIpAddress =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? undefined;
+  const clientUserAgent = request.headers.get("user-agent") ?? undefined;
+
+  await sendMetaLeadEvent({
+    bookingId,
+    retreatId,
+    reservationAmountCents: reservationChargeCents,
+    customerEmail: customerEmail.trim(),
+    customerName: customerName?.trim() || null,
+    clientIpAddress,
+    clientUserAgent,
   });
 
   return NextResponse.json({ url: session.url });
