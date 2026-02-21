@@ -28,12 +28,12 @@ function normalize(value: string): string {
   return value.trim().toLowerCase();
 }
 
-function splitName(name?: string | null): { firstName?: string; lastName?: string } {
+function splitName(name?: string | null): {
+  firstName?: string;
+  lastName?: string;
+} {
   if (!name) return {};
-  const tokens = name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
+  const tokens = name.trim().split(/\s+/).filter(Boolean);
   if (tokens.length === 0) return {};
   if (tokens.length === 1) return { firstName: tokens[0] };
   return {
@@ -90,7 +90,11 @@ export async function sendMetaPurchaseEvent({
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Meta CAPI purchase send failed:", response.status, errorText);
+      console.error(
+        "Meta CAPI purchase send failed:",
+        response.status,
+        errorText,
+      );
     }
   } catch (error) {
     console.error("Meta CAPI request error:", error);

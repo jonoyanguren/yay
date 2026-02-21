@@ -26,8 +26,6 @@ export default function Button({
   variant = "primary",
   size = "md",
   className = "",
-  target,
-  rel,
   ...props
 }: ButtonProps) {
   const baseStyles =
@@ -48,21 +46,21 @@ export default function Button({
   const combinedClassName = `${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`;
 
   if (href) {
+    const linkProps = props as React.AnchorHTMLAttributes<HTMLAnchorElement>;
     return (
       <Link
         href={href}
         className={combinedClassName}
-        target={target}
-        rel={rel}
-        {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
+        {...linkProps}
       >
         {children}
       </Link>
     );
   }
 
+  const buttonProps = props as React.ButtonHTMLAttributes<HTMLButtonElement>;
   return (
-    <button className={combinedClassName} {...props}>
+    <button className={combinedClassName} {...buttonProps}>
       {children}
     </button>
   );
