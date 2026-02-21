@@ -5,6 +5,8 @@ export type MetaEventName =
   | "Purchase";
 
 export type MetaParams = Record<string, string | number | boolean | string[]>;
+const MAX_FBQ_RETRIES = 12;
+const FBQ_RETRY_DELAY_MS = 200;
 
 declare global {
   interface Window {
@@ -28,8 +30,7 @@ export function trackMeta(
   params?: MetaParams,
   eventId?: string,
 ) {
-  if (typeof window === "undefined" || typeof window.fbq !== "function") return;
-  window.fbq("track", eventName, cleanParams(params), { eventID: eventId });
+  sendMetaEventWithRetry("track", eventName, params, eventId, 0);
 }
 
 export function trackMetaCustom(
@@ -37,6 +38,37 @@ export function trackMetaCustom(
   params?: MetaParams,
   eventId?: string,
 ) {
-  if (typeof window === "undefined" || typeof window.fbq !== "function") return;
-  window.fbq("trackCustom", eventName, cleanParams(params), { eventID: eventId });
+  sendMetaEventWithRetry("trackCustom", eventName, params, eventId, 0);
+}
+
+function sendMetaEventWithRetry(
+  command: "track" | "trackCustom",
+  eventName: string,
+  params?: MetaParams,
+  eventId?: string,
+  attempt: number = 0,
+) {
+  if (typeof window === "undefined") return;
+
+  if (typeof window.fbq !== "function") {
+    if (attempt === 0) {
+      console.warn("[Meta Pixel] fbq not ready, scheduling retry", {
+        command,
+        eventName,
+        params,
+        eventId,
+      });
+    }
+    if (attempt < MAX_FBQ_RETRIES) {
+      window.setTimeout(
+        () =>
+          sendMetaEventWithRetry(command, eventName, params, eventId, attempt + 1),
+        FBQ_RETRY_DELAY_MS,
+      );
+    }
+    return;
+  }
+
+  console.info(`[Meta Pixel] ${command}`, { eventName, params, eventId, attempt });
+  window.fbq(command, eventName, cleanParams(params), { eventID: eventId });
 }

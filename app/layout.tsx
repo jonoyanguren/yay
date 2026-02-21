@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
+import MetaPageViewTracker from "@/components/analytics/MetaPageViewTracker";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -47,9 +48,9 @@ export default function RootLayout({
             window.fbq.version = '2.0';
             window.fbq.queue = [];
             window.fbq('init', '${metaPixelId}');
-            window.fbq('track', 'PageView');
           `}
         </Script>
+        <MetaPageViewTracker />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-FJ6KL0M75M"
           strategy="afterInteractive"
