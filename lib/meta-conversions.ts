@@ -24,6 +24,16 @@ type SendMetaLeadParams = {
   clientUserAgent?: string;
 };
 
+type MetaCustomData = Record<string, string | number | boolean | string[]>;
+
+type SendMetaFrontendEventParams = {
+  eventName: string;
+  eventId?: string;
+  customData?: MetaCustomData;
+  clientIpAddress?: string;
+  clientUserAgent?: string;
+};
+
 function normalize(value: string): string {
   return value.trim().toLowerCase();
 }
@@ -42,38 +52,32 @@ function splitName(name?: string | null): {
   };
 }
 
-export async function sendMetaPurchaseEvent({
-  bookingId,
-  retreatId,
-  chargedAmountCents,
-  customerEmail,
-}: SendMetaPurchaseParams): Promise<void> {
+async function sendMetaEvent({
+  eventName,
+  eventId,
+  userData,
+  customData,
+}: {
+  eventName: string;
+  eventId?: string;
+  userData?: Record<string, string[] | string>;
+  customData?: MetaCustomData;
+}): Promise<void> {
   const accessToken = process.env.META_CONVERSIONS_ACCESS_TOKEN;
   if (!accessToken) return;
 
   const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? DEFAULT_PIXEL_ID;
   const testEventCode = process.env.META_CONVERSIONS_TEST_EVENT_CODE;
 
-  const userData: Record<string, string[]> = {};
-  if (customerEmail) {
-    userData.em = [sha256(customerEmail.trim().toLowerCase())];
-  }
-
   const body = {
     data: [
       {
-        event_name: "Purchase",
+        event_name: eventName,
         event_time: Math.floor(Date.now() / 1000),
-        event_id: `purchase_${bookingId}`,
+        event_id: eventId,
         action_source: "website",
         user_data: userData,
-        custom_data: {
-          currency: "EUR",
-          value: chargedAmountCents / 100,
-          content_ids: [retreatId],
-          content_type: "product",
-          order_id: bookingId,
-        },
+        custom_data: customData,
       },
     ],
     test_event_code: testEventCode,
@@ -81,21 +85,42 @@ export async function sendMetaPurchaseEvent({
 
   const endpoint = `https://graph.facebook.com/${META_GRAPH_VERSION}/${pixelId}/events?access_token=${encodeURIComponent(accessToken)}`;
 
-  try {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(
-        "Meta CAPI purchase send failed:",
-        response.status,
-        errorText,
-      );
-    }
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Meta CAPI send failed:", response.status, errorText);
+  }
+}
+
+export async function sendMetaPurchaseEvent({
+  bookingId,
+  retreatId,
+  chargedAmountCents,
+  customerEmail,
+}: SendMetaPurchaseParams): Promise<void> {
+  const userData: Record<string, string[]> = {};
+  if (customerEmail) {
+    userData.em = [sha256(normalize(customerEmail))];
+  }
+
+  try {
+    await sendMetaEvent({
+      eventName: "Purchase",
+      eventId: `purchase_${bookingId}`,
+      userData,
+      customData: {
+        currency: "EUR",
+        value: chargedAmountCents / 100,
+        content_ids: [retreatId],
+        content_type: "product",
+        order_id: bookingId,
+      },
+    });
   } catch (error) {
     console.error("Meta CAPI request error:", error);
   }
@@ -110,11 +135,6 @@ export async function sendMetaLeadEvent({
   clientIpAddress,
   clientUserAgent,
 }: SendMetaLeadParams): Promise<void> {
-  const accessToken = process.env.META_CONVERSIONS_ACCESS_TOKEN;
-  if (!accessToken) return;
-
-  const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? DEFAULT_PIXEL_ID;
-  const testEventCode = process.env.META_CONVERSIONS_TEST_EVENT_CODE;
   const { firstName, lastName } = splitName(customerName);
 
   const userData: Record<string, string[] | string> = {};
@@ -124,40 +144,43 @@ export async function sendMetaLeadEvent({
   if (clientIpAddress) userData.client_ip_address = clientIpAddress;
   if (clientUserAgent) userData.client_user_agent = clientUserAgent;
 
-  const body = {
-    data: [
-      {
-        event_name: "Lead",
-        event_time: Math.floor(Date.now() / 1000),
-        event_id: `lead_${bookingId}`,
-        action_source: "website",
-        user_data: userData,
-        custom_data: {
-          currency: "EUR",
-          value: reservationAmountCents / 100,
-          content_ids: [retreatId],
-          content_type: "product",
-          order_id: bookingId,
-        },
-      },
-    ],
-    test_event_code: testEventCode,
-  };
-
-  const endpoint = `https://graph.facebook.com/${META_GRAPH_VERSION}/${pixelId}/events?access_token=${encodeURIComponent(accessToken)}`;
-
   try {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+    await sendMetaEvent({
+      eventName: "Lead",
+      eventId: `lead_${bookingId}`,
+      userData,
+      customData: {
+        currency: "EUR",
+        value: reservationAmountCents / 100,
+        content_ids: [retreatId],
+        content_type: "product",
+        order_id: bookingId,
+      },
     });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Meta CAPI lead send failed:", response.status, errorText);
-    }
   } catch (error) {
     console.error("Meta CAPI request error:", error);
+  }
+}
+
+export async function sendMetaFrontendEvent({
+  eventName,
+  eventId,
+  customData,
+  clientIpAddress,
+  clientUserAgent,
+}: SendMetaFrontendEventParams): Promise<void> {
+  const userData: Record<string, string[] | string> = {};
+  if (clientIpAddress) userData.client_ip_address = clientIpAddress;
+  if (clientUserAgent) userData.client_user_agent = clientUserAgent;
+
+  try {
+    await sendMetaEvent({
+      eventName,
+      eventId,
+      userData,
+      customData,
+    });
+  } catch (error) {
+    console.error("Meta CAPI frontend event send failed:", error);
   }
 }
