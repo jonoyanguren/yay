@@ -1,5 +1,6 @@
 import Button from "@/components/ui/Button";
 import ImageGallery from "@/components/ImageGallery";
+import TrackMetaOnMount from "@/components/analytics/TrackMetaOnMount";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
@@ -83,6 +84,14 @@ export default async function RetreatPage({ params }: PageProps) {
 
   return (
     <div className="pb-24">
+      <TrackMetaOnMount
+        eventName="ViewContent"
+        params={{
+          content_ids: [retreat.id],
+          content_name: retreat.title,
+          content_type: "product",
+        }}
+      />
       {/* Hero */}
       <div
         className="h-[60vh] bg-gray/20 relative flex items-end pb-12 px-4 md:px-12"

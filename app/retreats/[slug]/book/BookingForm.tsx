@@ -5,6 +5,7 @@ import ImageGallery from "@/components/ImageGallery";
 import type { RetreatRoomTypeWithAvailability } from "@/lib/types";
 import type { RetreatExtraActivityRow } from "@/lib/types";
 import Button from "@/components/ui/Button";
+import { trackMeta } from "@/lib/meta-pixel";
 
 function formatPrice(cents: number): string {
   return new Intl.NumberFormat("es-ES", {
@@ -89,6 +90,14 @@ export default function BookingForm({
         return;
       }
       if (data.url) {
+        trackMeta("AddPaymentInfo", {
+          content_ids: [retreatId, selectedRoomTypeId],
+          content_type: "product",
+          currency: "EUR",
+          value: totalCents / 100,
+          num_items: 1,
+        });
+
         const popup = window.open(data.url, "_blank");
         if (popup) {
           popup.opener = null;

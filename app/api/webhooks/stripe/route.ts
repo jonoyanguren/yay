@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 import { sendBookingConfirmationEmail } from "@/lib/email";
+import { sendMetaPurchaseEvent } from "@/lib/meta-conversions";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -118,6 +119,13 @@ export async function POST(request: NextRequest) {
             stripeAmountTotalCents: session.amount_total ?? null,
             stripePaymentType: session.metadata?.paymentType ?? null,
           },
+        });
+
+        await sendMetaPurchaseEvent({
+          bookingId,
+          retreatId: booking.retreatId,
+          chargedAmountCents: chargedAmount,
+          customerEmail: booking.customerEmail,
         });
 
         // Send confirmation email

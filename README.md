@@ -38,14 +38,14 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 ### Variables de entorno
 
-| Variable | Uso |
-|----------|-----|
-| `DATABASE_URL` | Connection string de Postgres (Prisma). Inyectada por Vercel al enlazar el almacén. |
-| `STRIPE_SECRET_KEY` | Clave secreta de la API de Stripe. |
-| `STRIPE_WEBHOOK_SECRET` | Signing secret del webhook (diferente en local con CLI y en producción). |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | (Opcional) Si más adelante usas Stripe.js en cliente. |
+| Variable                              | Uso                                                                                 |
+| ------------------------------------- | ----------------------------------------------------------------------------------- |
+| `DATABASE_URL`                        | Connection string de Postgres (Prisma). Inyectada por Vercel al enlazar el almacén. |
+| `STRIPE_SECRET_KEY`                   | Clave secreta de la API de Stripe.                                                  |
+| `STRIPE_WEBHOOK_SECRET`               | Signing secret del webhook (diferente en local con CLI y en producción).            |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`  | (Opcional) Si más adelante usas Stripe.js en cliente.                               |
 | `NEXT_PUBLIC_RESERVATION_PAYMENT_EUR` | (Fallback) Tope por defecto en euros si un retiro no tiene señal configurada en BD. |
-| `NEXT_PUBLIC_BASE_URL` o `VERCEL_URL` | URL base para success/cancel de Checkout (Vercel inyecta `VERCEL_URL`). |
+| `NEXT_PUBLIC_BASE_URL` o `VERCEL_URL` | URL base para success/cancel de Checkout (Vercel inyecta `VERCEL_URL`).             |
 
 La señal de reserva se configura por retiro desde admin (`reserva / señal`) y se guarda en `retreats.reservation_deposit_cents`.
 También puedes activar `cobrar total (sin reserva)` por retiro para cobrar el 100% en Checkout.

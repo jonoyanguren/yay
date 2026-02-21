@@ -26,11 +26,30 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const metaPixelId =
+    process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "948434710971588";
+
   return (
     <html lang="es">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-sand text-black min-h-screen flex flex-col`}
       >
+        <Script
+          src="https://connect.facebook.net/en_US/fbevents.js"
+          strategy="afterInteractive"
+        />
+        <Script id="meta-pixel" strategy="afterInteractive">
+          {`
+            window.fbq = window.fbq || function(){(window.fbq.q=window.fbq.q||[]).push(arguments)};
+            if (!window._fbq) window._fbq = window.fbq;
+            window.fbq.push = window.fbq;
+            window.fbq.loaded = true;
+            window.fbq.version = '2.0';
+            window.fbq.queue = [];
+            window.fbq('init', '${metaPixelId}');
+            window.fbq('track', 'PageView');
+          `}
+        </Script>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-FJ6KL0M75M"
           strategy="afterInteractive"
