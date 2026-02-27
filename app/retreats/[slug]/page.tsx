@@ -1,8 +1,12 @@
 import Button from "@/components/ui/Button";
+import Title from "@/components/ui/Title";
 import ImageGallery from "@/components/ImageGallery";
 import TrackMetaOnMount from "@/components/analytics/TrackMetaOnMount";
+import ExperienceSection from "@/components/retreats/ExperienceSection";
+import ItinerarySection from "@/components/retreats/ItinerarySection";
+import RetreatHero from "@/components/retreats/RetreatHero";
+import RetreatSection from "@/components/retreats/RetreatSection";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
 interface PageProps {
@@ -92,224 +96,156 @@ export default async function RetreatPage({ params }: PageProps) {
           content_type: "product",
         }}
       />
-      {/* Hero */}
-      <div
-        className="h-[60vh] bg-gray/20 relative flex items-end pb-12 px-4 md:px-12"
-        style={{
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.5)), url(${imageUrl})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="relative z-10 max-w-6xl mx-auto w-full">
-          <Link
-            href="/#retreats"
-            className="text-white/80 hover:text-white text-sm mb-4 block"
-          >
-            &larr; Volver a Retiros
-          </Link>
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-2">
-            {retreat.title}
-          </h1>
-          <p className="text-xl text-white/90 flex items-center gap-2">
-            <span>{retreat.location}</span>
-            <span className="w-1 h-1 bg-white rounded-full"></span>
-            <span>{retreat.date}</span>
-          </p>
-        </div>
-      </div>
+      <section className="pb-4 md:pb-8">
+        <RetreatHero
+          title={retreat.title}
+          location={retreat.location}
+          date={retreat.date}
+          imageUrl={imageUrl}
+          maxPeople={maxPeople}
+          spotsLeft={spotsLeft}
+          bookingHref={`/retreats/${retreat.slug}/book`}
+        />
+      </section>
+
+      <RetreatSection>
+        <ExperienceSection
+          title="La experiencia"
+          description={retreat.fullDescription}
+          imageSrc={retreat.images?.[1] || imageUrl}
+          imageAlt={`${retreat.title} experience`}
+        />
+      </RetreatSection>
 
       {/* Galería de imágenes - ancho completo */}
       {galleryImages.length > 0 && (
-        <section className="mt-16 md:mt-24 w-full">
-          <div className="px-4 md:px-12 max-w-6xl mx-auto">
-            <ImageGallery
-              images={galleryImages}
-              altPrefix={retreat.title}
-              variant="full"
-              title="Galería"
-              imageCountLabel={
-                galleryImages.length === 1
-                  ? "1 imagen"
-                  : `${galleryImages.length} imágenes`
-              }
-            />
-          </div>
-        </section>
+        <RetreatSection>
+          <ImageGallery
+            images={galleryImages}
+            altPrefix={retreat.title}
+            variant="full"
+            title="Galería"
+          />
+        </RetreatSection>
       )}
 
-      <div className="px-4 md:px-12 max-w-6xl mx-auto mt-12 grid md:grid-cols-3 gap-12 md:gap-24">
-        {/* Main Content */}
-        <div className="md:col-span-2 space-y-12">
-          <section>
-            <h2 className="text-2xl font-bold mb-4">La Experiencia</h2>
-            <p className="text-black/70 mb-4">
-              Quedan <strong>{spotsLeft} plazas</strong> de {maxPeople} para este retiro.
-            </p>
-            <p className="text-lg leading-relaxed text-black/80 whitespace-pre-line">
-              {retreat.fullDescription}
-            </p>
-          </section>
+      {/* Itinerary section */}
+      <RetreatSection>
+        <ItinerarySection title="Itinerario día a día" days={dayByDay} />
+      </RetreatSection>
 
-          {arrivalOptions.length > 0 && (
-            <>
-              <section className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-bold">Llegadas y transfers</h2>
-                  <span className="text-xs uppercase tracking-wide text-black/50">
-                    Opcional
-                  </span>
-                </div>
-                <p className="text-black/70 text-sm leading-relaxed">
-                  {arrivalIntro}
-                </p>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {arrivalOptions.map((item) => (
-                    <div
-                      key={item.title}
-                      className="p-4 border border-gray/15 rounded-lg bg-white shadow-sm"
-                    >
-                      <p className="text-sm font-semibold mb-2">{item.title}</p>
-                      <p className="text-sm leading-relaxed text-black/80">
-                        {item.detail}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </section>
+      {/* Accommodation section */}
+      <RetreatSection className="bg-brand-blue-dark h-96" type="full">
+        <Title className="text-2xl text-white">Hospedaje</Title>
+      </RetreatSection>
 
-              {dayByDay.length > 0 && (
-                <section className="space-y-6">
-                  <h2 className="text-2xl font-bold">Itinerario día a día</h2>
-                  <div className="relative pl-8 md:pl-10">
-                    <div className="absolute left-3 md:left-4 top-2 bottom-2 w-px bg-gray/15" />
-                    <div className="space-y-5">
-                      {dayByDay.map((day) => (
-                        <div key={day.day} className="relative">
-                          <span className="absolute -left-[9px] md:-left-[7px] top-3 w-4 h-4 rounded-full bg-black border-2 border-white shadow-[0_2px_6px_rgba(0,0,0,0.08)]" />
-                          <div className="ml-4 md:ml-6 p-5 md:p-6 bg-white border border-gray/10 rounded-xl shadow-sm">
-                            <p className="text-sm uppercase tracking-wide text-black/50 mb-2">
-                              {day.day}
-                            </p>
-                            <ul className="space-y-2 text-black/80">
-                              {day.items.map((item) => (
-                                <li key={item} className="flex gap-2">
-                                  <span className="text-green font-bold">
-                                    •
-                                  </span>
-                                  <span>{item}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </section>
-              )}
-            </>
-          )}
-
-          <section>
-            <h2 className="text-2xl font-bold mb-6">Actividades Destacadas</h2>
-            <ul className="grid sm:grid-cols-2 gap-4">
-              {activities.map((activity, index) => (
-                <li
-                  key={index}
-                  className="flex items-start gap-3 p-4 bg-sand-light border border-gray/10 rounded-lg"
-                >
-                  <span className="text-green font-bold">0{index + 1}</span>
-                  <span>{activity}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          {(includes.length > 0 || notIncludes.length > 0) && (
-            <section className="grid md:grid-cols-2 gap-6">
-              <div className="p-5 border border-gray/15 rounded-lg bg-white space-y-2">
-                <h3 className="text-xl font-semibold">Qué incluye</h3>
-                <ul className="space-y-2 text-black/80">
-                  {includes.map((item) => (
-                    <li key={item} className="flex gap-2">
-                      <span className="text-green font-bold">✓</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="p-5 border border-gray/15 rounded-lg bg-white space-y-2">
-                <h3 className="text-xl font-semibold">No incluye</h3>
-                <ul className="space-y-2 text-black/80">
-                  {notIncludes.map((item) => (
-                    <li key={item} className="flex gap-2">
-                      <span className="text-black/40 font-bold">–</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </section>
-          )}
-
-          {extraIdeas.length > 0 && (
-            <section className="space-y-3">
-              <h2 className="text-2xl font-bold">Otras ideas de tarde/noche</h2>
-              <div className="flex flex-wrap gap-3">
-                {extraIdeas.map((item) => (
-                  <span
-                    key={item}
-                    className="px-3 py-2 bg-sand-light border border-gray/10 rounded-full text-sm"
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
-
-        {/* Sidebar / Booking */}
-        <div className="md:col-span-1">
-          <div className="sticky top-24 p-6 bg-sand-light border border-gray/20 rounded-xl shadow-sm space-y-6">
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between py-2 border-b border-gray/10">
-                <span className="text-black/60">Fechas</span>
-                <span className="font-medium">{retreat.date}</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-gray/10">
-                <span className="text-black/60">Ubicación</span>
-                <span className="font-medium text-right">
-                  {retreat.location}
-                </span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-gray/10">
-                <span className="text-black/60">Grupo</span>
-                <span className="font-medium">Max {maxPeople} personas</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-gray/10">
-                <span className="text-black/60">Plazas</span>
-                <span className="font-medium">
-                  Quedan {spotsLeft} de {maxPeople} plazas
-                </span>
-              </div>
+      {arrivalOptions.length > 0 && (
+        <RetreatSection className="bg-brand-blue-dark" type="full">
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Title className="text-2xl text-white">
+                Llegadas y transfers
+              </Title>
             </div>
+            <p className="text-white leading-relaxed">{arrivalIntro}</p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {arrivalOptions.map((item, index) => (
+                <div
+                  key={item.title}
+                  className={`p-4 border-2 rounded-lg shadow-sm ${
+                    index === 0 ? "" : "border-white/15 bg-white"
+                  }`}
+                  style={
+                    index === 0
+                      ? {
+                          borderColor: "#4f73c3",
+                          backgroundColor: "#faf8f4",
+                        }
+                      : undefined
+                  }
+                >
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <p className="text-sm font-semibold">{item.title}</p>
+                    {index === 0 && (
+                      <span className="text-[10px] px-2 py-1 rounded-full bg-brand-blue-medium text-white uppercase tracking-wide">
+                        Recomendada
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm leading-relaxed text-black/80">
+                    {item.detail}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        </RetreatSection>
+      )}
 
-            <Button
-              className="w-full"
-              size="lg"
-              href={`/retreats/${retreat.slug}/book`}
-            >
-              Reservar plaza
-            </Button>
-            <p className="text-xs text-center text-black/40">
-              Elige habitación y extras; pago seguro con Stripe.
-            </p>
+      {(includes.length > 0 || notIncludes.length > 0) && (
+        <RetreatSection>
+          <section className="grid md:grid-cols-2 gap-6">
+            <div className="p-5 border border-gray/15 rounded-lg bg-white space-y-2">
+              <Title className="text-xl">Qué incluye</Title>
+              <ul className="space-y-2 text-black/80">
+                {includes.map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <span className="text-green font-bold">✓</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="p-5 border border-gray/15 rounded-lg bg-white space-y-2">
+              <Title className="text-xl">No incluye</Title>
+              <ul className="space-y-2 text-black/80">
+                {notIncludes.map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <span className="text-black/40 font-bold">–</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        </RetreatSection>
+      )}
+
+      <RetreatSection className="md:hidden">
+        <div className="p-6 bg-sand-light border border-gray/20 rounded-xl shadow-sm space-y-6">
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between py-2 border-b border-gray/10">
+              <span className="text-black/60">Fechas</span>
+              <span className="font-medium">{retreat.date}</span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-gray/10">
+              <span className="text-black/60">Ubicación</span>
+              <span className="font-medium text-right">{retreat.location}</span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-gray/10">
+              <span className="text-black/60">Grupo</span>
+              <span className="font-medium">Max {maxPeople} personas</span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-gray/10">
+              <span className="text-black/60">Plazas</span>
+              <span className="font-medium">
+                Quedan {spotsLeft} de {maxPeople} plazas
+              </span>
+            </div>
           </div>
+
+          <Button
+            className="w-full"
+            size="lg"
+            href={`/retreats/${retreat.slug}/book`}
+          >
+            Reservar plaza
+          </Button>
+          <p className="text-xs text-center text-black/40">
+            Elige habitación y extras; pago seguro con Stripe.
+          </p>
         </div>
-      </div>
+      </RetreatSection>
     </div>
   );
 }

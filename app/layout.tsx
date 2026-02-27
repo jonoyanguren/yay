@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bowlby_One, Caveat, Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import { Suspense } from "react";
 import MetaPageViewTracker from "@/components/analytics/MetaPageViewTracker";
@@ -17,6 +17,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const bowlbyOne = Bowlby_One({
+  variable: "--font-dela-gothic",
+  subsets: ["latin"],
+  weight: "400",
+});
+
+const caveat = Caveat({
+  variable: "--font-handwriting",
+  subsets: ["latin"],
+  weight: ["500", "600"],
+});
+
 export const metadata: Metadata = {
   title: "YaY Retreats | Modern Disconnect",
   description:
@@ -31,7 +43,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-sand text-black min-h-screen flex flex-col`}
+        className={`${geistSans.variable} ${geistMono.variable} ${bowlbyOne.variable} ${caveat.variable} antialiased bg-sand text-black min-h-screen flex flex-col`}
       >
         <Suspense fallback={null}>
           <MetaPageViewTracker />

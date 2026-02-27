@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Title from "./ui/Title";
 
 export type ImageGalleryVariant = "full" | "compact" | "button";
 
@@ -29,9 +30,7 @@ export default function ImageGallery({
   className = "",
 }: ImageGalleryProps) {
   const thumbClass =
-    variant === "compact" && compactSize === "sm"
-      ? "w-16 h-16"
-      : "w-20 h-20";
+    variant === "compact" && compactSize === "sm" ? "w-16 h-16" : "w-20 h-20";
   const thumbSizes = compactSize === "sm" ? "64px" : "80px";
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
@@ -39,12 +38,10 @@ export default function ImageGallery({
   const close = () => setLightboxIndex(null);
   const goPrev = () =>
     setLightboxIndex((i) =>
-      i === null ? null : i === 0 ? images.length - 1 : i - 1
+      i === null ? null : i === 0 ? images.length - 1 : i - 1,
     );
   const goNext = () =>
-    setLightboxIndex((i) =>
-      i === null ? null : (i + 1) % images.length
-    );
+    setLightboxIndex((i) => (i === null ? null : (i + 1) % images.length));
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -55,7 +52,7 @@ export default function ImageGallery({
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [lightboxIndex, images.length]);
+  }, [lightboxIndex, images.length, goPrev, goNext]);
 
   useEffect(() => {
     if (lightboxIndex !== null) {
@@ -77,7 +74,7 @@ export default function ImageGallery({
     <>
       {(title || imageCountLabel) && (
         <div className="mb-4">
-          {title && <h2 className="text-2xl font-bold">{title}</h2>}
+          {title && <Title className="text-2xl">{title}</Title>}
           {imageCountLabel && (
             <p className="text-black/60 text-sm mt-1">{imageCountLabel}</p>
           )}
