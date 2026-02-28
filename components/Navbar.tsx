@@ -2,10 +2,13 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { FaBars, FaTimes } from "react-icons/fa";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+  const isRetreatDetail = /^\/retreats\/[^/]+$/.test(pathname);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -14,6 +17,10 @@ export default function Navbar() {
   const closeMenu = () => {
     setIsOpen(false);
   };
+
+  if (isRetreatDetail) {
+    return null;
+  }
 
   return (
     <>

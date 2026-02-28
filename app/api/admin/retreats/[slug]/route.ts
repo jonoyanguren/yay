@@ -90,6 +90,15 @@ export async function PATCH(
       ...(data.arrivalOptions !== undefined && {
         arrivalOptions: data.arrivalOptions,
       }),
+      ...(data.hotelName !== undefined && {
+        hotelName: data.hotelName,
+      }),
+      ...(data.hotelUrl !== undefined && {
+        hotelUrl: data.hotelUrl,
+      }),
+      ...(data.videoUrl !== undefined && {
+        videoUrl: data.videoUrl,
+      }),
       ...(data.accommodationTitle !== undefined && {
         accommodationTitle: data.accommodationTitle,
       }),

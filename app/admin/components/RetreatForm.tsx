@@ -64,6 +64,9 @@ export default function RetreatForm({
     maxPeople: retreat?.maxPeople ?? 12,
     published: retreat?.published || false,
     arrivalIntro: retreat?.arrivalIntro || "",
+    hotelName: retreat?.hotelName || "",
+    hotelUrl: retreat?.hotelUrl || "",
+    videoUrl: retreat?.videoUrl || "",
     accommodationTitle: retreat?.accommodationTitle || "",
     accommodationDescription: retreat?.accommodationDescription || "",
   });
@@ -295,6 +298,9 @@ export default function RetreatForm({
         activities,
         program,
         arrivalOptions: arrivalOptions.length > 0 ? arrivalOptions : null,
+        hotelName: formData.hotelName || null,
+        hotelUrl: formData.hotelUrl || null,
+        videoUrl: formData.videoUrl || null,
         accommodationTitle: formData.accommodationTitle || null,
         accommodationDescription: formData.accommodationDescription || null,
         accommodationImages,
@@ -581,6 +587,48 @@ export default function RetreatForm({
               onChange={handleChange}
               rows={3}
               placeholder="Texto introductorio sobre las opciones de llegada..."
+              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-slate-700">
+              Nombre del hotel
+            </label>
+            <input
+              type="text"
+              name="hotelName"
+              value={formData.hotelName}
+              onChange={handleChange}
+              placeholder="Ej: Riad Merzouga Premium"
+              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-slate-700">
+              URL del hotel
+            </label>
+            <input
+              type="url"
+              name="hotelUrl"
+              value={formData.hotelUrl}
+              onChange={handleChange}
+              placeholder="https://..."
+              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-slate-700">
+              Video URL Accommodation
+            </label>
+            <input
+              type="url"
+              name="videoUrl"
+              value={formData.videoUrl}
+              onChange={handleChange}
+              placeholder="https://...mp4"
               className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
             />
           </div>

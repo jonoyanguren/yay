@@ -6,24 +6,9 @@ import { prisma } from "../lib/prisma";
 import { retreats } from "../lib/data";
 import { RESERVATION_PAYMENT_CENTS } from "../lib/stripe-config";
 
-const reservationDepositBySlug: Record<string, number> = {
-  "sahara-calm": 60000,
-  "tropical-relax": 30000,
-  "atlantic-reset": 35000,
-  "indian-ocean-reset": 50000,
-};
-
-const chargeFullAmountBySlug: Record<string, boolean> = {
-  "atlantic-reset": true,
-};
-
 async function seed() {
   console.log("Seeding retreats (full content)...");
   for (const r of retreats) {
-    const reservationDepositCents =
-      reservationDepositBySlug[r.slug] ?? RESERVATION_PAYMENT_CENTS;
-    const chargeFullAmount = chargeFullAmountBySlug[r.slug] ?? false;
-
     await prisma.retreat.upsert({
       where: { slug: r.slug },
       create: {
@@ -36,13 +21,17 @@ async function seed() {
         activitiesImage: r.activitiesImage ?? null,
         program: r.program,
         image: r.image,
+        images: r.images ?? [],
         date: r.date,
         price: r.price,
-        reservationDepositCents,
-        chargeFullAmount,
+        reservationDepositCents: RESERVATION_PAYMENT_CENTS,
+        chargeFullAmount: false,
         published: true, // Published by default
         arrivalIntro: r.arrivalIntro ?? null,
         arrivalOptions: r.arrivalOptions ?? undefined,
+        hotelName: r.hotelName ?? null,
+        hotelUrl: r.hotelUrl ?? null,
+        videoUrl: r.videoUrl ?? null,
         accommodationTitle: r.accommodationTitle ?? null,
         accommodationDescription: r.accommodationDescription ?? null,
         accommodationImages: r.accommodationImages ?? [],
@@ -59,13 +48,15 @@ async function seed() {
         activitiesImage: r.activitiesImage ?? null,
         program: r.program,
         image: r.image,
+        images: r.images ?? [],
         date: r.date,
         price: r.price,
-        reservationDepositCents,
-        chargeFullAmount,
         published: true, // Keep published on update
         arrivalIntro: r.arrivalIntro ?? null,
         arrivalOptions: r.arrivalOptions ?? undefined,
+        hotelName: r.hotelName ?? null,
+        hotelUrl: r.hotelUrl ?? null,
+        videoUrl: r.videoUrl ?? null,
         accommodationTitle: r.accommodationTitle ?? null,
         accommodationDescription: r.accommodationDescription ?? null,
         accommodationImages: r.accommodationImages ?? [],

@@ -34,6 +34,18 @@ export const retreats: RetreatSeedData[] = [
       "Día 10: Vuelo temprano de regreso"
     ],
     image: "/assets/sahara.jpg",
+    images: [
+      "https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&w=1800&q=80",
+      "https://images.unsplash.com/photo-1547234935-80c7145ec969?auto=format&fit=crop&w=1800&q=80",
+      "https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=1800&q=80",
+      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1800&q=80",
+      "https://images.unsplash.com/photo-1539650116574-8efeb43e2750?auto=format&fit=crop&w=1800&q=80",
+      "https://images.unsplash.com/photo-1519834785169-98be25ec3f84?auto=format&fit=crop&w=1800&q=80",
+      "https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1800&q=80",
+      "https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=1800&q=80",
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1800&q=80",
+      "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=1800&q=80",
+    ],
     date: "28 diciembre 2025 – 6 enero 2026",
     price: "Consultar plaza",
     arrivalIntro:
@@ -55,6 +67,8 @@ export const retreats: RetreatSeedData[] = [
           "Vienes con tu propio coche hasta Merzouga. Ruta libre y flexible. Coordinamos horario de llegada al alojamiento para que entres con el grupo.",
       },
     ],
+    hotelName: "Riad Merzouga Premium",
+    hotelUrl: "https://example.com/riad-merzouga-premium",
     accommodationTitle: "Accommodation",
     accommodationDescription:
       "Nos alojamos en campamento boutique en Merzouga: habitaciones cómodas, baño privado y zonas comunes para descansar entre actividades.",
@@ -143,6 +157,13 @@ export const retreats: RetreatSeedData[] = [
       "Día 7: Yoga de cierre, brunch y despedida"
     ],
     image: "/assets/caribe.jpg",
+    images: [
+      "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=1800&q=80",
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1800&q=80",
+      "https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1800&q=80",
+      "https://images.unsplash.com/photo-1473116763249-2faaef81ccda?auto=format&fit=crop&w=1800&q=80",
+      "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1800&q=80",
+    ],
     date: "Fechas por anunciar",
     price: "Consultar plaza",
     dayByDay: [
@@ -217,6 +238,13 @@ export const retreats: RetreatSeedData[] = [
       "Domingo: Yoga de cierre y despedida"
     ],
     image: "/assets/caribe.jpg",
+    images: [
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1800&q=80",
+      "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1800&q=80",
+      "https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=1800&q=80",
+      "https://images.unsplash.com/photo-1530789253388-582c481c54b0?auto=format&fit=crop&w=1800&q=80",
+      "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=1800&q=80",
+    ],
     date: "Fechas por anunciar",
     price: "Consultar plaza",
     dayByDay: [
@@ -300,6 +328,13 @@ export const retreats: RetreatSeedData[] = [
       "Domingo: Yoga de cierre, brunch y despedida"
     ],
     image: "/assets/noruega.jpg",
+    images: [
+      "https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=1800&q=80",
+      "https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=1800&q=80",
+      "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=1800&q=80",
+      "https://images.unsplash.com/photo-1473116763249-2faaef81ccda?auto=format&fit=crop&w=1800&q=80",
+      "https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=1800&q=80",
+    ],
     date: "Fechas por anunciar",
     price: "Consultar plaza",
     dayByDay: [

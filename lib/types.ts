@@ -24,6 +24,9 @@ export type Retreat = {
   maxPeople: number;
   arrivalIntro?: string | null;
   arrivalOptions?: { title: string; detail: string }[] | null;
+  hotelName?: string | null;
+  hotelUrl?: string | null;
+  videoUrl?: string | null;
   accommodationTitle?: string | null;
   accommodationDescription?: string | null;
   accommodationImages?: string[];
@@ -39,7 +42,6 @@ export type Retreat = {
 /** Shape used in lib/data.ts for seed; seed script does not use these fields. */
 export type RetreatSeedData = Omit<
   Retreat,
-  | "images"
   | "published"
   | "roomTypes"
   | "extraActivities"

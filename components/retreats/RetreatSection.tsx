@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import FadeInOnView from "@/components/retreats/FadeInOnView";
 
 type RetreatSectionType = "full" | "narrow";
 
@@ -31,12 +32,14 @@ export default function RetreatSection({
   children,
 }: RetreatSectionProps) {
   return (
-    <section className={className}>
-      <div
-        className={`mx-auto ${guttersByType[type]} ${widthByType[type]} ${verticalPaddingByType[type]} ${contentClassName}`.trim()}
-      >
-        {children}
-      </div>
-    </section>
+    <FadeInOnView>
+      <section className={className}>
+        <div
+          className={`mx-auto ${guttersByType[type]} ${widthByType[type]} ${verticalPaddingByType[type]} ${contentClassName}`.trim()}
+        >
+          {children}
+        </div>
+      </section>
+    </FadeInOnView>
   );
 }

@@ -1,12 +1,16 @@
-import Button from "@/components/ui/Button";
+import Image from "next/image";
 import Title from "@/components/ui/Title";
 import ImageGallery from "@/components/ImageGallery";
 import TrackMetaOnMount from "@/components/analytics/TrackMetaOnMount";
 import AccommodationSection from "@/components/retreats/AccommodationSection";
 import ExperienceSection from "@/components/retreats/ExperienceSection";
+import FadeInOnView from "@/components/retreats/FadeInOnView";
 import ItinerarySection from "@/components/retreats/ItinerarySection";
+import InspirationalScrollHighlight from "@/components/retreats/InspirationalScrollHighlight";
 import RetreatHero from "@/components/retreats/RetreatHero";
 import RetreatSection from "@/components/retreats/RetreatSection";
+import RetreatStickyInfoBar from "@/components/retreats/RetreatStickyInfoBar";
+import WaveSeparator from "@/components/retreats/WaveSeparator";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
@@ -70,6 +74,9 @@ export default async function RetreatPage({ params }: PageProps) {
   const dayByDay = (Array.isArray(retreat.dayByDay)
     ? retreat.dayByDay
     : []) as unknown as DayItem[];
+  const hotelName = retreat.hotelName?.trim() || "";
+  const hotelUrl = retreat.hotelUrl?.trim() || "";
+  const videoUrl = retreat.videoUrl?.trim() || "";
   const accommodationTitle =
     retreat.accommodationTitle?.trim() || "Accommodation";
   const accommodationDescription =
@@ -77,6 +84,8 @@ export default async function RetreatPage({ params }: PageProps) {
   const accommodationImages = retreat.accommodationImages || [];
   const hasAccommodationContent =
     Boolean(accommodationDescription) || accommodationImages.length > 0;
+  const hasDarkBlueSections =
+    hasAccommodationContent || arrivalOptions.length > 0;
   const includes = (
     Array.isArray(retreat.includes) ? retreat.includes : []
   ) as string[];
@@ -104,17 +113,24 @@ export default async function RetreatPage({ params }: PageProps) {
           content_type: "product",
         }}
       />
-      <section className="pb-4 md:pb-8">
+      <section>
         <RetreatHero
           title={retreat.title}
           location={retreat.location}
           date={retreat.date}
           imageUrl={imageUrl}
+        />
+      </section>
+
+      <FadeInOnView>
+        <RetreatStickyInfoBar
+          date={retreat.date}
+          location={retreat.location}
           maxPeople={maxPeople}
           spotsLeft={spotsLeft}
           bookingHref={`/retreats/${retreat.slug}/book`}
         />
-      </section>
+      </FadeInOnView>
 
       <RetreatSection>
         <ExperienceSection
@@ -125,16 +141,19 @@ export default async function RetreatPage({ params }: PageProps) {
         />
       </RetreatSection>
 
+      <RetreatSection type="full">
+        <InspirationalScrollHighlight />
+      </RetreatSection>
+
       {/* Galería de imágenes - ancho completo */}
       {galleryImages.length > 0 && (
-        <RetreatSection>
+        <section className="py-6 md:py-12">
           <ImageGallery
             images={galleryImages}
             altPrefix={retreat.title}
-            variant="full"
-            title="Galería"
+            variant="stack-parallax"
           />
-        </RetreatSection>
+        </section>
       )}
 
       {/* Itinerary section */}
@@ -143,71 +162,92 @@ export default async function RetreatPage({ params }: PageProps) {
       </RetreatSection>
 
       {activitiesImage && (
-        <section className="py-6 md:py-12">
-          <div className="mx-auto max-w-6xl px-6 md:px-12 mb-4">
-            <Title className="text-2xl">Collage de actividades</Title>
-          </div>
-          <div
-            className="w-full bg-center bg-cover min-h-[280px] md:min-h-[520px]"
-            style={{ backgroundImage: `url(${activitiesImage})` }}
-            role="img"
-            aria-label={`Collage de actividades de ${retreat.title}`}
-          />
-        </section>
-      )}
-
-      {/* Accommodation section */}
-      {hasAccommodationContent && (
-        <RetreatSection className="bg-brand-blue-dark" type="full">
-          <AccommodationSection
-            title={accommodationTitle}
-            description={accommodationDescription}
-            images={accommodationImages}
+        <RetreatSection>
+          <Image
+            src={activitiesImage}
+            width={1080}
+            height={800}
+            alt={`Collage de actividades de ${retreat.title}`}
           />
         </RetreatSection>
       )}
 
-      {arrivalOptions.length > 0 && (
-        <RetreatSection className="bg-brand-blue-dark" type="full">
-          <section className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Title className="text-2xl text-white">
-                Llegadas y transfers
-              </Title>
-            </div>
-            <p className="text-white leading-relaxed">{arrivalIntro}</p>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {arrivalOptions.map((item, index) => (
-                <div
-                  key={item.title}
-                  className={`p-4 border-2 rounded-lg shadow-sm ${
-                    index === 0 ? "" : "border-white/15 bg-white"
-                  }`}
-                  style={
-                    index === 0
-                      ? {
-                          borderColor: "#4f73c3",
-                          backgroundColor: "#faf8f4",
-                        }
-                      : undefined
-                  }
-                >
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <p className="text-sm font-semibold">{item.title}</p>
-                    {index === 0 && (
-                      <span className="text-[10px] px-2 py-1 rounded-full bg-brand-blue-medium text-white uppercase tracking-wide">
-                        Recomendada
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm leading-relaxed text-black/80">
-                    {item.detail}
-                  </p>
+      {hasDarkBlueSections && (
+        <div className="overflow-hidden">
+          <WaveSeparator
+            variant="bold"
+            colorClassName="text-brand-blue-dark"
+            heightClassName="h-16 md:h-28"
+          />
+
+          {/* Accommodation section */}
+          {hasAccommodationContent && (
+            <RetreatSection
+              className="bg-brand-blue-dark text-center"
+              type="full"
+            >
+              <AccommodationSection
+                title={accommodationTitle}
+                description={accommodationDescription}
+                images={accommodationImages}
+                hotelName={hotelName}
+                hotelUrl={hotelUrl}
+                videoUrl={videoUrl}
+              />
+            </RetreatSection>
+          )}
+
+          {arrivalOptions.length > 0 && (
+            <RetreatSection
+              className="bg-brand-blue-dark text-center"
+              type="full"
+            >
+              <section className="space-y-4">
+                <Title className="text-2xl text-white">
+                  Llegadas y transfers
+                </Title>
+                <p className="text-white leading-relaxed">{arrivalIntro}</p>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {arrivalOptions.map((item, index) => (
+                    <div
+                      key={item.title}
+                      className={`p-4 border-2 rounded-lg shadow-sm ${
+                        index === 0 ? "" : "border-white/15 bg-white"
+                      }`}
+                      style={
+                        index === 0
+                          ? {
+                              borderColor: "#4f73c3",
+                              backgroundColor: "#faf8f4",
+                            }
+                          : undefined
+                      }
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <p className="text-sm font-semibold">{item.title}</p>
+                        {index === 0 && (
+                          <span className="text-[10px] px-2 py-1 rounded-full bg-brand-blue-medium text-white uppercase tracking-wide">
+                            Recomendada
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm leading-relaxed text-black/80">
+                        {item.detail}
+                      </p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </section>
-        </RetreatSection>
+              </section>
+            </RetreatSection>
+          )}
+
+          <WaveSeparator
+            variant="bold"
+            flip
+            colorClassName="text-brand-blue-dark"
+            heightClassName="h-16 md:h-28"
+          />
+        </div>
       )}
 
       {(includes.length > 0 || notIncludes.length > 0) && (
@@ -239,41 +279,6 @@ export default async function RetreatPage({ params }: PageProps) {
         </RetreatSection>
       )}
 
-      <RetreatSection className="md:hidden">
-        <div className="p-6 bg-sand-light border border-gray/20 rounded-xl shadow-sm space-y-6">
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between py-2 border-b border-gray/10">
-              <span className="text-black/60">Fechas</span>
-              <span className="font-medium">{retreat.date}</span>
-            </div>
-            <div className="flex justify-between py-2 border-b border-gray/10">
-              <span className="text-black/60">Ubicación</span>
-              <span className="font-medium text-right">{retreat.location}</span>
-            </div>
-            <div className="flex justify-between py-2 border-b border-gray/10">
-              <span className="text-black/60">Grupo</span>
-              <span className="font-medium">Max {maxPeople} personas</span>
-            </div>
-            <div className="flex justify-between py-2 border-b border-gray/10">
-              <span className="text-black/60">Plazas</span>
-              <span className="font-medium">
-                Quedan {spotsLeft} de {maxPeople} plazas
-              </span>
-            </div>
-          </div>
-
-          <Button
-            className="w-full"
-            size="lg"
-            href={`/retreats/${retreat.slug}/book`}
-          >
-            Reservar plaza
-          </Button>
-          <p className="text-xs text-center text-black/40">
-            Elige habitación y extras; pago seguro con Stripe.
-          </p>
-        </div>
-      </RetreatSection>
     </div>
   );
 }

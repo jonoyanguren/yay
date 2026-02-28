@@ -23,6 +23,8 @@ interface Retreat {
   published: boolean;
   arrivalIntro?: string;
   arrivalOptions?: { title: string; detail: string }[];
+  hotelName?: string | null;
+  hotelUrl?: string | null;
   accommodationTitle?: string | null;
   accommodationDescription?: string | null;
   accommodationImages?: string[];
@@ -94,6 +96,8 @@ export default function PreviewPage() {
     "Llega como quieras: te ayudamos a coordinar vuelos, coche o transfer para que encaje con el grupo y con tus horarios.";
 
   const dayByDay = retreat.dayByDay ?? [];
+  const hotelName = retreat.hotelName?.trim() || "";
+  const hotelUrl = retreat.hotelUrl?.trim() || "";
   const accommodationTitle = retreat.accommodationTitle?.trim() || "Accommodation";
   const accommodationDescription = retreat.accommodationDescription?.trim() || "";
   const accommodationImages = retreat.accommodationImages ?? [];
@@ -179,6 +183,23 @@ export default function PreviewPage() {
             {hasAccommodationContent && (
               <section className="space-y-4">
                 <h2 className="text-2xl font-bold">{accommodationTitle}</h2>
+                {hotelName && (
+                  <p className="text-black/80">
+                    Hotel:{" "}
+                    {hotelUrl ? (
+                      <a
+                        href={hotelUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline hover:text-black"
+                      >
+                        {hotelName}
+                      </a>
+                    ) : (
+                      <span>{hotelName}</span>
+                    )}
+                  </p>
+                )}
                 {accommodationDescription && (
                   <p className="text-black/80 leading-relaxed whitespace-pre-line">
                     {accommodationDescription}
