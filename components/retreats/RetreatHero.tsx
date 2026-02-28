@@ -78,7 +78,7 @@ export default function RetreatHero({
           style={{ opacity: lightOverlayOpacity }}
         />
         <motion.div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none"
+          className="absolute bottom-16 md:bottom-24 left-1/2 -translate-x-1/2 z-30 pointer-events-none"
           style={{ opacity: shouldReduceMotion ? 0 : arrowOpacity }}
           animate={shouldReduceMotion ? undefined : { y: [0, 8, 0] }}
           transition={
@@ -88,6 +88,9 @@ export default function RetreatHero({
           }
         >
           <div className="flex flex-col items-center gap-1 text-black/80">
+            <span className="text-xl md:text-3xl font-semibold tracking-tight">
+              ¿Estás preparado?
+            </span>
             <span className="text-[11px] uppercase tracking-[0.2em]">Scroll</span>
             <span className="text-2xl leading-none">↓</span>
           </div>
