@@ -64,11 +64,19 @@ export default function RetreatForm({
     maxPeople: retreat?.maxPeople ?? 12,
     published: retreat?.published || false,
     arrivalIntro: retreat?.arrivalIntro || "",
+    accommodationTitle: retreat?.accommodationTitle || "",
+    accommodationDescription: retreat?.accommodationDescription || "",
   });
 
   // Image states
   const [retreatImages, setRetreatImages] = useState<string[]>(
     retreat?.images || [],
+  );
+  const [activitiesImage, setActivitiesImage] = useState<string>(
+    retreat?.activitiesImage || "",
+  );
+  const [accommodationImages, setAccommodationImages] = useState<string[]>(
+    retreat?.accommodationImages || [],
   );
 
   // Array states for structured data
@@ -83,9 +91,6 @@ export default function RetreatForm({
   const [includes, setIncludes] = useState<string[]>(retreat?.includes || []);
   const [notIncludes, setNotIncludes] = useState<string[]>(
     retreat?.notIncludes || [],
-  );
-  const [extraIdeas, setExtraIdeas] = useState<string[]>(
-    retreat?.extraIdeas || [],
   );
   const [roomTypes, setRoomTypes] = useState<RoomType[]>(
     retreat?.roomTypes?.map((rt: any) => ({
@@ -112,7 +117,6 @@ export default function RetreatForm({
   const [newDayByDay, setNewDayByDay] = useState({ day: "", items: "" });
   const [newInclude, setNewInclude] = useState("");
   const [newNotInclude, setNewNotInclude] = useState("");
-  const [newExtraIdea, setNewExtraIdea] = useState("");
   const [newRoomType, setNewRoomType] = useState({
     name: "",
     description: "",
@@ -196,17 +200,6 @@ export default function RetreatForm({
 
   const removeNotInclude = (index: number) => {
     setNotIncludes(notIncludes.filter((_, i) => i !== index));
-  };
-
-  const addExtraIdea = () => {
-    if (newExtraIdea.trim()) {
-      setExtraIdeas([...extraIdeas, newExtraIdea.trim()]);
-      setNewExtraIdea("");
-    }
-  };
-
-  const removeExtraIdea = (index: number) => {
-    setExtraIdeas(extraIdeas.filter((_, i) => i !== index));
   };
 
   const addRoomType = () => {
@@ -298,13 +291,16 @@ export default function RetreatForm({
         ),
         chargeFullAmount: formData.chargeFullAmount,
         images: retreatImages,
+        activitiesImage: activitiesImage || null,
         activities,
         program,
         arrivalOptions: arrivalOptions.length > 0 ? arrivalOptions : null,
+        accommodationTitle: formData.accommodationTitle || null,
+        accommodationDescription: formData.accommodationDescription || null,
+        accommodationImages,
         dayByDay: dayByDay.length > 0 ? dayByDay : null,
         includes: includes.length > 0 ? includes : null,
         notIncludes: notIncludes.length > 0 ? notIncludes : null,
-        extraIdeas: extraIdeas.length > 0 ? extraIdeas : null,
         arrivalIntro: formData.arrivalIntro || null,
         roomTypes: roomTypes.map((rt) => ({
           name: rt.name,
@@ -588,6 +584,53 @@ export default function RetreatForm({
               className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
             />
           </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-slate-700">
+              Título Accommodation
+            </label>
+            <input
+              type="text"
+              name="accommodationTitle"
+              value={formData.accommodationTitle}
+              onChange={handleChange}
+              placeholder="Ej: Accommodation"
+              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-slate-700">
+              Descripción Accommodation
+            </label>
+            <textarea
+              name="accommodationDescription"
+              value={formData.accommodationDescription}
+              onChange={handleChange}
+              rows={4}
+              placeholder="Describe el alojamiento del retiro..."
+              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-3 text-slate-700">
+              Imágenes Accommodation
+            </label>
+            <ImageGallery
+              images={accommodationImages}
+              onRemove={(index) =>
+                setAccommodationImages(
+                  accommodationImages.filter((_, i) => i !== index),
+                )
+              }
+              onAdd={(url) =>
+                setAccommodationImages([...accommodationImages, url])
+              }
+              maxImages={5}
+              folder="yay/accommodation"
+            />
+          </div>
         </div>
       </div>
 
@@ -596,6 +639,21 @@ export default function RetreatForm({
         <h2 className="text-xl font-bold mb-5 text-slate-800">
           Actividades Destacadas
         </h2>
+        <div className="mb-5">
+          <label className="block text-sm font-semibold mb-2 text-slate-700">
+            Imagen collage de actividades
+          </label>
+          <ImageGallery
+            images={activitiesImage ? [activitiesImage] : []}
+            onRemove={() => setActivitiesImage("")}
+            onAdd={(url) => setActivitiesImage(url)}
+            maxImages={1}
+            folder="yay/activities"
+          />
+          <p className="text-xs text-slate-500 mt-1.5">
+            Esta imagen se mostrará como collage visual de actividades.
+          </p>
+        </div>
         <div className="flex gap-2 mb-4">
           <input
             type="text"
@@ -893,51 +951,6 @@ export default function RetreatForm({
               </li>
             ))}
           </ul>
-        )}
-      </div>
-
-      {/* Extra Ideas */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-100">
-        <h2 className="text-xl font-bold mb-5 text-slate-800">
-          Otras Ideas (tarde/noche)
-        </h2>
-        <div className="flex gap-2 mb-4">
-          <input
-            type="text"
-            value={newExtraIdea}
-            onChange={(e) => setNewExtraIdea(e.target.value)}
-            onKeyPress={(e) =>
-              e.key === "Enter" && (e.preventDefault(), addExtraIdea())
-            }
-            placeholder="Ej: Masaje relajante"
-            className="flex-1 px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
-          />
-          <button
-            type="button"
-            onClick={addExtraIdea}
-            className="px-6 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium whitespace-nowrap"
-          >
-            Añadir
-          </button>
-        </div>
-        {extraIdeas.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {extraIdeas.map((idea, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-full border border-slate-100"
-              >
-                <span className="text-sm text-slate-700">{idea}</span>
-                <button
-                  type="button"
-                  onClick={() => removeExtraIdea(index)}
-                  className="text-rose-600 hover:text-rose-700 text-xs font-medium transition-colors"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-          </div>
         )}
       </div>
 

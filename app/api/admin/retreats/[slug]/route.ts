@@ -65,6 +65,9 @@ export async function PATCH(
         fullDescription: data.fullDescription,
       }),
       ...(data.activities !== undefined && { activities: data.activities }),
+      ...(data.activitiesImage !== undefined && {
+        activitiesImage: data.activitiesImage,
+      }),
       ...(data.program !== undefined && { program: data.program }),
       ...(data.image !== undefined && { image: data.image }),
       ...(data.images !== undefined && { images: data.images }),
@@ -87,10 +90,18 @@ export async function PATCH(
       ...(data.arrivalOptions !== undefined && {
         arrivalOptions: data.arrivalOptions,
       }),
+      ...(data.accommodationTitle !== undefined && {
+        accommodationTitle: data.accommodationTitle,
+      }),
+      ...(data.accommodationDescription !== undefined && {
+        accommodationDescription: data.accommodationDescription,
+      }),
+      ...(data.accommodationImages !== undefined && {
+        accommodationImages: data.accommodationImages,
+      }),
       ...(data.dayByDay !== undefined && { dayByDay: data.dayByDay }),
       ...(data.includes !== undefined && { includes: data.includes }),
       ...(data.notIncludes !== undefined && { notIncludes: data.notIncludes }),
-      ...(data.extraIdeas !== undefined && { extraIdeas: data.extraIdeas }),
     };
 
     const existingRetreat = await prisma.retreat.findUnique({
@@ -193,9 +204,9 @@ export async function PATCH(
 
     return NextResponse.json(retreat);
   } catch (error: unknown) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      console.error("Error updating retreat:", error);
+    console.error("Error updating retreat:", error);
 
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2025") {
         return NextResponse.json(
           { error: "Retreat not found" },
@@ -215,6 +226,11 @@ export async function PATCH(
         { status: 500 },
       );
     }
+
+    return NextResponse.json(
+      { error: "Error updating retreat" },
+      { status: 500 },
+    );
   }
 }
 

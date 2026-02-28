@@ -28,7 +28,6 @@ async function getRetreats() {
         dayByDay: true,
         includes: true,
         notIncludes: true,
-        extraIdeas: true,
         published: true,
         createdAt: true,
       },

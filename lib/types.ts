@@ -13,6 +13,7 @@ export type Retreat = {
   description: string;
   fullDescription: string;
   activities: string[];
+  activitiesImage?: string | null;
   program: string[];
   image: string;
   images: string[];
@@ -23,10 +24,12 @@ export type Retreat = {
   maxPeople: number;
   arrivalIntro?: string | null;
   arrivalOptions?: { title: string; detail: string }[] | null;
+  accommodationTitle?: string | null;
+  accommodationDescription?: string | null;
+  accommodationImages?: string[];
   dayByDay?: { day: string; items: string[] }[] | null;
   includes?: string[] | null;
   notIncludes?: string[] | null;
-  extraIdeas?: string[] | null;
   published: boolean;
   roomTypes: RetreatRoomTypeRow[];
   extraActivities: RetreatExtraActivityRow[];

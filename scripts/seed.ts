@@ -33,6 +33,7 @@ async function seed() {
         description: r.description,
         fullDescription: r.fullDescription,
         activities: r.activities,
+        activitiesImage: r.activitiesImage ?? null,
         program: r.program,
         image: r.image,
         date: r.date,
@@ -42,10 +43,12 @@ async function seed() {
         published: true, // Published by default
         arrivalIntro: r.arrivalIntro ?? null,
         arrivalOptions: r.arrivalOptions ?? undefined,
+        accommodationTitle: r.accommodationTitle ?? null,
+        accommodationDescription: r.accommodationDescription ?? null,
+        accommodationImages: r.accommodationImages ?? [],
         dayByDay: r.dayByDay ?? undefined,
         includes: r.includes ?? undefined,
         notIncludes: r.notIncludes ?? undefined,
-        extraIdeas: r.extraIdeas ?? undefined,
       },
       update: {
         title: r.title,
@@ -53,6 +56,7 @@ async function seed() {
         description: r.description,
         fullDescription: r.fullDescription,
         activities: r.activities,
+        activitiesImage: r.activitiesImage ?? null,
         program: r.program,
         image: r.image,
         date: r.date,
@@ -62,10 +66,12 @@ async function seed() {
         published: true, // Keep published on update
         arrivalIntro: r.arrivalIntro ?? null,
         arrivalOptions: r.arrivalOptions ?? undefined,
+        accommodationTitle: r.accommodationTitle ?? null,
+        accommodationDescription: r.accommodationDescription ?? null,
+        accommodationImages: r.accommodationImages ?? [],
         dayByDay: r.dayByDay ?? undefined,
         includes: r.includes ?? undefined,
         notIncludes: r.notIncludes ?? undefined,
-        extraIdeas: r.extraIdeas ?? undefined,
       },
     });
   }

@@ -13,6 +13,7 @@ interface Retreat {
   description: string;
   fullDescription: string;
   activities: string[];
+  activitiesImage?: string | null;
   program: string[];
   image: string;
   images: string[];
@@ -22,10 +23,12 @@ interface Retreat {
   published: boolean;
   arrivalIntro?: string;
   arrivalOptions?: { title: string; detail: string }[];
+  accommodationTitle?: string | null;
+  accommodationDescription?: string | null;
+  accommodationImages?: string[];
   dayByDay?: { day: string; items: string[] }[];
   includes?: string[];
   notIncludes?: string[];
-  extraIdeas?: string[];
 }
 
 export default function PreviewPage() {
@@ -91,9 +94,18 @@ export default function PreviewPage() {
     "Llega como quieras: te ayudamos a coordinar vuelos, coche o transfer para que encaje con el grupo y con tus horarios.";
 
   const dayByDay = retreat.dayByDay ?? [];
+  const accommodationTitle = retreat.accommodationTitle?.trim() || "Accommodation";
+  const accommodationDescription = retreat.accommodationDescription?.trim() || "";
+  const accommodationImages = retreat.accommodationImages ?? [];
+  const hasAccommodationContent =
+    Boolean(accommodationDescription) || accommodationImages.length > 0;
   const includes = retreat.includes ?? [];
   const notIncludes = retreat.notIncludes ?? [];
-  const extraIdeas = retreat.extraIdeas ?? [];
+  const activitiesImageRaw = retreat.activitiesImage?.trim() || "";
+  const activitiesImage =
+    activitiesImageRaw && !activitiesImageRaw.startsWith("/assets/")
+      ? activitiesImageRaw
+      : retreat.images?.[0] || retreat.image || "";
   const imageUrl = retreat.images?.[0] || retreat.image || "/assets/placeholder.jpg";
   const galleryImages = retreat.images || [];
 
@@ -163,6 +175,24 @@ export default function PreviewPage() {
                 {retreat.fullDescription}
               </p>
             </section>
+
+            {hasAccommodationContent && (
+              <section className="space-y-4">
+                <h2 className="text-2xl font-bold">{accommodationTitle}</h2>
+                {accommodationDescription && (
+                  <p className="text-black/80 leading-relaxed whitespace-pre-line">
+                    {accommodationDescription}
+                  </p>
+                )}
+                {accommodationImages.length > 0 && (
+                  <ImageGallery
+                    images={accommodationImages}
+                    altPrefix={accommodationTitle}
+                    variant="full"
+                  />
+                )}
+              </section>
+            )}
 
             {arrivalOptions.length > 0 && (
               <>
@@ -243,6 +273,17 @@ export default function PreviewPage() {
               </ul>
             </section>
 
+            {activitiesImage && (
+              <section className="space-y-4">
+                <h2 className="text-2xl font-bold">Collage de actividades</h2>
+                <ImageGallery
+                  images={[activitiesImage]}
+                  altPrefix={`Collage de actividades de ${retreat.title}`}
+                  variant="full"
+                />
+              </section>
+            )}
+
             <section>
               <h2 className="text-2xl font-bold mb-6">Programa</h2>
               <div className="space-y-4 border-l-2 border-gray/20 pl-6 ml-2">
@@ -282,23 +323,6 @@ export default function PreviewPage() {
               </section>
             )}
 
-            {extraIdeas.length > 0 && (
-              <section className="space-y-3">
-                <h2 className="text-2xl font-bold">
-                  Otras ideas de tarde/noche
-                </h2>
-                <div className="flex flex-wrap gap-3">
-                  {extraIdeas.map((item) => (
-                    <span
-                      key={item}
-                      className="px-3 py-2 bg-sand-light border border-gray/10 rounded-full text-sm"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </section>
-            )}
           </div>
 
           {/* Sidebar */}

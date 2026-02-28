@@ -15,6 +15,7 @@ model Retreat {
   description     String   @default("")
   fullDescription String   @default("") @map("full_description")
   activities      Json     @default("[]")
+  activitiesImage String?  @map("activities_image")
   program         Json     @default("[]")
   image           String   @default("")
   images          String[] @default([])
@@ -26,10 +27,12 @@ model Retreat {
   published       Boolean  @default(false)
   arrivalIntro    String?  @map("arrival_intro")
   arrivalOptions  Json?    @map("arrival_options")
+  accommodationTitle       String?   @map("accommodation_title")
+  accommodationDescription String?   @map("accommodation_description")
+  accommodationImages      String[]  @default([]) @map("accommodation_images")
   dayByDay        Json?    @map("day_by_day")
   includes        Json?    @map("includes")
   notIncludes     Json?    @map("not_includes")
-  extraIdeas      Json?    @map("extra_ideas")
   createdAt       DateTime @default(now()) @map("created_at")
 
   roomTypes       RetreatRoomType[]

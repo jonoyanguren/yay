@@ -24,6 +24,8 @@ export const retreats: RetreatSeedData[] = [
       "Fotografía en las dunas",
       "Taller energía y productividad"
     ],
+    activitiesImage:
+      "https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&w=1600&q=80",
     program: [
       "Día 1: Llegada nocturna a Errachidia y descanso",
       "Día 2: Traslado a Merzouga, bienvenida y Yin Yoga",
@@ -53,6 +55,10 @@ export const retreats: RetreatSeedData[] = [
           "Vienes con tu propio coche hasta Merzouga. Ruta libre y flexible. Coordinamos horario de llegada al alojamiento para que entres con el grupo.",
       },
     ],
+    accommodationTitle: "Accommodation",
+    accommodationDescription:
+      "Nos alojamos en campamento boutique en Merzouga: habitaciones cómodas, baño privado y zonas comunes para descansar entre actividades.",
+    accommodationImages: ["/assets/sahara.jpg", "/assets/caribe.jpg"],
     dayByDay: [
       {
         day: "Día 1",
@@ -110,15 +116,6 @@ export const retreats: RetreatSeedData[] = [
     notIncludes: [
       "Vuelos y traslados (te ayudamos a organizarlos)",
       "Seguro de viaje recomendado (enviamos descuento Iati)",
-    ],
-    extraIdeas: [
-      "Taller de vision board",
-      "Ceremonia del té marroquí",
-      "Charla sobre la vida en el desierto",
-      "Observación del cielo nocturno",
-      "Taller de pan tradicional",
-      "Encuentro con familia nómada bereber",
-      "Cuentacuentos tradicional alrededor del fuego",
     ]
   },
   {
@@ -138,6 +135,8 @@ export const retreats: RetreatSeedData[] = [
       "Respiración y movilidad accesible",
       "Buena comida y espacios sin presión"
     ],
+    activitiesImage:
+      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1600&q=80",
     program: [
       "Día 1: Llegada, bienvenida y yoga suave",
       "Días 2-6: Yoga mañana, brunch, tarde libre/actividad, Yin Yoga, cena",
@@ -209,6 +208,8 @@ export const retreats: RetreatSeedData[] = [
       "Tiempo libre para playa y paseos",
       "Respiración y movilidad accesible"
     ],
+    activitiesImage:
+      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1600&q=80",
     program: [
       "Jueves: Llegada, bienvenida e Yin Yoga",
       "Viernes: Yoga, brunch, actividad + Yin Yoga",
@@ -290,6 +291,8 @@ export const retreats: RetreatSeedData[] = [
       "Actividades para desconectar",
       "Tiempo libre de playa y paseos"
     ],
+    activitiesImage:
+      "https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=1600&q=80",
     program: [
       "Jueves: Llegada, bienvenida y yoga suave",
       "Viernes: Yoga, surf, brunch, tarde libre, Yin Yoga",

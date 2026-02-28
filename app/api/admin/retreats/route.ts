@@ -57,6 +57,7 @@ export async function POST(request: Request) {
         description: data.description || "",
         fullDescription: data.fullDescription || "",
         activities: data.activities || [],
+        activitiesImage: data.activitiesImage || null,
         program: data.program || [],
         image: data.image || "",
         images: data.images || [],
@@ -71,10 +72,12 @@ export async function POST(request: Request) {
         published: data.published || false,
         arrivalIntro: data.arrivalIntro || null,
         arrivalOptions: data.arrivalOptions || null,
+        accommodationTitle: data.accommodationTitle || null,
+        accommodationDescription: data.accommodationDescription || null,
+        accommodationImages: data.accommodationImages || [],
         dayByDay: data.dayByDay || null,
         includes: data.includes || null,
         notIncludes: data.notIncludes || null,
-        extraIdeas: data.extraIdeas || null,
         roomTypes: data.roomTypes
           ? {
               create: data.roomTypes.map((rt: any) => ({

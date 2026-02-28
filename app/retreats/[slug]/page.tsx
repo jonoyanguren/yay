@@ -2,6 +2,7 @@ import Button from "@/components/ui/Button";
 import Title from "@/components/ui/Title";
 import ImageGallery from "@/components/ImageGallery";
 import TrackMetaOnMount from "@/components/analytics/TrackMetaOnMount";
+import AccommodationSection from "@/components/retreats/AccommodationSection";
 import ExperienceSection from "@/components/retreats/ExperienceSection";
 import ItinerarySection from "@/components/retreats/ItinerarySection";
 import RetreatHero from "@/components/retreats/RetreatHero";
@@ -22,6 +23,8 @@ interface DayItem {
   day: string;
   items: string[];
 }
+
+export const dynamic = "force-dynamic";
 
 export async function generateStaticParams() {
   const retreats = await prisma.retreat.findMany({
@@ -67,24 +70,29 @@ export default async function RetreatPage({ params }: PageProps) {
   const dayByDay = (Array.isArray(retreat.dayByDay)
     ? retreat.dayByDay
     : []) as unknown as DayItem[];
+  const accommodationTitle =
+    retreat.accommodationTitle?.trim() || "Accommodation";
+  const accommodationDescription =
+    retreat.accommodationDescription?.trim() || "";
+  const accommodationImages = retreat.accommodationImages || [];
+  const hasAccommodationContent =
+    Boolean(accommodationDescription) || accommodationImages.length > 0;
   const includes = (
     Array.isArray(retreat.includes) ? retreat.includes : []
   ) as string[];
   const notIncludes = (
     Array.isArray(retreat.notIncludes) ? retreat.notIncludes : []
   ) as string[];
-  const extraIdeas = (
-    Array.isArray(retreat.extraIdeas) ? retreat.extraIdeas : []
-  ) as string[];
-  const activities = (
-    Array.isArray(retreat.activities) ? retreat.activities : []
-  ) as string[];
-  const program = (
-    Array.isArray(retreat.program) ? retreat.program : []
-  ) as string[];
+  const activitiesImageRaw = retreat.activitiesImage?.trim() || "";
+  const activitiesImage =
+    activitiesImageRaw && !activitiesImageRaw.startsWith("/assets/")
+      ? activitiesImageRaw
+      : retreat.images?.[0] || retreat.image || "";
   const imageUrl =
     retreat.images?.[0] || retreat.image || "/assets/placeholder.jpg";
   const galleryImages = retreat.images || [];
+
+  console.log("Activities image:", activitiesImage);
 
   return (
     <div className="pb-24">
@@ -134,10 +142,30 @@ export default async function RetreatPage({ params }: PageProps) {
         <ItinerarySection title="Itinerario día a día" days={dayByDay} />
       </RetreatSection>
 
+      {activitiesImage && (
+        <section className="py-6 md:py-12">
+          <div className="mx-auto max-w-6xl px-6 md:px-12 mb-4">
+            <Title className="text-2xl">Collage de actividades</Title>
+          </div>
+          <div
+            className="w-full bg-center bg-cover min-h-[280px] md:min-h-[520px]"
+            style={{ backgroundImage: `url(${activitiesImage})` }}
+            role="img"
+            aria-label={`Collage de actividades de ${retreat.title}`}
+          />
+        </section>
+      )}
+
       {/* Accommodation section */}
-      <RetreatSection className="bg-brand-blue-dark h-96" type="full">
-        <Title className="text-2xl text-white">Hospedaje</Title>
-      </RetreatSection>
+      {hasAccommodationContent && (
+        <RetreatSection className="bg-brand-blue-dark" type="full">
+          <AccommodationSection
+            title={accommodationTitle}
+            description={accommodationDescription}
+            images={accommodationImages}
+          />
+        </RetreatSection>
+      )}
 
       {arrivalOptions.length > 0 && (
         <RetreatSection className="bg-brand-blue-dark" type="full">
