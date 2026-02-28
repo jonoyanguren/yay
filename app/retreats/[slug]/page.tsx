@@ -141,9 +141,9 @@ export default async function RetreatPage({ params }: PageProps) {
         />
       </RetreatSection>
 
-      <RetreatSection type="full">
+      {/* <RetreatSection type="full">
         <InspirationalScrollHighlight />
-      </RetreatSection>
+      </RetreatSection> */}
 
       {/* Galería de imágenes - ancho completo */}
       {galleryImages.length > 0 && (
@@ -185,6 +185,7 @@ export default async function RetreatPage({ params }: PageProps) {
             <RetreatSection
               className="bg-brand-blue-dark text-center"
               type="full"
+              animate={false}
             >
               <AccommodationSection
                 title={accommodationTitle}
@@ -201,6 +202,7 @@ export default async function RetreatPage({ params }: PageProps) {
             <RetreatSection
               className="bg-brand-blue-dark text-center"
               type="full"
+              animate={false}
             >
               <section className="space-y-4">
                 <Title className="text-2xl text-white">
@@ -278,7 +280,6 @@ export default async function RetreatPage({ params }: PageProps) {
           </section>
         </RetreatSection>
       )}
-
     </div>
   );
 }

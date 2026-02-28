@@ -88,7 +88,7 @@ export default function RetreatStickyInfoBar({
         className={
           isPinned
             ? "fixed top-0 left-0 right-0 z-50 bg-sand-light/95 backdrop-blur border-b border-black/10"
-            : "relative bg-sand-light"
+            : "relative mx-auto max-w-6xl bg-sand-light border border-black/10"
         }
         animate={
           shouldReduceMotion

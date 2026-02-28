@@ -7,6 +7,7 @@ interface RetreatSectionProps {
   type?: RetreatSectionType;
   className?: string;
   contentClassName?: string;
+  animate?: boolean;
   children: ReactNode;
 }
 
@@ -29,17 +30,26 @@ export default function RetreatSection({
   type = "narrow",
   className = "",
   contentClassName = "",
+  animate = true,
   children,
 }: RetreatSectionProps) {
+  const content = (
+    <section className={className}>
+      <div
+        className={`mx-auto ${guttersByType[type]} ${widthByType[type]} ${verticalPaddingByType[type]} ${contentClassName}`.trim()}
+      >
+        {children}
+      </div>
+    </section>
+  );
+
+  if (!animate) {
+    return content;
+  }
+
   return (
     <FadeInOnView>
-      <section className={className}>
-        <div
-          className={`mx-auto ${guttersByType[type]} ${widthByType[type]} ${verticalPaddingByType[type]} ${contentClassName}`.trim()}
-        >
-          {children}
-        </div>
-      </section>
+      {content}
     </FadeInOnView>
   );
 }
