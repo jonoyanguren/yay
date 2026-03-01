@@ -1,4 +1,8 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Title from "@/components/ui/Title";
+import { motion } from "framer-motion";
 
 interface ItineraryDay {
   day: string;
@@ -89,6 +93,16 @@ export default function ItinerarySection({
   title,
   days,
 }: ItinerarySectionProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobile(mediaQuery.matches);
+    update();
+    mediaQuery.addEventListener("change", update);
+    return () => mediaQuery.removeEventListener("change", update);
+  }, []);
+
   if (days.length === 0) return null;
 
   return (
@@ -99,9 +113,16 @@ export default function ItinerarySection({
         {days.map((day, index) => {
           const { name, number } = splitDayLabel(day.day);
           const marker = markerVariants[index % markerVariants.length];
+          const dayDelay = index * 0.12;
 
           return (
-            <div key={day.day}>
+            <motion.div
+              key={day.day}
+              initial={isMobile ? { opacity: 0, y: 24 } : false}
+              whileInView={isMobile ? { opacity: 1, y: 0 } : undefined}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ duration: 0.45, ease: "easeOut", delay: dayDelay }}
+            >
               <div className="mb-3">
                 <p className="text-brand-blue-dark font-semibold leading-none text-xl md:text-2xl">
                   <span className="relative inline-block">
@@ -125,13 +146,22 @@ export default function ItinerarySection({
               </div>
 
               <ul className="space-y-2">
-                {day.items.map((item) => {
+                {day.items.map((item, itemIndex) => {
                   const { startTime, activity } = splitStartTime(item);
+                  const itemDelay = dayDelay + 0.08 + itemIndex * 0.05;
 
                   return (
-                    <li
+                    <motion.li
                       key={item}
                       className="text-sm leading-snug text-brand-blue-dark whitespace-pre-line"
+                      initial={isMobile ? { opacity: 0, y: 14 } : false}
+                      whileInView={isMobile ? { opacity: 1, y: 0 } : undefined}
+                      viewport={{ once: true, amount: 0.45 }}
+                      transition={{
+                        duration: 0.32,
+                        ease: "easeOut",
+                        delay: itemDelay,
+                      }}
                     >
                       {startTime && (
                         <span className="font-handwriting mr-1 text-xl md:text-2xl font-bold leading-none text-brand-main-dark">
@@ -141,11 +171,11 @@ export default function ItinerarySection({
                       {activity && (
                         <span>{startTime ? ` ${activity}` : activity}</span>
                       )}
-                    </li>
+                    </motion.li>
                   );
                 })}
               </ul>
-            </div>
+            </motion.div>
           );
         })}
       </div>

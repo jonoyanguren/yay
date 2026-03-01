@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import Title from "@/components/ui/Title";
@@ -20,15 +20,32 @@ export default function RetreatHero({
 }: RetreatHeroProps) {
   const heroRef = useRef<HTMLDivElement | null>(null);
   const shouldReduceMotion = useReducedMotion();
+  const [isMobile, setIsMobile] = useState(false);
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end end"],
   });
 
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobile(mediaQuery.matches);
+    update();
+    mediaQuery.addEventListener("change", update);
+    return () => mediaQuery.removeEventListener("change", update);
+  }, []);
+
   const mediaScale = useTransform(scrollYProgress, [0, 1], [1, 1.9]);
   const mediaOpacity = useTransform(scrollYProgress, [0, 0.7, 1], [1, 0.92, 0.5]);
-  const contentScale = useTransform(scrollYProgress, [0, 0.88], [1, 1.7]);
-  const contentY = useTransform(scrollYProgress, [0, 1], ["0vh", "2vh"]);
+  const contentScale = useTransform(
+    scrollYProgress,
+    [0, 0.88],
+    [1, isMobile ? 1.04 : 1.7],
+  );
+  const contentY = useTransform(
+    scrollYProgress,
+    [0, 1],
+    [isMobile ? "22vh" : "0vh", isMobile ? "0vh" : "2vh"],
+  );
   const contentOpacity = useTransform(scrollYProgress, [0, 0.72, 1], [1, 1, 0.9]);
   const blur = useTransform(scrollYProgress, [0, 1], [0, 22]);
   const mediaFilter = useTransform(blur, (value) => `blur(${value.toFixed(2)}px)`);
@@ -96,6 +113,17 @@ export default function RetreatHero({
           </div>
         </motion.div>
 
+        <div className="absolute top-6 md:top-8 left-4 right-4 md:left-12 md:right-12 z-20">
+          <div className="max-w-6xl mx-auto">
+            <Link
+              href="/#retreats"
+              className="text-white/80 hover:text-white text-sm block"
+            >
+              &larr; Volver a Retiros
+            </Link>
+          </div>
+        </div>
+
         <motion.div
           className="absolute inset-0 flex items-center justify-center px-4 md:px-12"
           style={
@@ -104,16 +132,6 @@ export default function RetreatHero({
               : { scale: contentScale, y: contentY, opacity: contentOpacity }
           }
         >
-          <div className="absolute top-6 md:top-8 left-4 right-4 md:left-12 md:right-12 z-20">
-            <div className="max-w-6xl mx-auto">
-              <Link
-                href="/#retreats"
-                className="text-white/80 hover:text-white text-sm block"
-              >
-                &larr; Volver a Retiros
-              </Link>
-            </div>
-          </div>
           <div className="relative z-10 max-w-6xl mx-auto w-full text-center">
             <motion.div style={{ color: shouldReduceMotion ? "#ffffff" : titleColor }}>
               <Title className="text-5xl md:text-8xl text-inherit mb-3">{title}</Title>

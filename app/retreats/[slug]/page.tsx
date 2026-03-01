@@ -6,7 +6,6 @@ import AccommodationSection from "@/components/retreats/AccommodationSection";
 import ExperienceSection from "@/components/retreats/ExperienceSection";
 import FadeInOnView from "@/components/retreats/FadeInOnView";
 import ItinerarySection from "@/components/retreats/ItinerarySection";
-import InspirationalScrollHighlight from "@/components/retreats/InspirationalScrollHighlight";
 import RetreatHero from "@/components/retreats/RetreatHero";
 import RetreatSection from "@/components/retreats/RetreatSection";
 import RetreatStickyInfoBar from "@/components/retreats/RetreatStickyInfoBar";
@@ -122,15 +121,28 @@ export default async function RetreatPage({ params }: PageProps) {
         />
       </section>
 
-      <FadeInOnView>
+      <div className="hidden md:block">
+        <FadeInOnView>
+          <RetreatStickyInfoBar
+            date={retreat.date}
+            location={retreat.location}
+            maxPeople={maxPeople}
+            spotsLeft={spotsLeft}
+            bookingHref={`/retreats/${retreat.slug}/book`}
+          />
+        </FadeInOnView>
+      </div>
+
+      <div className="md:hidden px-4 pt-4">
         <RetreatStickyInfoBar
           date={retreat.date}
           location={retreat.location}
           maxPeople={maxPeople}
           spotsLeft={spotsLeft}
           bookingHref={`/retreats/${retreat.slug}/book`}
+          disableSticky
         />
-      </FadeInOnView>
+      </div>
 
       <RetreatSection>
         <ExperienceSection
@@ -147,11 +159,12 @@ export default async function RetreatPage({ params }: PageProps) {
 
       {/* Galería de imágenes - ancho completo */}
       {galleryImages.length > 0 && (
-        <section className="py-6 md:py-12">
+        <section className="py-6 md:py-12 px-4 md:px-0">
           <ImageGallery
             images={galleryImages}
             altPrefix={retreat.title}
             variant="stack-parallax"
+            className="mx-auto max-w-6xl"
           />
         </section>
       )}
@@ -280,6 +293,17 @@ export default async function RetreatPage({ params }: PageProps) {
           </section>
         </RetreatSection>
       )}
+
+      <div className="md:hidden px-4 mt-6">
+        <RetreatStickyInfoBar
+          date={retreat.date}
+          location={retreat.location}
+          maxPeople={maxPeople}
+          spotsLeft={spotsLeft}
+          bookingHref={`/retreats/${retreat.slug}/book`}
+          disableSticky
+        />
+      </div>
     </div>
   );
 }

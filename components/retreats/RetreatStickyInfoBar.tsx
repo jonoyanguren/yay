@@ -16,6 +16,7 @@ interface RetreatStickyInfoBarProps {
   maxPeople: number;
   spotsLeft: number;
   bookingHref: string;
+  disableSticky?: boolean;
 }
 
 export default function RetreatStickyInfoBar({
@@ -24,6 +25,7 @@ export default function RetreatStickyInfoBar({
   maxPeople,
   spotsLeft,
   bookingHref,
+  disableSticky = false,
 }: RetreatStickyInfoBarProps) {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const barRef = useRef<HTMLDivElement | null>(null);
@@ -54,6 +56,8 @@ export default function RetreatStickyInfoBar({
   const contentPaddingX = useTransform(smoothMorph, [0, 1], ["0px", "14px"]);
 
   useEffect(() => {
+    if (disableSticky) return;
+
     const onScroll = () => {
       const node = sectionRef.current;
       if (!node) return;
@@ -75,28 +79,31 @@ export default function RetreatStickyInfoBar({
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
     };
-  }, []);
+  }, [disableSticky]);
+
+  const isStickyActive = !disableSticky && isPinned;
+  const canMorph = !shouldReduceMotion && !disableSticky;
 
   return (
     <section
       ref={sectionRef}
       className="relative z-40 -mt-1"
-      style={isPinned ? { height: `${barHeight}px` } : undefined}
+      style={isStickyActive ? { height: `${barHeight}px` } : undefined}
     >
       <motion.div
         ref={barRef}
         className={
-          isPinned
+          isStickyActive
             ? "fixed top-0 left-0 right-0 z-50 bg-sand-light/95 backdrop-blur border-b border-black/10"
             : "relative mx-auto max-w-6xl bg-sand-light border border-black/10"
         }
         animate={
-          shouldReduceMotion
+          !canMorph
             ? undefined
             : undefined
         }
         style={
-          shouldReduceMotion
+          !canMorph
             ? undefined
             : {
                 paddingTop: paddingY,
@@ -117,7 +124,7 @@ export default function RetreatStickyInfoBar({
         <motion.div
           className="mx-auto"
           style={
-            shouldReduceMotion
+            !canMorph
               ? { maxWidth: "72rem" }
               : {
                   maxWidth: contentMaxWidth,
