@@ -25,7 +25,7 @@ const geistMono = Geist_Mono({
 
 const alegreya = Alegreya({
   subsets: ["latin"],
-  weight: ["500", "700"],
+  weight: ["400", "500"],
 });
 
 const caveat = Caveat({

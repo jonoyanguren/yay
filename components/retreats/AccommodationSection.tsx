@@ -1,5 +1,4 @@
 import Title from "@/components/ui/Title";
-import TextWithHighlights from "@/components/ui/TextWithHighlights";
 
 interface AccommodationSectionProps {
   title: string;
@@ -8,8 +7,6 @@ interface AccommodationSectionProps {
   hotelName?: string;
   hotelUrl?: string;
   videoUrl?: string;
-  descriptionHighlights?: string[];
-  highlightColor?: string;
 }
 
 export default function AccommodationSection({
@@ -19,8 +16,6 @@ export default function AccommodationSection({
   hotelName = "",
   hotelUrl = "",
   videoUrl = "",
-  descriptionHighlights = [],
-  highlightColor = "#d77a61",
 }: AccommodationSectionProps) {
   const stripImages =
     images.length === 0
@@ -33,8 +28,7 @@ export default function AccommodationSection({
     <section className="space-y-5">
       <Title className="text-5xl text-white">{title}</Title>
       {hotelName && (
-        <p className="text-white/90">
-          Hotel:{" "}
+        <Title className="text-3xl italic font-extralight text-white/90">
           {hotelUrl ? (
             <a
               href={hotelUrl}
@@ -45,31 +39,30 @@ export default function AccommodationSection({
               {hotelName}
             </a>
           ) : (
-            <span>{hotelName}</span>
+            <Title className="text-3xl italic font-light text-white/90">
+              {hotelName}
+            </Title>
           )}
-        </p>
+        </Title>
       )}
       {description && (
-        <TextWithHighlights
-          text={description}
-          highlights={descriptionHighlights}
-          highlightColor={highlightColor}
-          className="text-white/90 leading-relaxed whitespace-pre-line"
-        />
+        <p className="text-2xl font-extralight text-white/90 mb-12">
+          {description}
+        </p>
       )}
       {stripImages.length > 0 && (
-        <div className="w-full overflow-hidden">
+        <div className="w-full">
           <div className="flex justify-center gap-0">
             {stripImages.map((image, index) => (
               <div
                 key={`${image}-${index}`}
-                className="w-[20vw] h-[20vw] max-w-[280px] max-h-[280px] shrink-0 overflow-hidden bg-white/10"
+                className="w-[20vw] min-w-[96px] max-w-[280px] aspect-square shrink-0 overflow-hidden bg-white/10"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={image}
                   alt={`${title} ${index + 1}`}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover object-center"
                 />
               </div>
             ))}

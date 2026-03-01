@@ -1,5 +1,4 @@
 import Title from "@/components/ui/Title";
-import TextWithHighlights from "@/components/ui/TextWithHighlights";
 
 export interface ArrivalOption {
   title: string;
@@ -9,27 +8,18 @@ export interface ArrivalOption {
 interface ArrivalOptionsSectionProps {
   intro: string;
   options: ArrivalOption[];
-  introHighlights?: string[];
-  highlightColor?: string;
 }
 
 export default function ArrivalOptionsSection({
   intro,
   options,
-  introHighlights = [],
-  highlightColor = "#d77a61",
 }: ArrivalOptionsSectionProps) {
   if (options.length === 0) return null;
 
   return (
     <section className="space-y-4">
       <Title className="text-5xl text-white">Llegadas y transfers</Title>
-      <TextWithHighlights
-        text={intro}
-        highlights={introHighlights}
-        highlightColor={highlightColor}
-        className="text-white leading-relaxed"
-      />
+      <p className="text-2xl text-white leading-relaxed mb-12">{intro}</p>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {options.map((item, index) => (
           <div
@@ -54,7 +44,9 @@ export default function ArrivalOptionsSection({
                 </span>
               )}
             </div>
-            <p className="text-sm leading-relaxed text-black/80">{item.detail}</p>
+            <p className="text-sm text-left leading-relaxed text-black/80">
+              {item.detail}
+            </p>
           </div>
         ))}
       </div>

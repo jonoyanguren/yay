@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import ImageGallery from "@/components/ImageGallery";
-import TextWithHighlights from "@/components/ui/TextWithHighlights";
 
 interface Retreat {
   id: string;
@@ -33,41 +32,6 @@ interface Retreat {
   includes?: string[];
   notIncludes?: string[];
   bgColor?: string | null;
-  textHighlights?: {
-    fullDescription?: string[];
-    arrivalIntro?: string[];
-    accommodationDescription?: string[];
-  } | null;
-}
-
-function normalizeHighlights(value: unknown) {
-  const empty = {
-    fullDescription: [] as string[],
-    arrivalIntro: [] as string[],
-    accommodationDescription: [] as string[],
-  };
-
-  if (!value) return empty;
-
-  let parsed: unknown = value;
-  if (typeof value === "string") {
-    try {
-      parsed = JSON.parse(value);
-    } catch {
-      return empty;
-    }
-  }
-
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return empty;
-  const source = parsed as Record<string, unknown>;
-  const asStringArray = (input: unknown) =>
-    Array.isArray(input) ? input.filter((item): item is string => typeof item === "string") : [];
-
-  return {
-    fullDescription: asStringArray(source.fullDescription),
-    arrivalIntro: asStringArray(source.arrivalIntro),
-    accommodationDescription: asStringArray(source.accommodationDescription),
-  };
 }
 
 export default function PreviewPage() {
@@ -150,7 +114,6 @@ export default function PreviewPage() {
   const imageUrl = retreat.images?.[0] || retreat.image || "/assets/placeholder.jpg";
   const galleryImages = retreat.images || [];
   const bgColor = retreat.bgColor?.trim() || "#d77a61";
-  const textHighlights = normalizeHighlights(retreat.textHighlights);
 
   return (
     <>
@@ -214,12 +177,9 @@ export default function PreviewPage() {
           <div className="md:col-span-2 space-y-12">
             <section>
               <h2 className="text-2xl font-bold mb-4">La Experiencia</h2>
-              <TextWithHighlights
-                text={retreat.fullDescription}
-                highlights={textHighlights.fullDescription || []}
-                highlightColor={bgColor}
-                className="text-lg leading-relaxed text-black/80 whitespace-pre-line"
-              />
+              <p className="text-lg leading-relaxed text-black/80 whitespace-pre-line">
+                {retreat.fullDescription}
+              </p>
             </section>
 
             {hasAccommodationContent && (
@@ -246,12 +206,9 @@ export default function PreviewPage() {
                   </p>
                 )}
                 {accommodationDescription && (
-                  <TextWithHighlights
-                    text={accommodationDescription}
-                    highlights={textHighlights.accommodationDescription || []}
-                    highlightColor={bgColor}
-                    className="text-black/80 leading-relaxed whitespace-pre-line"
-                  />
+                  <p className="text-black/80 leading-relaxed whitespace-pre-line">
+                    {accommodationDescription}
+                  </p>
                 )}
                 {accommodationImages.length > 0 && (
                   <ImageGallery
@@ -275,12 +232,9 @@ export default function PreviewPage() {
                       Opcional
                     </span>
                   </div>
-                  <TextWithHighlights
-                    text={arrivalIntro}
-                    highlights={textHighlights.arrivalIntro || []}
-                    highlightColor={bgColor}
-                    className="text-black/70 text-sm leading-relaxed"
-                  />
+                  <p className="text-black/70 text-sm leading-relaxed">
+                    {arrivalIntro}
+                  </p>
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {arrivalOptions.map((item) => (
                       <div

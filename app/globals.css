@@ -92,13 +92,24 @@ body {
   font-family: var(--font-plus-jakarta-sans), sans-serif;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-title-family), serif !important;
+:where(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--font-title-family), serif;
+  font-weight: 500;
+}
+
+.font-title-medium {
+  font-family: var(--font-title-family), serif;
+  font-weight: 500;
+}
+
+.font-title-light {
+  font-family: var(--font-title-family), serif;
+  font-weight: 300;
+}
+
+.font-title-extralight {
+  font-family: var(--font-title-family), serif;
+  font-weight: 200;
 }
 
 /* Keep Plus Jakarta as default for body copy */

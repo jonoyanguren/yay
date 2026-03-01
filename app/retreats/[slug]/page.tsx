@@ -28,15 +28,11 @@ interface DayItem {
 
 interface RetreatTextHighlights {
   fullDescription?: string[];
-  arrivalIntro?: string[];
-  accommodationDescription?: string[];
 }
 
 function normalizeHighlights(value: unknown): RetreatTextHighlights {
   const empty: RetreatTextHighlights = {
     fullDescription: [],
-    arrivalIntro: [],
-    accommodationDescription: [],
   };
 
   if (!value) return empty;
@@ -58,8 +54,6 @@ function normalizeHighlights(value: unknown): RetreatTextHighlights {
 
   return {
     fullDescription: asStringArray(source.fullDescription),
-    arrivalIntro: asStringArray(source.arrivalIntro),
-    accommodationDescription: asStringArray(source.accommodationDescription),
   };
 }
 
@@ -244,8 +238,6 @@ export default async function RetreatPage({ params }: PageProps) {
               <AccommodationSection
                 title={accommodationTitle}
                 description={accommodationDescription}
-                descriptionHighlights={textHighlights.accommodationDescription || []}
-                highlightColor={bgColor}
                 images={accommodationImages}
                 hotelName={hotelName}
                 hotelUrl={hotelUrl}
@@ -264,8 +256,6 @@ export default async function RetreatPage({ params }: PageProps) {
               <ArrivalOptionsSection
                 intro={arrivalIntro}
                 options={arrivalOptions}
-                introHighlights={textHighlights.arrivalIntro || []}
-                highlightColor={bgColor}
               />
             </RetreatSection>
           )}
