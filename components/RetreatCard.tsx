@@ -70,6 +70,7 @@ export default function RetreatCard({ retreat }: RetreatCardProps) {
   return (
     <Link
       href={`/retreats/${retreat.slug}`}
+      prefetch={false}
       className="group block h-full rounded-xl overflow-hidden"
     >
       {cardContent}
