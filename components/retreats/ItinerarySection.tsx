@@ -164,7 +164,7 @@ export default function ItinerarySection({
                       }}
                     >
                       {startTime && (
-                        <span className="font-sans mr-1 text-xl md:text-2xl font-bold leading-none text-brand-main-dark">
+                        <span className="font-handwriting mr-1 text-xl md:text-2xl font-bold leading-none text-brand-main-dark">
                           {startTime}:
                         </span>
                       )}

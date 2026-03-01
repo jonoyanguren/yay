@@ -101,8 +101,14 @@ h6 {
   font-family: var(--font-title-family), serif !important;
 }
 
-/* Keep Plus Jakarta as default for all non-heading text */
-body :not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) {
+/* Keep Plus Jakarta as default for body copy */
+p,
+span {
   font-family: var(--font-plus-jakarta-sans), sans-serif !important;
+}
+
+/* Allow explicit handwriting accents (e.g. itinerary times) */
+.font-handwriting {
+  font-family: var(--font-handwriting), cursive !important;
 }
 
