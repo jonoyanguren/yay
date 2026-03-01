@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
-import { Bowlby_One, Caveat, Geist, Geist_Mono } from "next/font/google";
+import {
+  Alegreya,
+  Caveat,
+  Geist_Mono,
+  Plus_Jakarta_Sans,
+} from "next/font/google";
 import Script from "next/script";
 import { Suspense } from "react";
 import MetaPageViewTracker from "@/components/analytics/MetaPageViewTracker";
@@ -7,9 +12,10 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const geistMono = Geist_Mono({
@@ -17,10 +23,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const bowlbyOne = Bowlby_One({
-  variable: "--font-dela-gothic",
+const alegreya = Alegreya({
   subsets: ["latin"],
-  weight: "400",
+  weight: ["500", "700"],
 });
 
 const caveat = Caveat({
@@ -43,7 +48,12 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${bowlbyOne.variable} ${caveat.variable} antialiased bg-sand text-black min-h-screen flex flex-col`}
+        className={`${plusJakartaSans.className} ${plusJakartaSans.variable} ${geistMono.variable} ${caveat.variable} antialiased bg-sand text-black min-h-screen flex flex-col`}
+        style={
+          {
+            "--font-title-family": alegreya.style.fontFamily,
+          } as React.CSSProperties
+        }
       >
         <Suspense fallback={null}>
           <MetaPageViewTracker />

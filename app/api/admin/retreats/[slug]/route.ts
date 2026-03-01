@@ -111,6 +111,10 @@ export async function PATCH(
       ...(data.dayByDay !== undefined && { dayByDay: data.dayByDay }),
       ...(data.includes !== undefined && { includes: data.includes }),
       ...(data.notIncludes !== undefined && { notIncludes: data.notIncludes }),
+      ...(data.bgColor !== undefined && { bgColor: data.bgColor }),
+      ...(data.textHighlights !== undefined && {
+        textHighlights: data.textHighlights,
+      }),
     };
 
     const existingRetreat = await prisma.retreat.findUnique({

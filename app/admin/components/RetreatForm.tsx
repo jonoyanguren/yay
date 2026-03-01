@@ -43,6 +43,90 @@ interface ExtraActivity {
   priceEuros?: number; // For display only
 }
 
+interface TextHighlightsConfig {
+  fullDescription?: string[];
+  arrivalIntro?: string[];
+  accommodationDescription?: string[];
+}
+
+function parseHighlightsInput(value: string) {
+  return Array.from(
+    new Set(
+      value
+        .split(/[,;\n]+/)
+        .map((item) => item.trim())
+        .filter(Boolean),
+    ),
+  );
+}
+
+interface CommaSeparatedHighlightsInputProps {
+  value: string;
+  onChange: (nextValue: string) => void;
+  placeholder: string;
+}
+
+function CommaSeparatedHighlightsInput({
+  value,
+  onChange,
+  placeholder,
+}: CommaSeparatedHighlightsInputProps) {
+  const [draft, setDraft] = useState("");
+  const chips = parseHighlightsInput(value);
+
+  const commitDraft = () => {
+    const next = parseHighlightsInput(draft);
+    if (next.length === 0) return;
+
+    const merged = Array.from(new Set([...chips, ...next]));
+    onChange(merged.join(", "));
+    setDraft("");
+  };
+
+  const removeChip = (chipToRemove: string) => {
+    const remaining = chips.filter((chip) => chip !== chipToRemove);
+    onChange(remaining.join(", "));
+  };
+
+  return (
+    <div className="mt-2 rounded-lg border border-slate-200 px-2 py-2 focus-within:ring-2 focus-within:ring-emerald-500 focus-within:border-transparent transition-shadow">
+      <div className="flex flex-wrap items-center gap-2">
+        {chips.map((chip) => (
+          <span
+            key={chip}
+            className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-1 text-xs text-emerald-800"
+          >
+            {chip}
+            <button
+              type="button"
+              onClick={() => removeChip(chip)}
+              className="text-emerald-700/80 hover:text-emerald-900 leading-none"
+              aria-label={`Quitar ${chip}`}
+            >
+              ×
+            </button>
+          </span>
+        ))}
+
+        <input
+          type="text"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === "," || e.key === "Tab") {
+              e.preventDefault();
+              commitDraft();
+            }
+          }}
+          onBlur={commitDraft}
+          placeholder={chips.length === 0 ? placeholder : "Añadir highlight..."}
+          className="min-w-[180px] flex-1 bg-transparent px-2 py-1 text-sm text-slate-700 outline-none"
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function RetreatForm({
   retreat,
   isEdit = false,
@@ -69,6 +153,22 @@ export default function RetreatForm({
     videoUrl: retreat?.videoUrl || "",
     accommodationTitle: retreat?.accommodationTitle || "",
     accommodationDescription: retreat?.accommodationDescription || "",
+    bgColor: retreat?.bgColor || "#d77a61",
+  });
+  const existingTextHighlights = (retreat?.textHighlights ||
+    {}) as TextHighlightsConfig;
+  const [highlightInputs, setHighlightInputs] = useState({
+    fullDescription: Array.isArray(existingTextHighlights.fullDescription)
+      ? existingTextHighlights.fullDescription.join(", ")
+      : "",
+    arrivalIntro: Array.isArray(existingTextHighlights.arrivalIntro)
+      ? existingTextHighlights.arrivalIntro.join(", ")
+      : "",
+    accommodationDescription: Array.isArray(
+      existingTextHighlights.accommodationDescription,
+    )
+      ? existingTextHighlights.accommodationDescription.join(", ")
+      : "",
   });
 
   // Image states
@@ -285,6 +385,17 @@ export default function RetreatForm({
     }
 
     try {
+      const parsedTextHighlights = {
+        fullDescription: parseHighlightsInput(highlightInputs.fullDescription),
+        arrivalIntro: parseHighlightsInput(highlightInputs.arrivalIntro),
+        accommodationDescription: parseHighlightsInput(
+          highlightInputs.accommodationDescription,
+        ),
+      };
+      const hasAnyTextHighlights = Object.values(parsedTextHighlights).some(
+        (items) => items.length > 0,
+      );
+
       const data = {
         ...formData,
         maxPeople: Number(formData.maxPeople) || 12,
@@ -308,6 +419,8 @@ export default function RetreatForm({
         includes: includes.length > 0 ? includes : null,
         notIncludes: notIncludes.length > 0 ? notIncludes : null,
         arrivalIntro: formData.arrivalIntro || null,
+        bgColor: formData.bgColor || null,
+        textHighlights: hasAnyTextHighlights ? parsedTextHighlights : null,
         roomTypes: roomTypes.map((rt) => ({
           name: rt.name,
           description: rt.description || "",
@@ -363,6 +476,7 @@ export default function RetreatForm({
         type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     }));
   };
+  const colorPreview = formData.bgColor?.trim() || "#ffffff";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -450,6 +564,30 @@ export default function RetreatForm({
               placeholder="Ej: Desde 450€"
               className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-slate-700">
+              Color fondo (waves y secciones)
+            </label>
+            <div className="flex items-center gap-2">
+              <span
+                className="h-10 w-10 shrink-0 rounded-md border border-slate-300"
+                style={{ backgroundColor: colorPreview }}
+                aria-hidden="true"
+              />
+              <input
+                type="text"
+                name="bgColor"
+                value={formData.bgColor}
+                onChange={handleChange}
+                placeholder="#d77a61"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+              />
+            </div>
+            <p className="text-xs text-slate-500 mt-1.5">
+              Formato HEX. Ej: #d77a61
+            </p>
           </div>
 
           <div>
@@ -575,6 +713,16 @@ export default function RetreatForm({
               placeholder="Descripción detallada de la experiencia..."
               className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
             />
+            <CommaSeparatedHighlightsInput
+              value={highlightInputs.fullDescription}
+              onChange={(nextValue) =>
+                setHighlightInputs((prev) => ({
+                  ...prev,
+                  fullDescription: nextValue,
+                }))
+              }
+              placeholder="Highlights (coma separada): reset, calma, foco"
+            />
           </div>
 
           <div>
@@ -588,6 +736,16 @@ export default function RetreatForm({
               rows={3}
               placeholder="Texto introductorio sobre las opciones de llegada..."
               className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+            />
+            <CommaSeparatedHighlightsInput
+              value={highlightInputs.arrivalIntro}
+              onChange={(nextValue) =>
+                setHighlightInputs((prev) => ({
+                  ...prev,
+                  arrivalIntro: nextValue,
+                }))
+              }
+              placeholder="Highlights (coma separada): vuelos, transfer"
             />
           </div>
 
@@ -658,6 +816,16 @@ export default function RetreatForm({
               rows={4}
               placeholder="Describe el alojamiento del retiro..."
               className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+            />
+            <CommaSeparatedHighlightsInput
+              value={highlightInputs.accommodationDescription}
+              onChange={(nextValue) =>
+                setHighlightInputs((prev) => ({
+                  ...prev,
+                  accommodationDescription: nextValue,
+                }))
+              }
+              placeholder="Highlights (coma separada): boutique, descanso"
             />
           </div>
 

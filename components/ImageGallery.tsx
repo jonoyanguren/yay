@@ -157,7 +157,7 @@ export default function ImageGallery({
         <div className="mb-4">
           {title && <Title className="text-2xl">{title}</Title>}
           {imageCountLabel && (
-            <p className="text-black/60 text-sm mt-1">{imageCountLabel}</p>
+            <p className="font-sans text-black/60 text-sm mt-1">{imageCountLabel}</p>
           )}
         </div>
       )}
@@ -225,10 +225,10 @@ export default function ImageGallery({
                       animate={{ y: [0, 7, 0] }}
                       transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
                     >
-                      <p className="text-3xl md:text-4xl font-semibold tracking-tight text-center leading-tight">
+                      <p className="font-sans text-3xl md:text-4xl font-semibold tracking-tight text-center leading-tight">
                         Quiero esto!
                       </p>
-                      <span className="text-3xl leading-none">↓</span>
+                      <span className="font-sans text-3xl leading-none">↓</span>
                     </motion.div>
                   </motion.div>
                 </motion.div>
@@ -371,7 +371,7 @@ export default function ImageGallery({
           </div>
 
           {images.length > 1 && (
-            <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/80 text-sm">
+            <p className="font-sans absolute bottom-4 left-1/2 -translate-x-1/2 text-white/80 text-sm">
               {lightboxIndex + 1} / {images.length}
             </p>
           )}

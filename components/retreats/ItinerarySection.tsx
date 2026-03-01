@@ -107,7 +107,7 @@ export default function ItinerarySection({
 
   return (
     <section className="space-y-6">
-      <Title className="text-2xl text-brand-blue-medium">{title}</Title>
+      <Title className="text-5xl text-brand-blue-medium">{title}</Title>
 
       <div className="grid gap-x-6 gap-y-8 sm:grid-cols-2 md:grid-flow-col md:auto-cols-fr">
         {days.map((day, index) => {
@@ -124,7 +124,7 @@ export default function ItinerarySection({
               transition={{ duration: 0.45, ease: "easeOut", delay: dayDelay }}
             >
               <div className="mb-3">
-                <p className="text-brand-blue-dark font-semibold leading-none text-xl md:text-2xl">
+                <p className="font-sans text-brand-blue-dark font-semibold leading-none text-xl md:text-2xl">
                   <span className="relative inline-block">
                     <span className="relative z-10">
                       {name}
@@ -153,7 +153,7 @@ export default function ItinerarySection({
                   return (
                     <motion.li
                       key={item}
-                      className="text-sm leading-snug text-brand-blue-dark whitespace-pre-line"
+                      className="font-sans text-sm leading-snug text-brand-blue-dark whitespace-pre-line"
                       initial={isMobile ? { opacity: 0, y: 14 } : false}
                       whileInView={isMobile ? { opacity: 1, y: 0 } : undefined}
                       viewport={{ once: true, amount: 0.45 }}
@@ -164,12 +164,14 @@ export default function ItinerarySection({
                       }}
                     >
                       {startTime && (
-                        <span className="font-handwriting mr-1 text-xl md:text-2xl font-bold leading-none text-brand-main-dark">
+                        <span className="font-sans mr-1 text-xl md:text-2xl font-bold leading-none text-brand-main-dark">
                           {startTime}:
                         </span>
                       )}
                       {activity && (
-                        <span>{startTime ? ` ${activity}` : activity}</span>
+                        <span className="font-sans">
+                          {startTime ? ` ${activity}` : activity}
+                        </span>
                       )}
                     </motion.li>
                   );

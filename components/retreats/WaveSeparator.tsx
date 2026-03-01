@@ -7,6 +7,7 @@ interface WaveSeparatorProps {
   heightClassName?: string;
   variant?: WaveVariant;
   className?: string;
+  bgColor?: string;
 }
 
 const WAVE_PATHS: Record<WaveVariant, { back: string; front: string }> = {
@@ -38,11 +39,10 @@ export default function WaveSeparator({
   heightClassName = "h-12 md:h-20",
   variant = "medium",
   className,
+  bgColor,
 }: WaveSeparatorProps) {
   return (
-    <div
-      className={joinClasses("relative w-full overflow-hidden leading-0", className)}
-    >
+    <div className={joinClasses("relative w-full overflow-hidden leading-0", className)}>
       <svg
         viewBox="0 0 1440 180"
         preserveAspectRatio="none"
@@ -55,13 +55,13 @@ export default function WaveSeparator({
         )}
       >
         <path
-          d={WAVE_PATHS[variant].back}
+          d={WAVE_PATHS[variant].front}
           className={joinClasses(
-            "fill-current opacity-65",
+            "fill-current",
             secondaryColorClassName ?? colorClassName,
           )}
+          style={bgColor ? { fill: bgColor } : undefined}
         />
-        <path d={WAVE_PATHS[variant].front} className={joinClasses("fill-current", colorClassName)} />
       </svg>
     </div>
   );

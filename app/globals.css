@@ -44,6 +44,7 @@
 
   --background: var(--color-brand-cream-warm);
   --foreground: var(--color-black);
+  --font-title-family: Georgia, serif;
 }
 
 @theme inline {
@@ -79,14 +80,29 @@
   --color-brand-accent-coral: var(--color-brand-accent-coral);
   --color-brand-accent-yellow: var(--color-brand-accent-yellow);
 
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-plus-jakarta-sans);
   --font-mono: var(--font-geist-mono);
-  --font-title: var(--font-dela-gothic);
+  --font-title: var(--font-title-family);
   --font-handwriting: var(--font-handwriting);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-plus-jakarta-sans), sans-serif;
 }
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-title-family), serif !important;
+}
+
+/* Keep Plus Jakarta as default for all non-heading text */
+body :not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) {
+  font-family: var(--font-plus-jakarta-sans), sans-serif !important;
+}
+

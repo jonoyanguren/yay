@@ -33,6 +33,12 @@ export type Retreat = {
   dayByDay?: { day: string; items: string[] }[] | null;
   includes?: string[] | null;
   notIncludes?: string[] | null;
+  bgColor?: string | null;
+  textHighlights?: {
+    fullDescription?: string[];
+    arrivalIntro?: string[];
+    accommodationDescription?: string[];
+  } | null;
   published: boolean;
   roomTypes: RetreatRoomTypeRow[];
   extraActivities: RetreatExtraActivityRow[];

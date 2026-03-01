@@ -81,6 +81,8 @@ export async function POST(request: Request) {
         dayByDay: data.dayByDay || null,
         includes: data.includes || null,
         notIncludes: data.notIncludes || null,
+        bgColor: data.bgColor || null,
+        textHighlights: data.textHighlights || null,
         roomTypes: data.roomTypes
           ? {
               create: data.roomTypes.map((rt: any) => ({

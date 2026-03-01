@@ -1,4 +1,5 @@
 import Title from "@/components/ui/Title";
+import TextWithHighlights from "@/components/ui/TextWithHighlights";
 
 interface AccommodationSectionProps {
   title: string;
@@ -7,6 +8,8 @@ interface AccommodationSectionProps {
   hotelName?: string;
   hotelUrl?: string;
   videoUrl?: string;
+  descriptionHighlights?: string[];
+  highlightColor?: string;
 }
 
 export default function AccommodationSection({
@@ -16,6 +19,8 @@ export default function AccommodationSection({
   hotelName = "",
   hotelUrl = "",
   videoUrl = "",
+  descriptionHighlights = [],
+  highlightColor = "#d77a61",
 }: AccommodationSectionProps) {
   const stripImages =
     images.length === 0
@@ -26,7 +31,7 @@ export default function AccommodationSection({
 
   return (
     <section className="space-y-5">
-      <Title className="text-2xl text-white">{title}</Title>
+      <Title className="text-5xl text-white">{title}</Title>
       {hotelName && (
         <p className="text-white/90">
           Hotel:{" "}
@@ -45,9 +50,12 @@ export default function AccommodationSection({
         </p>
       )}
       {description && (
-        <p className="text-white/90 leading-relaxed whitespace-pre-line">
-          {description}
-        </p>
+        <TextWithHighlights
+          text={description}
+          highlights={descriptionHighlights}
+          highlightColor={highlightColor}
+          className="text-white/90 leading-relaxed whitespace-pre-line"
+        />
       )}
       {stripImages.length > 0 && (
         <div className="w-full overflow-hidden">

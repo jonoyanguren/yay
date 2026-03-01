@@ -36,6 +36,8 @@ model Retreat {
   dayByDay        Json?    @map("day_by_day")
   includes        Json?    @map("includes")
   notIncludes     Json?    @map("not_includes")
+  bgColor         String?  @map("bg_color")
+  textHighlights  Json?    @map("text_highlights")
   createdAt       DateTime @default(now()) @map("created_at")
 
   roomTypes       RetreatRoomType[]

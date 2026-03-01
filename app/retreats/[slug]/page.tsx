@@ -3,11 +3,15 @@ import Title from "@/components/ui/Title";
 import ImageGallery from "@/components/ImageGallery";
 import TrackMetaOnMount from "@/components/analytics/TrackMetaOnMount";
 import AccommodationSection from "@/components/retreats/AccommodationSection";
+import ArrivalOptionsSection, {
+  type ArrivalOption,
+} from "@/components/retreats/ArrivalOptionsSection";
 import ExperienceSection from "@/components/retreats/ExperienceSection";
 import FadeInOnView from "@/components/retreats/FadeInOnView";
 import ItinerarySection from "@/components/retreats/ItinerarySection";
 import RetreatHero from "@/components/retreats/RetreatHero";
 import RetreatSection from "@/components/retreats/RetreatSection";
+import ScrollToTopOnMount from "@/components/retreats/ScrollToTopOnMount";
 import RetreatStickyInfoBar from "@/components/retreats/RetreatStickyInfoBar";
 import WaveSeparator from "@/components/retreats/WaveSeparator";
 import { notFound } from "next/navigation";
@@ -17,14 +21,46 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-interface ArrivalOption {
-  title: string;
-  detail: string;
-}
-
 interface DayItem {
   day: string;
   items: string[];
+}
+
+interface RetreatTextHighlights {
+  fullDescription?: string[];
+  arrivalIntro?: string[];
+  accommodationDescription?: string[];
+}
+
+function normalizeHighlights(value: unknown): RetreatTextHighlights {
+  const empty: RetreatTextHighlights = {
+    fullDescription: [],
+    arrivalIntro: [],
+    accommodationDescription: [],
+  };
+
+  if (!value) return empty;
+
+  let parsed: unknown = value;
+  if (typeof value === "string") {
+    try {
+      parsed = JSON.parse(value);
+    } catch {
+      return empty;
+    }
+  }
+
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return empty;
+  const source = parsed as Record<string, unknown>;
+
+  const asStringArray = (input: unknown) =>
+    Array.isArray(input) ? input.filter((item): item is string => typeof item === "string") : [];
+
+  return {
+    fullDescription: asStringArray(source.fullDescription),
+    arrivalIntro: asStringArray(source.arrivalIntro),
+    accommodationDescription: asStringArray(source.accommodationDescription),
+  };
 }
 
 export const dynamic = "force-dynamic";
@@ -52,6 +88,7 @@ async function getRetreatBySlug(slug: string) {
 export default async function RetreatPage({ params }: PageProps) {
   const { slug } = await params;
   const retreat = await getRetreatBySlug(slug);
+  const bgColor = retreat?.bgColor?.trim() || "#d77a61";
 
   if (!retreat) {
     notFound();
@@ -83,7 +120,7 @@ export default async function RetreatPage({ params }: PageProps) {
   const accommodationImages = retreat.accommodationImages || [];
   const hasAccommodationContent =
     Boolean(accommodationDescription) || accommodationImages.length > 0;
-  const hasDarkBlueSections =
+  const hasColoredSections =
     hasAccommodationContent || arrivalOptions.length > 0;
   const includes = (
     Array.isArray(retreat.includes) ? retreat.includes : []
@@ -99,11 +136,13 @@ export default async function RetreatPage({ params }: PageProps) {
   const imageUrl =
     retreat.images?.[0] || retreat.image || "/assets/placeholder.jpg";
   const galleryImages = retreat.images || [];
+  const textHighlights = normalizeHighlights(retreat.textHighlights);
 
   console.log("Activities image:", activitiesImage);
 
   return (
     <div className="pb-24">
+      <ScrollToTopOnMount />
       <TrackMetaOnMount
         eventName="ViewContent"
         params={{
@@ -148,6 +187,8 @@ export default async function RetreatPage({ params }: PageProps) {
         <ExperienceSection
           title="La experiencia"
           description={retreat.fullDescription}
+          descriptionHighlights={textHighlights.fullDescription || []}
+          highlightColor={bgColor}
           imageSrc={retreat.images?.[1] || imageUrl}
           imageAlt={`${retreat.title} experience`}
         />
@@ -185,24 +226,26 @@ export default async function RetreatPage({ params }: PageProps) {
         </RetreatSection>
       )}
 
-      {hasDarkBlueSections && (
+      {hasColoredSections && (
         <div className="overflow-hidden">
           <WaveSeparator
             variant="bold"
-            colorClassName="text-brand-blue-dark"
+            bgColor={bgColor}
             heightClassName="h-16 md:h-28"
           />
 
           {/* Accommodation section */}
           {hasAccommodationContent && (
             <RetreatSection
-              className="bg-brand-blue-dark text-center"
-              type="full"
+              className="text-center"
+              style={{ backgroundColor: bgColor }}
               animate={false}
             >
               <AccommodationSection
                 title={accommodationTitle}
                 description={accommodationDescription}
+                descriptionHighlights={textHighlights.accommodationDescription || []}
+                highlightColor={bgColor}
                 images={accommodationImages}
                 hotelName={hotelName}
                 hotelUrl={hotelUrl}
@@ -213,53 +256,24 @@ export default async function RetreatPage({ params }: PageProps) {
 
           {arrivalOptions.length > 0 && (
             <RetreatSection
-              className="bg-brand-blue-dark text-center"
+              className="text-center"
+              style={{ backgroundColor: bgColor }}
               type="full"
               animate={false}
             >
-              <section className="space-y-4">
-                <Title className="text-2xl text-white">
-                  Llegadas y transfers
-                </Title>
-                <p className="text-white leading-relaxed">{arrivalIntro}</p>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {arrivalOptions.map((item, index) => (
-                    <div
-                      key={item.title}
-                      className={`p-4 border-2 rounded-lg shadow-sm ${
-                        index === 0 ? "" : "border-white/15 bg-white"
-                      }`}
-                      style={
-                        index === 0
-                          ? {
-                              borderColor: "#4f73c3",
-                              backgroundColor: "#faf8f4",
-                            }
-                          : undefined
-                      }
-                    >
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <p className="text-sm font-semibold">{item.title}</p>
-                        {index === 0 && (
-                          <span className="text-[10px] px-2 py-1 rounded-full bg-brand-blue-medium text-white uppercase tracking-wide">
-                            Recomendada
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm leading-relaxed text-black/80">
-                        {item.detail}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </section>
+              <ArrivalOptionsSection
+                intro={arrivalIntro}
+                options={arrivalOptions}
+                introHighlights={textHighlights.arrivalIntro || []}
+                highlightColor={bgColor}
+              />
             </RetreatSection>
           )}
 
           <WaveSeparator
             variant="bold"
             flip
-            colorClassName="text-brand-blue-dark"
+            bgColor={bgColor}
             heightClassName="h-16 md:h-28"
           />
         </div>

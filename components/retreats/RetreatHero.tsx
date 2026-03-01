@@ -2,7 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 import Title from "@/components/ui/Title";
 
 interface RetreatHeroProps {
@@ -35,7 +40,11 @@ export default function RetreatHero({
   }, []);
 
   const mediaScale = useTransform(scrollYProgress, [0, 1], [1, 1.9]);
-  const mediaOpacity = useTransform(scrollYProgress, [0, 0.7, 1], [1, 0.92, 0.5]);
+  const mediaOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.7, 1],
+    [1, 0.92, 0.5],
+  );
   const contentScale = useTransform(
     scrollYProgress,
     [0, 0.88],
@@ -46,11 +55,22 @@ export default function RetreatHero({
     [0, 1],
     [isMobile ? "22vh" : "0vh", isMobile ? "0vh" : "2vh"],
   );
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.72, 1], [1, 1, 0.9]);
+  const contentOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.72, 1],
+    [1, 1, 0.9],
+  );
   const blur = useTransform(scrollYProgress, [0, 1], [0, 22]);
-  const mediaFilter = useTransform(blur, (value) => `blur(${value.toFixed(2)}px)`);
+  const mediaFilter = useTransform(
+    blur,
+    (value) => `blur(${value.toFixed(2)}px)`,
+  );
   const lightOverlayOpacity = useTransform(scrollYProgress, [0.72, 1], [0, 1]);
-  const arrowOpacity = useTransform(scrollYProgress, [0.68, 0.82, 1], [0, 1, 0.55]);
+  const arrowOpacity = useTransform(
+    scrollYProgress,
+    [0.68, 0.82, 1],
+    [0, 1, 0.55],
+  );
   const titleColor = useTransform(
     scrollYProgress,
     [0, 1],
@@ -61,12 +81,6 @@ export default function RetreatHero({
     [0, 1],
     ["rgba(255, 255, 255, 0.9)", "rgba(15, 23, 42, 0.9)"],
   );
-  const dotColor = useTransform(
-    scrollYProgress,
-    [0, 1],
-    ["rgb(255, 255, 255)", "rgb(15, 23, 42)"],
-  );
-
   return (
     <div ref={heroRef} className="relative h-[185vh] md:h-[205vh]">
       <div className="sticky top-0 h-screen overflow-hidden">
@@ -95,7 +109,7 @@ export default function RetreatHero({
           style={{ opacity: lightOverlayOpacity }}
         />
         <motion.div
-          className="absolute bottom-16 md:bottom-24 left-1/2 -translate-x-1/2 z-30 pointer-events-none"
+          className="absolute bottom-8 md:bottom-16 left-1/2 -translate-x-1/2 z-30 pointer-events-none"
           style={{ opacity: shouldReduceMotion ? 0 : arrowOpacity }}
           animate={shouldReduceMotion ? undefined : { y: [0, 8, 0] }}
           transition={
@@ -105,11 +119,13 @@ export default function RetreatHero({
           }
         >
           <div className="flex flex-col items-center gap-1 text-black/80">
-            <span className="text-xl md:text-3xl font-semibold tracking-tight">
+            <span className="font-sans text-xl md:text-3xl font-semibold tracking-tight">
               ¿Estás preparado?
             </span>
-            <span className="text-[11px] uppercase tracking-[0.2em]">Scroll</span>
-            <span className="text-2xl leading-none">↓</span>
+            <span className="font-sans text-[11px] uppercase tracking-[0.2em]">
+              Scroll
+            </span>
+            <span className="font-sans text-2xl leading-none">↓</span>
           </div>
         </motion.div>
 
@@ -117,7 +133,7 @@ export default function RetreatHero({
           <div className="max-w-6xl mx-auto">
             <Link
               href="/#retreats"
-              className="text-white/80 hover:text-white text-sm block"
+              className="font-sans text-white/80 hover:text-white text-sm block"
             >
               &larr; Volver a Retiros
             </Link>
@@ -133,19 +149,23 @@ export default function RetreatHero({
           }
         >
           <div className="relative z-10 max-w-6xl mx-auto w-full text-center">
-            <motion.div style={{ color: shouldReduceMotion ? "#ffffff" : titleColor }}>
-              <Title className="text-5xl md:text-8xl text-inherit mb-3">{title}</Title>
+            <motion.div
+              style={{ color: shouldReduceMotion ? "#ffffff" : titleColor }}
+            >
+              <Title className="text-5xl md:text-[8rem] text-inherit mb-3">
+                {title}
+              </Title>
             </motion.div>
             <motion.p
-              style={{ color: shouldReduceMotion ? "rgba(255, 255, 255, 0.9)" : subtitleColor }}
-              className="text-xl md:text-2xl flex items-center justify-center gap-2"
+              style={{
+                color: shouldReduceMotion
+                  ? "rgba(255, 255, 255, 0.9)"
+                  : subtitleColor,
+              }}
+              className="font-sans text-xl md:text-2xl flex flex-col items-center justify-center leading-snug"
             >
-              <span>{location}</span>
-              <motion.span
-                style={{ backgroundColor: shouldReduceMotion ? "#ffffff" : dotColor }}
-                className="w-1 h-1 rounded-full"
-              />
-              <span>{date}</span>
+              <span className="font-sans">{location}</span>
+              <span className="font-sans">{date}</span>
             </motion.p>
           </div>
         </motion.div>
