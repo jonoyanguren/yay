@@ -194,12 +194,12 @@ export default async function RetreatPage({ params }: PageProps) {
 
       {/* Galería de imágenes - ancho completo */}
       {galleryImages.length > 0 && (
-        <section className="py-6 md:py-12 px-4 md:px-0">
+        <section className="py-6 md:py-12 px-0 overflow-x-clip">
           <ImageGallery
             images={galleryImages}
             altPrefix={retreat.title}
             variant="stack-parallax"
-            className="mx-auto max-w-6xl"
+            className="w-full"
           />
         </section>
       )}

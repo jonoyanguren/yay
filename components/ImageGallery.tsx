@@ -43,6 +43,7 @@ export default function ImageGallery({
     variant === "compact" && compactSize === "sm" ? "w-16 h-16" : "w-20 h-20";
   const thumbSizes = compactSize === "sm" ? "64px" : "80px";
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [horizontalStartX, setHorizontalStartX] = useState(0);
   const [horizontalTravel, setHorizontalTravel] = useState(0);
   const [horizontalSectionHeight, setHorizontalSectionHeight] = useState(1800);
   const shouldReduceMotion = useReducedMotion();
@@ -55,7 +56,7 @@ export default function ImageGallery({
   const horizontalStopProgress = 0.78;
   const horizontalX = useTransform(scrollYProgress, (value) => {
     const normalized = Math.min(value / horizontalStopProgress, 1);
-    return -normalized * horizontalTravel;
+    return horizontalStartX - normalized * horizontalTravel;
   });
   const cardsFadeOut = useTransform(
     scrollYProgress,
@@ -114,25 +115,30 @@ export default function ImageGallery({
       if (!section || !track) return;
 
       const viewportWidth = section.clientWidth;
-      const totalTrackWidth = track.scrollWidth;
-      const neededTravel = Math.max(0, totalTrackWidth - viewportWidth);
-      const viewportHeight = window.innerHeight || 900;
+      const firstCard = track.firstElementChild as HTMLElement | null;
       const finalCard = track.lastElementChild as HTMLElement | null;
-      const targetTravelToCenter = finalCard
-        ? finalCard.offsetLeft + finalCard.offsetWidth / 2 - viewportWidth / 2
-        : neededTravel;
-      const effectiveTravel = Math.max(
-        0,
-        Math.min(neededTravel, targetTravelToCenter),
-      );
+      const viewportHeight = window.innerHeight || 900;
+      const firstCardCenter = firstCard
+        ? firstCard.offsetLeft + firstCard.offsetWidth / 2
+        : viewportWidth / 2;
+      const finalCardCenter = finalCard
+        ? finalCard.offsetLeft + finalCard.offsetWidth / 2
+        : viewportWidth / 2;
+
+      // Start with the first card centered and end with the final CTA card centered.
+      const startX = viewportWidth / 2 - firstCardCenter;
+      const endX = viewportWidth / 2 - finalCardCenter;
+      const travelDistance = Math.max(0, startX - endX);
+
       // Extra vertical runway after centering final card so others can fade out.
       const postCenterRunway = viewportHeight * 0.38;
       const sectionHeight = Math.max(
         1200,
-        viewportHeight + effectiveTravel + postCenterRunway,
+        viewportHeight + travelDistance + postCenterRunway,
       );
 
-      setHorizontalTravel(effectiveTravel);
+      setHorizontalStartX(startX);
+      setHorizontalTravel(travelDistance);
       setHorizontalSectionHeight(sectionHeight);
     };
 
@@ -194,7 +200,7 @@ export default function ImageGallery({
                 <motion.div
                   ref={trackRef}
                   style={{ x: horizontalX }}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-6 md:gap-8 lg:gap-10 pl-[8vw] pr-[36vw]"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-6 md:gap-8 lg:gap-10"
                 >
                   {images.map((img, index) => {
                     return (
