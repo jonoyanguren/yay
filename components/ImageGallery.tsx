@@ -48,9 +48,12 @@ export default function ImageGallery({
   const [horizontalSectionHeight, setHorizontalSectionHeight] = useState(1800);
   const shouldReduceMotion = useReducedMotion();
   const stackRef = useRef<HTMLDivElement | null>(null);
+  const fallbackScrollRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
+  const shouldTrackStackScroll =
+    variant === "stack-parallax" && !shouldReduceMotion && images.length > 0;
   const { scrollYProgress } = useScroll({
-    target: stackRef,
+    target: shouldTrackStackScroll ? stackRef : fallbackScrollRef,
     offset: ["start start", "end end"],
   });
   const horizontalStopProgress = 0.78;
@@ -152,13 +155,13 @@ export default function ImageGallery({
   const alt = (i: number) =>
     altPrefix ? `${altPrefix} - Imagen ${i + 1}` : `Imagen ${i + 1}`;
 
-  const canUseStackLayout =
-    variant === "stack-parallax" &&
-    !shouldReduceMotion &&
-    images.length > 0;
+  const canUseStackLayout = shouldTrackStackScroll;
 
   return (
     <>
+      {!shouldTrackStackScroll && (
+        <div ref={fallbackScrollRef} className="hidden" aria-hidden="true" />
+      )}
       {(title || imageCountLabel) && (
         <div className="mb-4">
           {title && <Title className="text-2xl">{title}</Title>}

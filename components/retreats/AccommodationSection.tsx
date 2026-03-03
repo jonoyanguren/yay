@@ -39,9 +39,9 @@ export default function AccommodationSection({
               {hotelName}
             </a>
           ) : (
-            <Title className="text-3xl italic font-light text-white/90">
+            <span className="text-3xl italic font-light text-white/90">
               {hotelName}
-            </Title>
+            </span>
           )}
         </Title>
       )}
