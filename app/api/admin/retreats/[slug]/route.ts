@@ -128,17 +128,35 @@ export async function PATCH(
       data: updateData,
     });
 
-    // Room types: update existing (by id) or create new. No deletes.
+    // Room types: sync exact payload (update/create/delete).
     if (data.roomTypes !== undefined) {
       const existingRoomIds = new Set(existingRetreat.roomTypes.map((e) => e.id));
-      for (const rt of data.roomTypes as Array<{
+      const roomPayload = data.roomTypes as Array<{
         id?: string;
         name: string;
         description?: string;
         images?: string[];
         priceCents: number;
         maxQuantity: number;
-      }>) {
+      }>;
+      const incomingRoomIds = roomPayload
+        .map((rt) => rt.id)
+        .filter((id): id is string => Boolean(id));
+
+      if (incomingRoomIds.length > 0) {
+        await prisma.retreatRoomType.deleteMany({
+          where: {
+            retreatId: existingRetreat.id,
+            id: { notIn: incomingRoomIds },
+          },
+        });
+      } else {
+        await prisma.retreatRoomType.deleteMany({
+          where: { retreatId: existingRetreat.id },
+        });
+      }
+
+      for (const rt of roomPayload) {
         const payload = {
           name: rt.name,
           description: rt.description ?? "",
@@ -159,12 +177,12 @@ export async function PATCH(
       }
     }
 
-    // Extra activities: update existing (by id) or create new. No deletes.
+    // Extra activities: sync exact payload (update/create/delete).
     if (data.extraActivities !== undefined) {
       const existingExtraIds = new Set(
         existingRetreat.extraActivities.map((e) => e.id)
       );
-      for (const ea of data.extraActivities as Array<{
+      const extraPayload = data.extraActivities as Array<{
         id?: string;
         name: string;
         description?: string;
@@ -173,7 +191,25 @@ export async function PATCH(
         allowMultiple: boolean;
         maxQuantity: number | null;
         link?: string | null;
-      }>) {
+      }>;
+      const incomingExtraIds = extraPayload
+        .map((ea) => ea.id)
+        .filter((id): id is string => Boolean(id));
+
+      if (incomingExtraIds.length > 0) {
+        await prisma.retreatExtraActivity.deleteMany({
+          where: {
+            retreatId: existingRetreat.id,
+            id: { notIn: incomingExtraIds },
+          },
+        });
+      } else {
+        await prisma.retreatExtraActivity.deleteMany({
+          where: { retreatId: existingRetreat.id },
+        });
+      }
+
+      for (const ea of extraPayload) {
         const payload = {
           name: ea.name,
           description: ea.description ?? "",

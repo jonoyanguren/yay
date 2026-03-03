@@ -43,6 +43,65 @@ interface ExtraActivity {
   priceEuros?: number; // For display only
 }
 
+type RoomTypeRaw = {
+  id?: string;
+  name: string;
+  description?: string;
+  images?: string[];
+  priceCents?: number;
+  price_cents?: number;
+  maxQuantity?: number;
+  max_quantity?: number;
+};
+
+type ExtraActivityRaw = {
+  id?: string;
+  name: string;
+  description?: string | null;
+  images?: string[];
+  priceCents?: number;
+  price_cents?: number;
+  allowMultiple?: boolean;
+  allow_multiple?: boolean;
+  maxQuantity?: number | null;
+  max_quantity?: number | null;
+  link?: string | null;
+};
+
+function normalizeRoomTypes(input: RoomTypeRaw[] | undefined): RoomType[] {
+  return (input || []).map((rt) => {
+    const priceCents = rt.priceCents ?? rt.price_cents ?? 0;
+    return {
+      id: rt.id,
+      name: rt.name,
+      description: rt.description ?? "",
+      images: rt.images || [],
+      priceCents,
+      maxQuantity: rt.maxQuantity ?? rt.max_quantity ?? 1,
+      priceEuros: priceCents / 100,
+    };
+  });
+}
+
+function normalizeExtraActivities(
+  input: ExtraActivityRaw[] | undefined,
+): ExtraActivity[] {
+  return (input || []).map((ea) => {
+    const priceCents = ea.priceCents ?? ea.price_cents ?? 0;
+    return {
+      id: ea.id,
+      name: ea.name,
+      description: ea.description ?? "",
+      images: ea.images || [],
+      priceCents,
+      allowMultiple: ea.allowMultiple ?? ea.allow_multiple ?? true,
+      maxQuantity: ea.maxQuantity ?? ea.max_quantity ?? null,
+      link: ea.link ?? undefined,
+      priceEuros: priceCents / 100,
+    };
+  });
+}
+
 export default function RetreatForm({
   retreat,
   isEdit = false,
@@ -103,18 +162,10 @@ export default function RetreatForm({
     retreat?.notIncludes || [],
   );
   const [roomTypes, setRoomTypes] = useState<RoomType[]>(
-    retreat?.roomTypes?.map((rt: any) => ({
-      ...rt,
-      images: rt.images || [],
-      priceEuros: rt.priceCents / 100,
-    })) || [],
+    normalizeRoomTypes(retreat?.roomTypes),
   );
   const [extraActivities, setExtraActivities] = useState<ExtraActivity[]>(
-    retreat?.extraActivities?.map((ea: any) => ({
-      ...ea,
-      images: ea.images || [],
-      priceEuros: ea.priceCents / 100,
-    })) || [],
+    normalizeExtraActivities(retreat?.extraActivities),
   );
 
   // Temporary input states
@@ -180,6 +231,65 @@ export default function RetreatForm({
     maxQuantity: "",
     link: "",
   });
+
+  const persistCollections = async (
+    payload:
+      | { roomTypes: RoomType[]; extraActivities?: undefined }
+      | { roomTypes?: undefined; extraActivities: ExtraActivity[] },
+  ) => {
+    if (!isEdit || !retreat?.slug) return;
+    const password = localStorage.getItem("adminPassword");
+    if (!password) {
+      router.push("/admin/login");
+      return;
+    }
+
+    const body: Record<string, unknown> = {};
+    if (payload.roomTypes) {
+      body.roomTypes = payload.roomTypes.map((rt) => ({
+        id: rt.id,
+        name: rt.name,
+        description: rt.description || "",
+        images: rt.images || [],
+        priceCents: rt.priceCents,
+        maxQuantity: rt.maxQuantity,
+      }));
+    }
+    if (payload.extraActivities) {
+      body.extraActivities = payload.extraActivities.map((ea) => ({
+        id: ea.id,
+        name: ea.name,
+        description: ea.description || "",
+        images: ea.images || [],
+        priceCents: ea.priceCents,
+        allowMultiple: ea.allowMultiple,
+        maxQuantity: ea.maxQuantity,
+        link: ea.link ?? null,
+      }));
+    }
+
+    const res = await fetch(`/api/admin/retreats/${retreat.slug}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${password}`,
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || "Error sincronizando cambios");
+    }
+
+    const updatedRetreat = await res.json();
+    if (payload.roomTypes) {
+      setRoomTypes(normalizeRoomTypes(updatedRetreat.roomTypes));
+    }
+    if (payload.extraActivities) {
+      setExtraActivities(normalizeExtraActivities(updatedRetreat.extraActivities));
+    }
+  };
 
   // Add/Remove functions
   const addArrivalOption = () => {
@@ -382,7 +492,7 @@ export default function RetreatForm({
     ) {
       const priceEuros = parseFloat(newRoomType.priceCents);
       const priceCents = Math.round(priceEuros * 100);
-      setRoomTypes([
+      const nextRoomTypes = [
         ...roomTypes,
         {
           name: newRoomType.name.trim(),
@@ -392,7 +502,8 @@ export default function RetreatForm({
           priceEuros,
           maxQuantity: parseInt(newRoomType.maxQuantity),
         },
-      ]);
+      ];
+      setRoomTypes(nextRoomTypes);
       setNewRoomType({
         name: "",
         description: "",
@@ -400,6 +511,13 @@ export default function RetreatForm({
         priceCents: "",
         maxQuantity: "",
       });
+      if (isEdit) {
+        persistCollections({ roomTypes: nextRoomTypes }).catch((err: unknown) =>
+          setError(
+            err instanceof Error ? err.message : "Error guardando habitaciones",
+          ),
+        );
+      }
     }
   };
 
@@ -414,7 +532,15 @@ export default function RetreatForm({
         maxQuantity: "",
       });
     }
-    setRoomTypes(roomTypes.filter((_, i) => i !== index));
+    const nextRoomTypes = roomTypes.filter((_, i) => i !== index);
+    setRoomTypes(nextRoomTypes);
+    if (isEdit) {
+      persistCollections({ roomTypes: nextRoomTypes }).catch((err: unknown) =>
+        setError(
+          err instanceof Error ? err.message : "Error guardando habitaciones",
+        ),
+      );
+    }
   };
 
   const startEditRoomType = (index: number) => {
@@ -456,21 +582,27 @@ export default function RetreatForm({
     if (Number.isNaN(priceEuros) || Number.isNaN(maxQuantity)) return;
 
     const priceCents = Math.round(priceEuros * 100);
-    setRoomTypes((prev) =>
-      prev.map((room, index) =>
-        index === editingRoomTypeIndex
-          ? {
-              ...room,
-              name: editingRoomType.name.trim(),
-              description: editingRoomType.description.trim() || "",
-              images: editingRoomType.images,
-              priceCents,
-              priceEuros,
-              maxQuantity,
-            }
-          : room,
-      ),
+    const nextRoomTypes = roomTypes.map((room, index) =>
+      index === editingRoomTypeIndex
+        ? {
+            ...room,
+            name: editingRoomType.name.trim(),
+            description: editingRoomType.description.trim() || "",
+            images: editingRoomType.images,
+            priceCents,
+            priceEuros,
+            maxQuantity,
+          }
+        : room,
     );
+    setRoomTypes(nextRoomTypes);
+    if (isEdit) {
+      persistCollections({ roomTypes: nextRoomTypes }).catch((err: unknown) =>
+        setError(
+          err instanceof Error ? err.message : "Error guardando habitaciones",
+        ),
+      );
+    }
     cancelEditRoomType();
   };
 
@@ -478,7 +610,7 @@ export default function RetreatForm({
     if (newExtraActivity.name.trim() && newExtraActivity.priceCents) {
       const priceEuros = parseFloat(newExtraActivity.priceCents);
       const priceCents = Math.round(priceEuros * 100);
-      setExtraActivities([
+      const nextExtraActivities = [
         ...extraActivities,
         {
           name: newExtraActivity.name.trim(),
@@ -492,7 +624,8 @@ export default function RetreatForm({
             : null,
           link: newExtraActivity.link.trim() || undefined,
         },
-      ]);
+      ];
+      setExtraActivities(nextExtraActivities);
       setNewExtraActivity({
         name: "",
         description: "",
@@ -502,6 +635,12 @@ export default function RetreatForm({
         maxQuantity: "",
         link: "",
       });
+      if (isEdit) {
+        persistCollections({ extraActivities: nextExtraActivities }).catch(
+          (err: unknown) =>
+            setError(err instanceof Error ? err.message : "Error guardando extras"),
+        );
+      }
     }
   };
 
@@ -518,7 +657,14 @@ export default function RetreatForm({
         link: "",
       });
     }
-    setExtraActivities(extraActivities.filter((_, i) => i !== index));
+    const nextExtraActivities = extraActivities.filter((_, i) => i !== index);
+    setExtraActivities(nextExtraActivities);
+    if (isEdit) {
+      persistCollections({ extraActivities: nextExtraActivities }).catch(
+        (err: unknown) =>
+          setError(err instanceof Error ? err.message : "Error guardando extras"),
+      );
+    }
   };
 
   const startEditExtraActivity = (index: number) => {
@@ -572,23 +718,28 @@ export default function RetreatForm({
       return;
     }
 
-    setExtraActivities((prev) =>
-      prev.map((activity, index) =>
-        index === editingExtraActivityIndex
-          ? {
-              ...activity,
-              name: editingExtraActivity.name.trim(),
-              description: editingExtraActivity.description.trim() || "",
-              images: editingExtraActivity.images,
-              priceCents,
-              priceEuros,
-              allowMultiple: editingExtraActivity.allowMultiple,
-              maxQuantity: parsedMaxQuantity,
-              link: editingExtraActivity.link.trim() || undefined,
-            }
-          : activity,
-      ),
+    const nextExtraActivities = extraActivities.map((activity, index) =>
+      index === editingExtraActivityIndex
+        ? {
+            ...activity,
+            name: editingExtraActivity.name.trim(),
+            description: editingExtraActivity.description.trim() || "",
+            images: editingExtraActivity.images,
+            priceCents,
+            priceEuros,
+            allowMultiple: editingExtraActivity.allowMultiple,
+            maxQuantity: parsedMaxQuantity,
+            link: editingExtraActivity.link.trim() || undefined,
+          }
+        : activity,
     );
+    setExtraActivities(nextExtraActivities);
+    if (isEdit) {
+      persistCollections({ extraActivities: nextExtraActivities }).catch(
+        (err: unknown) =>
+          setError(err instanceof Error ? err.message : "Error guardando extras"),
+      );
+    }
     cancelEditExtraActivity();
   };
 
@@ -644,21 +795,26 @@ export default function RetreatForm({
             : null,
         arrivalIntro: formData.arrivalIntro || null,
         bgColor: formData.bgColor || null,
-        roomTypes: roomTypes.map((rt) => ({
-          name: rt.name,
-          description: rt.description || "",
-          images: rt.images || [],
-          priceCents: rt.priceCents,
-          maxQuantity: rt.maxQuantity,
-        })),
-        extraActivities: extraActivities.map((ea) => ({
-          name: ea.name,
-          description: ea.description || "",
-          images: ea.images || [],
-          priceCents: ea.priceCents,
-          allowMultiple: ea.allowMultiple,
-          maxQuantity: ea.maxQuantity,
-        })),
+        ...(!isEdit && {
+          roomTypes: roomTypes.map((rt) => ({
+            id: rt.id,
+            name: rt.name,
+            description: rt.description || "",
+            images: rt.images || [],
+            priceCents: rt.priceCents,
+            maxQuantity: rt.maxQuantity,
+          })),
+          extraActivities: extraActivities.map((ea) => ({
+            id: ea.id,
+            name: ea.name,
+            description: ea.description || "",
+            images: ea.images || [],
+            priceCents: ea.priceCents,
+            allowMultiple: ea.allowMultiple,
+            maxQuantity: ea.maxQuantity,
+            link: ea.link ?? null,
+          })),
+        }),
       };
 
       const url = isEdit
@@ -686,8 +842,8 @@ export default function RetreatForm({
         const errorData = await res.json();
         setError(errorData.error || "Error saving retreat");
       }
-    } catch (err: any) {
-      setError(err.message || "Error saving retreat");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Error saving retreat");
     } finally {
       setIsLoading(false);
     }
