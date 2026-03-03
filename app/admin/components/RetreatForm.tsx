@@ -72,6 +72,15 @@ export default function RetreatForm({
     accommodationDescription: retreat?.accommodationDescription || "",
     bgColor: retreat?.bgColor || "#d77a61",
   });
+  const [fullDescriptionHighlights, setFullDescriptionHighlights] = useState<
+    string[]
+  >(
+    Array.isArray(retreat?.textHighlights?.fullDescription)
+      ? retreat.textHighlights.fullDescription
+      : [],
+  );
+  const [newFullDescriptionHighlight, setNewFullDescriptionHighlight] =
+    useState("");
 
   // Image states
   const [retreatImages, setRetreatImages] = useState<string[]>(
@@ -411,6 +420,17 @@ export default function RetreatForm({
     setExtraActivities(extraActivities.filter((_, i) => i !== index));
   };
 
+  const addFullDescriptionHighlight = () => {
+    const value = newFullDescriptionHighlight.trim();
+    if (!value) return;
+    setFullDescriptionHighlights((prev) => [...prev, value]);
+    setNewFullDescriptionHighlight("");
+  };
+
+  const removeFullDescriptionHighlight = (index: number) => {
+    setFullDescriptionHighlights((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
@@ -444,6 +464,12 @@ export default function RetreatForm({
         dayByDay: dayByDay.length > 0 ? dayByDay : null,
         includes: includes.length > 0 ? includes : null,
         notIncludes: notIncludes.length > 0 ? notIncludes : null,
+        textHighlights:
+          fullDescriptionHighlights.length > 0
+            ? {
+                fullDescription: fullDescriptionHighlights,
+              }
+            : null,
         arrivalIntro: formData.arrivalIntro || null,
         bgColor: formData.bgColor || null,
         roomTypes: roomTypes.map((rt) => ({
@@ -748,6 +774,54 @@ export default function RetreatForm({
               placeholder="Descripción detallada de la experiencia..."
               className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
             />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-slate-700">
+              Highlights descripción completa
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newFullDescriptionHighlight}
+                onChange={(e) => setNewFullDescriptionHighlight(e.target.value)}
+                onKeyDown={(e) =>
+                  e.key === "Enter" &&
+                  (e.preventDefault(), addFullDescriptionHighlight())
+                }
+                placeholder="Añade un highlight"
+                className="flex-1 px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+              />
+              <button
+                type="button"
+                onClick={addFullDescriptionHighlight}
+                className="px-6 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium whitespace-nowrap"
+              >
+                Añadir
+              </button>
+            </div>
+            {fullDescriptionHighlights.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {fullDescriptionHighlights.map((highlight, index) => (
+                  <span
+                    key={`${highlight}-${index}`}
+                    className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1.5 rounded-full text-sm"
+                  >
+                    {highlight}
+                    <button
+                      type="button"
+                      onClick={() => removeFullDescriptionHighlight(index)}
+                      className="text-emerald-700 hover:text-rose-600 transition-colors text-xs font-bold"
+                      aria-label="Eliminar highlight"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <p className="text-xs text-slate-500 mt-1.5">
+              Se mostrarán como badges. Puedes quitar cada uno con la x.
+            </p>
           </div>
 
           <div>
