@@ -116,16 +116,23 @@ export default function RetreatForm({
   const [newDayByDay, setNewDayByDay] = useState({ day: "", items: "" });
   const [editingDayIndex, setEditingDayIndex] = useState<number | null>(null);
   const [editingDayByDay, setEditingDayByDay] = useState({ day: "", items: "" });
+  const [draggedDayIndex, setDraggedDayIndex] = useState<number | null>(null);
   const [newInclude, setNewInclude] = useState("");
   const [newNotInclude, setNewNotInclude] = useState("");
   const [editingIncludeIndex, setEditingIncludeIndex] = useState<number | null>(
     null,
   );
   const [editingIncludeValue, setEditingIncludeValue] = useState("");
+  const [draggedIncludeIndex, setDraggedIncludeIndex] = useState<number | null>(
+    null,
+  );
   const [editingNotIncludeIndex, setEditingNotIncludeIndex] = useState<
     number | null
   >(null);
   const [editingNotIncludeValue, setEditingNotIncludeValue] = useState("");
+  const [draggedNotIncludeIndex, setDraggedNotIncludeIndex] = useState<
+    number | null
+  >(null);
   const [newRoomType, setNewRoomType] = useState({
     name: "",
     description: "",
@@ -205,6 +212,25 @@ export default function RetreatForm({
     cancelEditDayByDay();
   };
 
+  const onDayByDayDrop = (targetIndex: number) => {
+    if (
+      draggedDayIndex === null ||
+      draggedDayIndex === targetIndex ||
+      editingDayIndex !== null
+    ) {
+      setDraggedDayIndex(null);
+      return;
+    }
+
+    setDayByDay((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(draggedDayIndex, 1);
+      next.splice(targetIndex, 0, moved);
+      return next;
+    });
+    setDraggedDayIndex(null);
+  };
+
   const addInclude = () => {
     if (newInclude.trim()) {
       setIncludes([...includes, newInclude.trim()]);
@@ -242,6 +268,25 @@ export default function RetreatForm({
     cancelEditInclude();
   };
 
+  const onIncludeDrop = (targetIndex: number) => {
+    if (
+      draggedIncludeIndex === null ||
+      draggedIncludeIndex === targetIndex ||
+      editingIncludeIndex !== null
+    ) {
+      setDraggedIncludeIndex(null);
+      return;
+    }
+
+    setIncludes((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(draggedIncludeIndex, 1);
+      next.splice(targetIndex, 0, moved);
+      return next;
+    });
+    setDraggedIncludeIndex(null);
+  };
+
   const addNotInclude = () => {
     if (newNotInclude.trim()) {
       setNotIncludes([...notIncludes, newNotInclude.trim()]);
@@ -277,6 +322,25 @@ export default function RetreatForm({
       ),
     );
     cancelEditNotInclude();
+  };
+
+  const onNotIncludeDrop = (targetIndex: number) => {
+    if (
+      draggedNotIncludeIndex === null ||
+      draggedNotIncludeIndex === targetIndex ||
+      editingNotIncludeIndex !== null
+    ) {
+      setDraggedNotIncludeIndex(null);
+      return;
+    }
+
+    setNotIncludes((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(draggedNotIncludeIndex, 1);
+      next.splice(targetIndex, 0, moved);
+      return next;
+    });
+    setDraggedNotIncludeIndex(null);
   };
 
   const addRoomType = () => {
@@ -910,7 +974,14 @@ export default function RetreatForm({
             {dayByDay.map((day, index) => (
               <div
                 key={index}
-                className="bg-slate-50 p-4 rounded-lg border border-slate-100"
+                draggable={editingDayIndex === null}
+                onDragStart={() => setDraggedDayIndex(index)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => onDayByDayDrop(index)}
+                onDragEnd={() => setDraggedDayIndex(null)}
+                className={`bg-slate-50 p-4 rounded-lg border border-slate-100 ${
+                  draggedDayIndex === index ? "opacity-50" : ""
+                } ${editingDayIndex === null ? "cursor-move" : ""}`}
               >
                 {editingDayIndex === index ? (
                   <div className="space-y-3">
@@ -958,7 +1029,10 @@ export default function RetreatForm({
                 ) : (
                   <>
                     <div className="flex justify-between items-start mb-2">
-                      <p className="font-semibold text-slate-800">{day.day}</p>
+                      <p className="font-semibold text-slate-800 flex items-center gap-2">
+                        <span className="text-slate-400 font-bold">⋮⋮</span>
+                        {day.day}
+                      </p>
                       <div className="flex items-center gap-3">
                         <button
                           type="button"
@@ -1019,7 +1093,14 @@ export default function RetreatForm({
             {includes.map((item, index) => (
               <li
                 key={index}
-                className="bg-slate-50 px-4 py-3 rounded-lg border border-slate-100"
+                draggable={editingIncludeIndex === null}
+                onDragStart={() => setDraggedIncludeIndex(index)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => onIncludeDrop(index)}
+                onDragEnd={() => setDraggedIncludeIndex(null)}
+                className={`bg-slate-50 px-4 py-3 rounded-lg border border-slate-100 ${
+                  draggedIncludeIndex === index ? "opacity-50" : ""
+                } ${editingIncludeIndex === null ? "cursor-move" : ""}`}
               >
                 {editingIncludeIndex === index ? (
                   <div className="flex items-center gap-2">
@@ -1057,6 +1138,7 @@ export default function RetreatForm({
                 ) : (
                   <div className="flex items-center justify-between">
                     <span className="flex gap-2 text-slate-700">
+                      <span className="text-slate-400 font-bold">⋮⋮</span>
                       <span className="text-emerald-600 font-bold">✓</span>
                       {item}
                     </span>
@@ -1111,7 +1193,14 @@ export default function RetreatForm({
             {notIncludes.map((item, index) => (
               <li
                 key={index}
-                className="bg-slate-50 px-4 py-3 rounded-lg border border-slate-100"
+                draggable={editingNotIncludeIndex === null}
+                onDragStart={() => setDraggedNotIncludeIndex(index)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => onNotIncludeDrop(index)}
+                onDragEnd={() => setDraggedNotIncludeIndex(null)}
+                className={`bg-slate-50 px-4 py-3 rounded-lg border border-slate-100 ${
+                  draggedNotIncludeIndex === index ? "opacity-50" : ""
+                } ${editingNotIncludeIndex === null ? "cursor-move" : ""}`}
               >
                 {editingNotIncludeIndex === index ? (
                   <div className="flex items-center gap-2">
@@ -1149,6 +1238,7 @@ export default function RetreatForm({
                 ) : (
                   <div className="flex items-center justify-between">
                     <span className="flex gap-2 text-slate-700">
+                      <span className="text-slate-400 font-bold">⋮⋮</span>
                       <span className="text-slate-400 font-bold">–</span>
                       {item}
                     </span>
