@@ -113,6 +113,8 @@ export default function RetreatForm({
     detail: "",
   });
   const [newDayByDay, setNewDayByDay] = useState({ day: "", items: "" });
+  const [editingDayIndex, setEditingDayIndex] = useState<number | null>(null);
+  const [editingDayByDay, setEditingDayByDay] = useState({ day: "", items: "" });
   const [newInclude, setNewInclude] = useState("");
   const [newNotInclude, setNewNotInclude] = useState("");
   const [newRoomType, setNewRoomType] = useState({
@@ -153,7 +155,45 @@ export default function RetreatForm({
   };
 
   const removeDayByDay = (index: number) => {
+    if (editingDayIndex === index) {
+      setEditingDayIndex(null);
+      setEditingDayByDay({ day: "", items: "" });
+    }
     setDayByDay(dayByDay.filter((_, i) => i !== index));
+  };
+
+  const startEditDayByDay = (index: number) => {
+    const day = dayByDay[index];
+    if (!day) return;
+    setEditingDayIndex(index);
+    setEditingDayByDay({
+      day: day.day,
+      items: day.items.join("\n"),
+    });
+  };
+
+  const cancelEditDayByDay = () => {
+    setEditingDayIndex(null);
+    setEditingDayByDay({ day: "", items: "" });
+  };
+
+  const saveEditDayByDay = () => {
+    if (editingDayIndex === null) return;
+    if (!editingDayByDay.day.trim() || !editingDayByDay.items.trim()) return;
+
+    const items = editingDayByDay.items
+      .split("\n")
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    setDayByDay(
+      dayByDay.map((day, index) =>
+        index === editingDayIndex
+          ? { day: editingDayByDay.day.trim(), items }
+          : day,
+      ),
+    );
+    cancelEditDayByDay();
   };
 
   const addInclude = () => {
@@ -802,24 +842,80 @@ export default function RetreatForm({
                 key={index}
                 className="bg-slate-50 p-4 rounded-lg border border-slate-100"
               >
-                <div className="flex justify-between items-start mb-2">
-                  <p className="font-semibold text-slate-800">{day.day}</p>
-                  <button
-                    type="button"
-                    onClick={() => removeDayByDay(index)}
-                    className="text-rose-600 hover:text-rose-700 text-sm font-medium transition-colors"
-                  >
-                    Eliminar
-                  </button>
-                </div>
-                <ul className="text-sm text-slate-600 space-y-1">
-                  {day.items.map((item, i) => (
-                    <li key={i} className="flex gap-2">
-                      <span className="text-emerald-600">•</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
+                {editingDayIndex === index ? (
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      value={editingDayByDay.day}
+                      onChange={(e) =>
+                        setEditingDayByDay({
+                          ...editingDayByDay,
+                          day: e.target.value,
+                        })
+                      }
+                      placeholder="Día (Ej: Día 1)"
+                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+                    />
+                    <textarea
+                      value={editingDayByDay.items}
+                      onChange={(e) =>
+                        setEditingDayByDay({
+                          ...editingDayByDay,
+                          items: e.target.value,
+                        })
+                      }
+                      rows={4}
+                      placeholder="Actividades (una por línea)"
+                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={saveEditDayByDay}
+                        className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium"
+                      >
+                        Guardar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={cancelEditDayByDay}
+                        className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 transition-colors text-sm font-medium"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex justify-between items-start mb-2">
+                      <p className="font-semibold text-slate-800">{day.day}</p>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => startEditDayByDay(index)}
+                          className="text-sky-600 hover:text-sky-700 text-sm font-medium transition-colors"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeDayByDay(index)}
+                          className="text-rose-600 hover:text-rose-700 text-sm font-medium transition-colors"
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </div>
+                    <ul className="text-sm text-slate-600 space-y-1">
+                      {day.items.map((item, i) => (
+                        <li key={i} className="flex gap-2">
+                          <span className="text-emerald-600">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
               </div>
             ))}
           </div>
