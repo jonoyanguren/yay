@@ -46,7 +46,7 @@ export default function AccommodationSection({
         </Title>
       )}
       {description && (
-        <p className="text-2xl font-extralight text-white/90 mb-12">
+        <p className="text-xl font-extralight text-white/90 mb-12">
           {description}
         </p>
       )}

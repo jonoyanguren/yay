@@ -19,7 +19,7 @@ export default function ArrivalOptionsSection({
   return (
     <section className="space-y-4">
       <Title className="text-5xl text-white">Llegadas y transfers</Title>
-      <p className="text-2xl text-white leading-relaxed mb-12">{intro}</p>
+      <p className="text-xl text-white leading-relaxed mb-12">{intro}</p>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {options.map((item, index) => (
           <div
