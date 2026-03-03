@@ -23,8 +23,10 @@ export default function ImageGallery({
 
   const handleDelete = async (index: number, imageUrl: string) => {
     if (deletingIndex !== null) return; // Prevent multiple simultaneous deletions
-    
-    const confirmed = confirm("¿Estás seguro de que quieres eliminar esta imagen? Se borrará permanentemente de Cloudinary.");
+
+    const confirmed = confirm(
+      "¿Estás seguro de que quieres eliminar esta imagen? Se borrará permanentemente de Cloudinary.",
+    );
     if (!confirmed) return;
 
     setDeletingIndex(index);
@@ -53,13 +55,23 @@ export default function ImageGallery({
       if (response.ok) {
         // Remove from local state
         onRemove(index);
-        
+
         if (result.warning) {
           console.warn(result.warning);
         }
-      } else {
-        alert(`Error al eliminar: ${result.error}`);
+        return;
       }
+
+      // If Cloudinary deletion fails (e.g. external URL), still remove from form state.
+      // This allows saving the entity without that image URL in DB.
+      console.warn(
+        "Cloudinary delete failed, removing image from form state:",
+        result,
+      );
+      onRemove(index);
+      console.info(
+        "No se pudo borrar en Cloudinary, pero la imagen se quitó del formulario. Guarda para aplicar el cambio en la BD.",
+      );
     } catch (error: any) {
       console.error("Error deleting image:", error);
       alert("Error al eliminar la imagen. Por favor, intenta de nuevo.");
@@ -95,12 +107,12 @@ export default function ImageGallery({
                       console.error("Image error:", imageUrl);
                     }}
                   />
-                  
+
                   {/* Image Number Badge */}
                   <div className="absolute top-2 left-2 bg-slate-900 bg-opacity-70 text-white text-xs px-2 py-1 rounded z-20">
                     {index + 1}
                   </div>
-                  
+
                   {/* Hover Overlay with Delete Button - ONLY visible on hover */}
                   <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-40 transition-opacity duration-200 pointer-events-none z-10"></div>
                   <div className="absolute inset-0 flex items-center justify-center z-20">
@@ -144,11 +156,9 @@ export default function ImageGallery({
             <span className="ml-2 text-amber-600">(límite alcanzado)</span>
           )}
         </div>
-        {canAddMore && (
-          <ImageUploadWidget onUpload={onAdd} folder={folder} />
-        )}
+        {canAddMore && <ImageUploadWidget onUpload={onAdd} folder={folder} />}
       </div>
-      
+
       {/* Debug info */}
       {images.length > 0 && (
         <div className="text-xs text-slate-400 p-2 bg-slate-50 rounded border border-slate-200">
