@@ -102,6 +102,7 @@ function getPendingCents(booking: Booking): number {
 export default function BookingsPage() {
   const router = useRouter();
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [deletingBookingId, setDeletingBookingId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -255,6 +256,36 @@ export default function BookingsPage() {
       }
     } catch (err) {
       alert("Error enviando el email");
+    }
+  };
+
+  const handleDeleteBooking = async (bookingId: string, customerEmail: string) => {
+    if (!confirm(`¿Borrar la reserva de ${customerEmail}? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    const password = localStorage.getItem("adminPassword");
+    if (!password) return;
+
+    setDeletingBookingId(bookingId);
+    try {
+      const res = await fetch(`/api/admin/bookings/${bookingId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${password}`,
+        },
+      });
+
+      if (res.ok) {
+        setBookings((prev) => prev.filter((b) => b.id !== bookingId));
+      } else {
+        const data = await res.json();
+        alert(data.error || "Error borrando la reserva");
+      }
+    } catch (err) {
+      alert("Error borrando la reserva");
+    } finally {
+      setDeletingBookingId(null);
     }
   };
 
@@ -571,6 +602,18 @@ export default function BookingsPage() {
                             title="Enviar email de confirmación"
                           >
                             📧 Enviar Email
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleDeleteBooking(booking.id, booking.customerEmail)
+                            }
+                            disabled={deletingBookingId === booking.id}
+                            className="px-3 py-1.5 text-xs font-medium text-rose-700 bg-rose-50 hover:bg-rose-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors"
+                            title="Borrar reserva"
+                          >
+                            {deletingBookingId === booking.id
+                              ? "Borrando..."
+                              : "🗑️ Borrar"}
                           </button>
                         </div>
                       </td>
