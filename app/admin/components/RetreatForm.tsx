@@ -118,6 +118,14 @@ export default function RetreatForm({
   const [editingDayByDay, setEditingDayByDay] = useState({ day: "", items: "" });
   const [newInclude, setNewInclude] = useState("");
   const [newNotInclude, setNewNotInclude] = useState("");
+  const [editingIncludeIndex, setEditingIncludeIndex] = useState<number | null>(
+    null,
+  );
+  const [editingIncludeValue, setEditingIncludeValue] = useState("");
+  const [editingNotIncludeIndex, setEditingNotIncludeIndex] = useState<
+    number | null
+  >(null);
+  const [editingNotIncludeValue, setEditingNotIncludeValue] = useState("");
   const [newRoomType, setNewRoomType] = useState({
     name: "",
     description: "",
@@ -205,7 +213,33 @@ export default function RetreatForm({
   };
 
   const removeInclude = (index: number) => {
+    if (editingIncludeIndex === index) {
+      setEditingIncludeIndex(null);
+      setEditingIncludeValue("");
+    }
     setIncludes(includes.filter((_, i) => i !== index));
+  };
+
+  const startEditInclude = (index: number) => {
+    setEditingIncludeIndex(index);
+    setEditingIncludeValue(includes[index] || "");
+  };
+
+  const cancelEditInclude = () => {
+    setEditingIncludeIndex(null);
+    setEditingIncludeValue("");
+  };
+
+  const saveEditInclude = () => {
+    if (editingIncludeIndex === null) return;
+    const value = editingIncludeValue.trim();
+    if (!value) return;
+    setIncludes(
+      includes.map((item, index) =>
+        index === editingIncludeIndex ? value : item,
+      ),
+    );
+    cancelEditInclude();
   };
 
   const addNotInclude = () => {
@@ -216,7 +250,33 @@ export default function RetreatForm({
   };
 
   const removeNotInclude = (index: number) => {
+    if (editingNotIncludeIndex === index) {
+      setEditingNotIncludeIndex(null);
+      setEditingNotIncludeValue("");
+    }
     setNotIncludes(notIncludes.filter((_, i) => i !== index));
+  };
+
+  const startEditNotInclude = (index: number) => {
+    setEditingNotIncludeIndex(index);
+    setEditingNotIncludeValue(notIncludes[index] || "");
+  };
+
+  const cancelEditNotInclude = () => {
+    setEditingNotIncludeIndex(null);
+    setEditingNotIncludeValue("");
+  };
+
+  const saveEditNotInclude = () => {
+    if (editingNotIncludeIndex === null) return;
+    const value = editingNotIncludeValue.trim();
+    if (!value) return;
+    setNotIncludes(
+      notIncludes.map((item, index) =>
+        index === editingNotIncludeIndex ? value : item,
+      ),
+    );
+    cancelEditNotInclude();
   };
 
   const addRoomType = () => {
@@ -959,19 +1019,65 @@ export default function RetreatForm({
             {includes.map((item, index) => (
               <li
                 key={index}
-                className="flex items-center justify-between bg-slate-50 px-4 py-3 rounded-lg border border-slate-100"
+                className="bg-slate-50 px-4 py-3 rounded-lg border border-slate-100"
               >
-                <span className="flex gap-2 text-slate-700">
-                  <span className="text-emerald-600 font-bold">✓</span>
-                  {item}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => removeInclude(index)}
-                  className="text-rose-600 hover:text-rose-700 text-sm font-medium transition-colors"
-                >
-                  Eliminar
-                </button>
+                {editingIncludeIndex === index ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={editingIncludeValue}
+                      onChange={(e) => setEditingIncludeValue(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          saveEditInclude();
+                        }
+                        if (e.key === "Escape") {
+                          e.preventDefault();
+                          cancelEditInclude();
+                        }
+                      }}
+                      className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    />
+                    <button
+                      type="button"
+                      onClick={saveEditInclude}
+                      className="text-emerald-600 hover:text-emerald-700 text-sm font-medium transition-colors"
+                    >
+                      Guardar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelEditInclude}
+                      className="text-slate-600 hover:text-slate-700 text-sm font-medium transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <span className="flex gap-2 text-slate-700">
+                      <span className="text-emerald-600 font-bold">✓</span>
+                      {item}
+                    </span>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => startEditInclude(index)}
+                        className="text-sky-600 hover:text-sky-700 text-sm font-medium transition-colors"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeInclude(index)}
+                        className="text-rose-600 hover:text-rose-700 text-sm font-medium transition-colors"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
@@ -1005,19 +1111,65 @@ export default function RetreatForm({
             {notIncludes.map((item, index) => (
               <li
                 key={index}
-                className="flex items-center justify-between bg-slate-50 px-4 py-3 rounded-lg border border-slate-100"
+                className="bg-slate-50 px-4 py-3 rounded-lg border border-slate-100"
               >
-                <span className="flex gap-2 text-slate-700">
-                  <span className="text-slate-400 font-bold">–</span>
-                  {item}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => removeNotInclude(index)}
-                  className="text-rose-600 hover:text-rose-700 text-sm font-medium transition-colors"
-                >
-                  Eliminar
-                </button>
+                {editingNotIncludeIndex === index ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={editingNotIncludeValue}
+                      onChange={(e) => setEditingNotIncludeValue(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          saveEditNotInclude();
+                        }
+                        if (e.key === "Escape") {
+                          e.preventDefault();
+                          cancelEditNotInclude();
+                        }
+                      }}
+                      className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    />
+                    <button
+                      type="button"
+                      onClick={saveEditNotInclude}
+                      className="text-emerald-600 hover:text-emerald-700 text-sm font-medium transition-colors"
+                    >
+                      Guardar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelEditNotInclude}
+                      className="text-slate-600 hover:text-slate-700 text-sm font-medium transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <span className="flex gap-2 text-slate-700">
+                      <span className="text-slate-400 font-bold">–</span>
+                      {item}
+                    </span>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => startEditNotInclude(index)}
+                        className="text-sky-600 hover:text-sky-700 text-sm font-medium transition-colors"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeNotInclude(index)}
+                        className="text-rose-600 hover:text-rose-700 text-sm font-medium transition-colors"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
