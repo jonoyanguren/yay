@@ -50,6 +50,7 @@ export default function RetreatForm({
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const [formData, setFormData] = useState({
     slug: retreat?.slug || "",
@@ -289,6 +290,7 @@ export default function RetreatForm({
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccessMessage("");
     setIsLoading(true);
 
     const password = localStorage.getItem("adminPassword");
@@ -353,7 +355,11 @@ export default function RetreatForm({
       });
 
       if (res.ok) {
-        router.push("/admin");
+        setSuccessMessage(
+          isEdit
+            ? "Retiro actualizado correctamente."
+            : "Retiro creado correctamente.",
+        );
       } else {
         const errorData = await res.json();
         setError(errorData.error || "Error saving retreat");
@@ -379,6 +385,13 @@ export default function RetreatForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {successMessage && (
+        <div className="fixed top-6 right-6 z-50">
+          <div className="bg-emerald-600 text-white px-4 py-3 rounded-lg shadow-lg border border-emerald-500">
+            {successMessage}
+          </div>
+        </div>
+      )}
       {error && (
         <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg">
           {error}
@@ -558,7 +571,6 @@ export default function RetreatForm({
               setRetreatImages(retreatImages.filter((_, i) => i !== index))
             }
             onAdd={(url) => setRetreatImages([...retreatImages, url])}
-            maxImages={5}
             folder="yay/retreats"
           />
         </div>
@@ -712,7 +724,6 @@ export default function RetreatForm({
               onAdd={(url) =>
                 setAccommodationImages([...accommodationImages, url])
               }
-              maxImages={5}
               folder="yay/accommodation"
             />
           </div>
@@ -732,7 +743,6 @@ export default function RetreatForm({
             images={activitiesImage ? [activitiesImage] : []}
             onRemove={() => setActivitiesImage("")}
             onAdd={(url) => setActivitiesImage(url)}
-            maxImages={1}
             folder="yay/activities"
           />
           <p className="text-xs text-slate-500 mt-1.5">
@@ -1082,7 +1092,6 @@ export default function RetreatForm({
                   images: [...newRoomType.images, url],
                 })
               }
-              maxImages={3}
               folder="yay/rooms"
             />
           </div>
@@ -1251,7 +1260,6 @@ export default function RetreatForm({
                   images: [...newExtraActivity.images, url],
                 })
               }
-              maxImages={3}
               folder="yay/extras"
             />
           </div>

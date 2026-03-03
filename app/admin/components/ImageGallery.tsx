@@ -7,7 +7,6 @@ interface ImageGalleryProps {
   images: string[];
   onRemove: (index: number) => void;
   onAdd: (url: string) => void;
-  maxImages?: number;
   folder?: string;
 }
 
@@ -15,11 +14,10 @@ export default function ImageGallery({
   images,
   onRemove,
   onAdd,
-  maxImages = 5,
   folder = "yay",
 }: ImageGalleryProps) {
   const [deletingIndex, setDeletingIndex] = useState<number | null>(null);
-  const canAddMore = images.length < maxImages;
+  const canAddMore = true;
 
   const handleDelete = async (index: number, imageUrl: string) => {
     if (deletingIndex !== null) return; // Prevent multiple simultaneous deletions
@@ -142,20 +140,13 @@ export default function ImageGallery({
         <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center bg-slate-50">
           <div className="text-slate-400 text-4xl mb-2">📷</div>
           <p className="text-slate-600 text-sm mb-1">No hay imágenes</p>
-          <p className="text-slate-500 text-xs">
-            Sube hasta {maxImages} imágenes
-          </p>
+          <p className="text-slate-500 text-xs">Sube imágenes</p>
         </div>
       )}
 
       {/* Upload Button */}
       <div className="flex items-center justify-between bg-slate-50 px-4 py-3 rounded-lg border border-slate-200">
-        <div className="text-sm text-slate-600">
-          {images.length} de {maxImages} imágenes
-          {!canAddMore && (
-            <span className="ml-2 text-amber-600">(límite alcanzado)</span>
-          )}
-        </div>
+        <div className="text-sm text-slate-600">{images.length} imágenes</div>
         {canAddMore && <ImageUploadWidget onUpload={onAdd} folder={folder} />}
       </div>
 
