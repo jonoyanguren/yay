@@ -149,7 +149,29 @@ export default function RetreatForm({
     priceCents: "",
     maxQuantity: "",
   });
+  const [editingRoomTypeIndex, setEditingRoomTypeIndex] = useState<number | null>(
+    null,
+  );
+  const [editingRoomType, setEditingRoomType] = useState({
+    name: "",
+    description: "",
+    images: [] as string[],
+    priceCents: "",
+    maxQuantity: "",
+  });
   const [newExtraActivity, setNewExtraActivity] = useState({
+    name: "",
+    description: "",
+    images: [] as string[],
+    priceCents: "",
+    allowMultiple: true,
+    maxQuantity: "",
+    link: "",
+  });
+  const [editingExtraActivityIndex, setEditingExtraActivityIndex] = useState<
+    number | null
+  >(null);
+  const [editingExtraActivity, setEditingExtraActivity] = useState({
     name: "",
     description: "",
     images: [] as string[],
@@ -382,7 +404,74 @@ export default function RetreatForm({
   };
 
   const removeRoomType = (index: number) => {
+    if (editingRoomTypeIndex === index) {
+      setEditingRoomTypeIndex(null);
+      setEditingRoomType({
+        name: "",
+        description: "",
+        images: [],
+        priceCents: "",
+        maxQuantity: "",
+      });
+    }
     setRoomTypes(roomTypes.filter((_, i) => i !== index));
+  };
+
+  const startEditRoomType = (index: number) => {
+    const room = roomTypes[index];
+    if (!room) return;
+    setEditingRoomTypeIndex(index);
+    setEditingRoomType({
+      name: room.name,
+      description: room.description || "",
+      images: room.images || [],
+      priceCents: (room.priceEuros ?? room.priceCents / 100).toString(),
+      maxQuantity: room.maxQuantity.toString(),
+    });
+  };
+
+  const cancelEditRoomType = () => {
+    setEditingRoomTypeIndex(null);
+    setEditingRoomType({
+      name: "",
+      description: "",
+      images: [],
+      priceCents: "",
+      maxQuantity: "",
+    });
+  };
+
+  const saveEditRoomType = () => {
+    if (editingRoomTypeIndex === null) return;
+    if (
+      !editingRoomType.name.trim() ||
+      !editingRoomType.priceCents ||
+      !editingRoomType.maxQuantity
+    ) {
+      return;
+    }
+
+    const priceEuros = parseFloat(editingRoomType.priceCents);
+    const maxQuantity = parseInt(editingRoomType.maxQuantity);
+    if (Number.isNaN(priceEuros) || Number.isNaN(maxQuantity)) return;
+
+    const priceCents = Math.round(priceEuros * 100);
+    setRoomTypes((prev) =>
+      prev.map((room, index) =>
+        index === editingRoomTypeIndex
+          ? {
+              ...room,
+              name: editingRoomType.name.trim(),
+              description: editingRoomType.description.trim() || "",
+              images: editingRoomType.images,
+              priceCents,
+              priceEuros,
+              maxQuantity,
+            }
+          : room,
+      ),
+    );
+    cancelEditRoomType();
   };
 
   const addExtraActivity = () => {
@@ -417,7 +506,90 @@ export default function RetreatForm({
   };
 
   const removeExtraActivity = (index: number) => {
+    if (editingExtraActivityIndex === index) {
+      setEditingExtraActivityIndex(null);
+      setEditingExtraActivity({
+        name: "",
+        description: "",
+        images: [],
+        priceCents: "",
+        allowMultiple: true,
+        maxQuantity: "",
+        link: "",
+      });
+    }
     setExtraActivities(extraActivities.filter((_, i) => i !== index));
+  };
+
+  const startEditExtraActivity = (index: number) => {
+    const activity = extraActivities[index];
+    if (!activity) return;
+    setEditingExtraActivityIndex(index);
+    setEditingExtraActivity({
+      name: activity.name,
+      description: activity.description || "",
+      images: activity.images || [],
+      priceCents: (activity.priceEuros ?? activity.priceCents / 100).toString(),
+      allowMultiple: activity.allowMultiple,
+      maxQuantity:
+        activity.maxQuantity !== null && activity.maxQuantity !== undefined
+          ? activity.maxQuantity.toString()
+          : "",
+      link: activity.link || "",
+    });
+  };
+
+  const cancelEditExtraActivity = () => {
+    setEditingExtraActivityIndex(null);
+    setEditingExtraActivity({
+      name: "",
+      description: "",
+      images: [],
+      priceCents: "",
+      allowMultiple: true,
+      maxQuantity: "",
+      link: "",
+    });
+  };
+
+  const saveEditExtraActivity = () => {
+    if (editingExtraActivityIndex === null) return;
+    if (!editingExtraActivity.name.trim() || !editingExtraActivity.priceCents) {
+      return;
+    }
+
+    const priceEuros = parseFloat(editingExtraActivity.priceCents);
+    if (Number.isNaN(priceEuros)) return;
+    const priceCents = Math.round(priceEuros * 100);
+
+    const parsedMaxQuantity = editingExtraActivity.maxQuantity
+      ? parseInt(editingExtraActivity.maxQuantity)
+      : null;
+    if (
+      editingExtraActivity.maxQuantity &&
+      (parsedMaxQuantity === null || Number.isNaN(parsedMaxQuantity))
+    ) {
+      return;
+    }
+
+    setExtraActivities((prev) =>
+      prev.map((activity, index) =>
+        index === editingExtraActivityIndex
+          ? {
+              ...activity,
+              name: editingExtraActivity.name.trim(),
+              description: editingExtraActivity.description.trim() || "",
+              images: editingExtraActivity.images,
+              priceCents,
+              priceEuros,
+              allowMultiple: editingExtraActivity.allowMultiple,
+              maxQuantity: parsedMaxQuantity,
+              link: editingExtraActivity.link.trim() || undefined,
+            }
+          : activity,
+      ),
+    );
+    cancelEditExtraActivity();
   };
 
   const addFullDescriptionHighlight = () => {
@@ -1426,48 +1598,149 @@ export default function RetreatForm({
                 key={index}
                 className="bg-slate-50 p-4 rounded-lg border border-slate-100"
               >
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <p className="font-semibold text-slate-800">{room.name}</p>
-                    {room.description && (
-                      <p className="text-sm text-slate-600 mt-1">
-                        {room.description}
-                      </p>
-                    )}
-                    {room.images && room.images.length > 0 && (
-                      <div className="flex gap-1 mt-2">
-                        {room.images.map((img, imgIdx) => (
-                          <div
-                            key={imgIdx}
-                            className="w-12 h-12 relative rounded border border-slate-200"
-                          >
-                            <Image
-                              src={img}
-                              alt=""
-                              fill
-                              className="object-cover rounded"
-                              sizes="48px"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    <div className="flex gap-4 mt-2 text-sm text-slate-600">
-                      <span className="font-medium">
-                        💰{" "}
-                        {(room.priceEuros ?? room.priceCents / 100).toFixed(2)}€
-                      </span>
-                      <span>📦 Max: {room.maxQuantity}</span>
+                {editingRoomTypeIndex === index ? (
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      value={editingRoomType.name}
+                      onChange={(e) =>
+                        setEditingRoomType({
+                          ...editingRoomType,
+                          name: e.target.value,
+                        })
+                      }
+                      placeholder="Nombre"
+                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+                    />
+                    <textarea
+                      value={editingRoomType.description}
+                      onChange={(e) =>
+                        setEditingRoomType({
+                          ...editingRoomType,
+                          description: e.target.value,
+                        })
+                      }
+                      rows={2}
+                      placeholder="Descripción"
+                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={editingRoomType.priceCents}
+                        onChange={(e) =>
+                          setEditingRoomType({
+                            ...editingRoomType,
+                            priceCents: e.target.value,
+                          })
+                        }
+                        placeholder="Precio en €"
+                        className="px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+                      />
+                      <input
+                        type="number"
+                        min="1"
+                        value={editingRoomType.maxQuantity}
+                        onChange={(e) =>
+                          setEditingRoomType({
+                            ...editingRoomType,
+                            maxQuantity: e.target.value,
+                          })
+                        }
+                        placeholder="Cantidad máxima"
+                        className="px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+                      />
+                    </div>
+                    <ImageGallery
+                      images={editingRoomType.images}
+                      onRemove={(imgIndex) =>
+                        setEditingRoomType({
+                          ...editingRoomType,
+                          images: editingRoomType.images.filter(
+                            (_, i) => i !== imgIndex,
+                          ),
+                        })
+                      }
+                      onAdd={(url) =>
+                        setEditingRoomType({
+                          ...editingRoomType,
+                          images: [...editingRoomType.images, url],
+                        })
+                      }
+                      folder="yay/rooms"
+                    />
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={saveEditRoomType}
+                        className="text-emerald-600 hover:text-emerald-700 text-sm font-medium transition-colors"
+                      >
+                        Guardar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={cancelEditRoomType}
+                        className="text-slate-600 hover:text-slate-700 text-sm font-medium transition-colors"
+                      >
+                        Cancelar
+                      </button>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => removeRoomType(index)}
-                    className="text-rose-600 hover:text-rose-700 text-sm font-medium transition-colors"
-                  >
-                    Eliminar
-                  </button>
-                </div>
+                ) : (
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <p className="font-semibold text-slate-800">{room.name}</p>
+                      {room.description && (
+                        <p className="text-sm text-slate-600 mt-1">
+                          {room.description}
+                        </p>
+                      )}
+                      {room.images && room.images.length > 0 && (
+                        <div className="flex gap-1 mt-2">
+                          {room.images.map((img, imgIdx) => (
+                            <div
+                              key={imgIdx}
+                              className="w-12 h-12 relative rounded border border-slate-200"
+                            >
+                              <Image
+                                src={img}
+                                alt=""
+                                fill
+                                className="object-cover rounded"
+                                sizes="48px"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex gap-4 mt-2 text-sm text-slate-600">
+                        <span className="font-medium">
+                          💰{" "}
+                          {(room.priceEuros ?? room.priceCents / 100).toFixed(2)}€
+                        </span>
+                        <span>📦 Max: {room.maxQuantity}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => startEditRoomType(index)}
+                        className="text-sky-600 hover:text-sky-700 text-sm font-medium transition-colors"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeRoomType(index)}
+                        className="text-rose-600 hover:text-rose-700 text-sm font-medium transition-colors"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -1594,74 +1867,203 @@ export default function RetreatForm({
                 key={index}
                 className="bg-slate-50 p-4 rounded-lg border border-slate-100"
               >
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <p className="font-semibold text-slate-800">
-                      {activity.name}
-                    </p>
-                    {activity.description && (
-                      <p className="text-sm text-slate-600 mt-1">
-                        {activity.description}
-                      </p>
-                    )}
-                    {activity.link && (
-                      <a
-                        href={activity.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-emerald-600 hover:text-emerald-700 hover:underline mt-1 inline-block"
-                      >
-                        🔗 Ver más información
-                      </a>
-                    )}
-                    {activity.images && activity.images.length > 0 && (
-                      <div className="flex gap-1 mt-2">
-                        {activity.images.map((img, imgIdx) => (
-                          <div
-                            key={imgIdx}
-                            className="w-12 h-12 relative rounded border border-slate-200"
-                          >
-                            <Image
-                              src={img}
-                              alt=""
-                              fill
-                              className="object-cover rounded"
-                              sizes="48px"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    <div className="flex gap-4 mt-2 text-sm text-slate-600">
-                      <span className="font-medium">
-                        💰{" "}
-                        {(
-                          activity.priceEuros ?? activity.priceCents / 100
-                        ).toFixed(2)}
-                        €
-                      </span>
-                      {activity.maxQuantity && (
-                        <span>📦 Max: {activity.maxQuantity}</span>
-                      )}
-                      <span
-                        className={
-                          activity.allowMultiple
-                            ? "text-emerald-600"
-                            : "text-slate-400"
+                {editingExtraActivityIndex === index ? (
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      value={editingExtraActivity.name}
+                      onChange={(e) =>
+                        setEditingExtraActivity({
+                          ...editingExtraActivity,
+                          name: e.target.value,
+                        })
+                      }
+                      placeholder="Nombre"
+                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+                    />
+                    <textarea
+                      value={editingExtraActivity.description}
+                      onChange={(e) =>
+                        setEditingExtraActivity({
+                          ...editingExtraActivity,
+                          description: e.target.value,
+                        })
+                      }
+                      rows={2}
+                      placeholder="Descripción"
+                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+                    />
+                    <input
+                      type="url"
+                      value={editingExtraActivity.link}
+                      onChange={(e) =>
+                        setEditingExtraActivity({
+                          ...editingExtraActivity,
+                          link: e.target.value,
+                        })
+                      }
+                      placeholder="Link (opcional)"
+                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={editingExtraActivity.priceCents}
+                        onChange={(e) =>
+                          setEditingExtraActivity({
+                            ...editingExtraActivity,
+                            priceCents: e.target.value,
+                          })
                         }
-                      >
-                        {activity.allowMultiple ? "✓ Múltiples" : "✗ Único"}
+                        placeholder="Precio en €"
+                        className="px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+                      />
+                      <input
+                        type="number"
+                        min="1"
+                        value={editingExtraActivity.maxQuantity}
+                        onChange={(e) =>
+                          setEditingExtraActivity({
+                            ...editingExtraActivity,
+                            maxQuantity: e.target.value,
+                          })
+                        }
+                        placeholder="Cantidad máxima (opcional)"
+                        className="px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+                      />
+                    </div>
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={editingExtraActivity.allowMultiple}
+                        onChange={(e) =>
+                          setEditingExtraActivity({
+                            ...editingExtraActivity,
+                            allowMultiple: e.target.checked,
+                          })
+                        }
+                        className="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500"
+                      />
+                      <span className="ml-2 text-sm font-medium text-slate-700">
+                        Permitir múltiples unidades
                       </span>
+                    </label>
+                    <ImageGallery
+                      images={editingExtraActivity.images}
+                      onRemove={(imgIndex) =>
+                        setEditingExtraActivity({
+                          ...editingExtraActivity,
+                          images: editingExtraActivity.images.filter(
+                            (_, i) => i !== imgIndex,
+                          ),
+                        })
+                      }
+                      onAdd={(url) =>
+                        setEditingExtraActivity({
+                          ...editingExtraActivity,
+                          images: [...editingExtraActivity.images, url],
+                        })
+                      }
+                      folder="yay/extras"
+                    />
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={saveEditExtraActivity}
+                        className="text-emerald-600 hover:text-emerald-700 text-sm font-medium transition-colors"
+                      >
+                        Guardar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={cancelEditExtraActivity}
+                        className="text-slate-600 hover:text-slate-700 text-sm font-medium transition-colors"
+                      >
+                        Cancelar
+                      </button>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => removeExtraActivity(index)}
-                    className="text-rose-600 hover:text-rose-700 text-sm font-medium transition-colors"
-                  >
-                    Eliminar
-                  </button>
-                </div>
+                ) : (
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <p className="font-semibold text-slate-800">
+                        {activity.name}
+                      </p>
+                      {activity.description && (
+                        <p className="text-sm text-slate-600 mt-1">
+                          {activity.description}
+                        </p>
+                      )}
+                      {activity.link && (
+                        <a
+                          href={activity.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-emerald-600 hover:text-emerald-700 hover:underline mt-1 inline-block"
+                        >
+                          🔗 Ver más información
+                        </a>
+                      )}
+                      {activity.images && activity.images.length > 0 && (
+                        <div className="flex gap-1 mt-2">
+                          {activity.images.map((img, imgIdx) => (
+                            <div
+                              key={imgIdx}
+                              className="w-12 h-12 relative rounded border border-slate-200"
+                            >
+                              <Image
+                                src={img}
+                                alt=""
+                                fill
+                                className="object-cover rounded"
+                                sizes="48px"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex gap-4 mt-2 text-sm text-slate-600">
+                        <span className="font-medium">
+                          💰{" "}
+                          {(
+                            activity.priceEuros ?? activity.priceCents / 100
+                          ).toFixed(2)}
+                          €
+                        </span>
+                        {activity.maxQuantity && (
+                          <span>📦 Max: {activity.maxQuantity}</span>
+                        )}
+                        <span
+                          className={
+                            activity.allowMultiple
+                              ? "text-emerald-600"
+                              : "text-slate-400"
+                          }
+                        >
+                          {activity.allowMultiple ? "✓ Múltiples" : "✗ Único"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => startEditExtraActivity(index)}
+                        className="text-sky-600 hover:text-sky-700 text-sm font-medium transition-colors"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeExtraActivity(index)}
+                        className="text-rose-600 hover:text-rose-700 text-sm font-medium transition-colors"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
