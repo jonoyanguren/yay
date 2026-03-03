@@ -165,6 +165,12 @@ export default function AdminPage() {
               📋 Ver Reservas
             </Link>
             <Link
+              href="/admin/waitlist"
+              className="bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+            >
+              📨 Waitlist
+            </Link>
+            <Link
               href="/admin/retreats/new"
               className="bg-emerald-600 text-white px-5 py-2.5 rounded-lg hover:bg-emerald-700 transition-colors font-medium text-sm"
             >

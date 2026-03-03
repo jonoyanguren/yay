@@ -69,30 +69,18 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Check availability
-  const availabilityRows = await prisma.$queryRaw<{ max_quantity: number; sold: string }[]>`
-    SELECT r.max_quantity,
-           COALESCE(SUM(brs.quantity) FILTER (WHERE b.status IN ('deposit', 'paid')), 0)::text AS sold
-    FROM retreat_room_types r
-    LEFT JOIN booking_room_slots brs ON brs.retreat_room_type_id = r.id
-    LEFT JOIN bookings b ON b.id = brs.booking_id
-    WHERE r.id = ${roomTypeId}
-    GROUP BY r.id, r.max_quantity
-    LIMIT 1
-  `;
-  if (!availabilityRows[0]) {
+  const maxPeople = retreat.maxPeople ?? 12;
+  const bookingsCount = await prisma.booking.count({
+    where: {
+      retreatId,
+      status: { in: ["deposit", "paid"] },
+    },
+  });
+
+  if (bookingsCount >= maxPeople) {
     return NextResponse.json(
-      { error: "Tipo de habitación no encontrado" },
-      { status: 404 }
-    );
-  }
-  const sold = parseInt(availabilityRows[0].sold, 10);
-  const available = Math.max(0, availabilityRows[0].max_quantity - sold);
-  
-  if (roomQuantity > available) {
-    return NextResponse.json(
-      { error: "No hay suficientes plazas disponibles para esa habitación" },
-      { status: 400 }
+      { error: "No quedan plazas para este retiro" },
+      { status: 400 },
     );
   }
 

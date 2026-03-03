@@ -9,21 +9,26 @@ import {
   useTransform,
 } from "framer-motion";
 import Button from "@/components/ui/Button";
+import RetreatSoldOutEmailForm from "@/components/retreats/RetreatSoldOutEmailForm";
 
 interface RetreatStickyInfoBarProps {
+  retreatSlug: string;
   date: string;
   location: string;
   maxPeople: number;
   spotsLeft: number;
+  isSoldOut?: boolean;
   bookingHref: string;
   disableSticky?: boolean;
 }
 
 export default function RetreatStickyInfoBar({
+  retreatSlug,
   date,
   location,
   maxPeople,
   spotsLeft,
+  isSoldOut = false,
   bookingHref,
   disableSticky = false,
 }: RetreatStickyInfoBarProps) {
@@ -150,14 +155,27 @@ export default function RetreatStickyInfoBar({
               <div className="rounded-lg border border-gray/15 bg-white px-3 py-2">
                 <p className="text-black/55 text-xs uppercase tracking-wide">Plazas</p>
                 <p className="font-medium">
-                  Quedan {spotsLeft} de {maxPeople} plazas
+                  {isSoldOut
+                    ? "No quedan plazas"
+                    : `Quedan ${spotsLeft} de ${maxPeople} plazas`}
                 </p>
               </div>
             </div>
 
-            <Button className="w-full md:w-auto" size="lg" href={bookingHref}>
-              Reservar plaza
-            </Button>
+            {isSoldOut ? (
+              <div className="w-full md:w-auto">
+                <p className="text-xs text-black/60 mb-2">
+                  Deja tu email y te avisamos si se libera una plaza.
+                </p>
+                <RetreatSoldOutEmailForm
+                  retreatSlug={retreatSlug}
+                />
+              </div>
+            ) : (
+              <Button className="w-full md:w-auto" size="lg" href={bookingHref}>
+                Reservar plaza
+              </Button>
+            )}
           </div>
         </motion.div>
       </motion.div>

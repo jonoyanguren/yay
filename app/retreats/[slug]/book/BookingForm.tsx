@@ -63,10 +63,6 @@ export default function BookingForm({
       setError("Elige una habitación e indica tu email.");
       return;
     }
-    if (selectedRoom && selectedRoom.available < 1) {
-      setError("No hay plazas disponibles para esa opción.");
-      return;
-    }
     setLoading(true);
     try {
       const res = await fetch("/api/checkout", {
@@ -158,9 +154,6 @@ export default function BookingForm({
                 )}
                 <span className="text-xl mt-2 font-semibold text-green">
                   {formatPrice(room.price_cents)}
-                </span>
-                <span className="text-sm text-black/60 mt-1">
-                  {room.available} plazas disponibles
                 </span>
               </div>
             </label>

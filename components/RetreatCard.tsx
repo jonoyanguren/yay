@@ -33,7 +33,9 @@ export default function RetreatCard({ retreat }: RetreatCardProps) {
         )}
         {isPublished && typeof spotsLeft === "number" && (
           <span className="absolute top-3 right-3 px-3 py-1.5 rounded-full text-sm font-bold bg-emerald-500 text-white shadow-md">
-            {spotsLeft} {spotsLeft === 1 ? "plaza" : "plazas"} disponibles
+            {spotsLeft <= 0
+              ? "No quedan plazas"
+              : `${spotsLeft} ${spotsLeft === 1 ? "plaza" : "plazas"} disponibles`}
           </span>
         )}
       </div>

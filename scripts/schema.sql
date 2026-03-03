@@ -69,6 +69,18 @@ CREATE TABLE IF NOT EXISTS booking_extras (
   quantity INTEGER NOT NULL CHECK (quantity >= 0)
 );
 
+-- Waitlist entries for sold-out retreats
+CREATE TABLE IF NOT EXISTS waitlist_entries (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  retreat_id UUID NOT NULL REFERENCES retreats(id) ON DELETE CASCADE,
+  email TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  notes TEXT DEFAULT '',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (retreat_id, email)
+);
+
 CREATE INDEX IF NOT EXISTS idx_retreat_room_types_retreat_id ON retreat_room_types(retreat_id);
 CREATE INDEX IF NOT EXISTS idx_retreat_extra_activities_retreat_id ON retreat_extra_activities(retreat_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_retreat_id ON bookings(retreat_id);
@@ -76,3 +88,6 @@ CREATE INDEX IF NOT EXISTS idx_bookings_stripe_session_id ON bookings(stripe_ses
 CREATE INDEX IF NOT EXISTS idx_booking_room_slots_booking_id ON booking_room_slots(booking_id);
 CREATE INDEX IF NOT EXISTS idx_booking_room_slots_room_type_id ON booking_room_slots(retreat_room_type_id);
 CREATE INDEX IF NOT EXISTS idx_booking_extras_booking_id ON booking_extras(booking_id);
+CREATE INDEX IF NOT EXISTS idx_waitlist_entries_retreat_id ON waitlist_entries(retreat_id);
+CREATE INDEX IF NOT EXISTS idx_waitlist_entries_status ON waitlist_entries(status);
+CREATE INDEX IF NOT EXISTS idx_waitlist_entries_created_at ON waitlist_entries(created_at);

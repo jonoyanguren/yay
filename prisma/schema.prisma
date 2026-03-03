@@ -41,6 +41,7 @@ model Retreat {
   roomTypes       RetreatRoomType[]
   extraActivities RetreatExtraActivity[]
   bookings        Booking[]
+  waitlistEntries WaitlistEntry[]
 
   @@map("retreats")
 }
@@ -118,4 +119,21 @@ model BookingExtra {
   retreatExtraActivity RetreatExtraActivity @relation(fields: [retreatExtraActivityId], references: [id])
 
   @@map("booking_extras")
+}
+
+model WaitlistEntry {
+  id          String   @id @default(uuid())
+  retreatId   String   @map("retreat_id")
+  email       String
+  status      String   @default("pending")
+  notes       String?  @default("")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  retreat Retreat @relation(fields: [retreatId], references: [id], onDelete: Cascade)
+
+  @@unique([retreatId, email])
+  @@index([status])
+  @@index([createdAt])
+  @@map("waitlist_entries")
 }

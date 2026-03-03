@@ -92,6 +92,7 @@ export default async function RetreatPage({ params }: PageProps) {
     where: { retreatId: retreat.id, status: { in: ["deposit", "paid"] } },
   });
   const maxPeople = retreat.maxPeople ?? 12;
+  const isSoldOut = paidCount >= maxPeople;
   const spotsLeft = Math.max(0, maxPeople - paidCount);
 
   const arrivalOptions = (Array.isArray(retreat.arrivalOptions)
@@ -157,10 +158,12 @@ export default async function RetreatPage({ params }: PageProps) {
       <div className="hidden md:block">
         <FadeInOnView>
           <RetreatStickyInfoBar
+            retreatSlug={retreat.slug}
             date={retreat.date}
             location={retreat.location}
             maxPeople={maxPeople}
             spotsLeft={spotsLeft}
+            isSoldOut={isSoldOut}
             bookingHref={`/retreats/${retreat.slug}/book`}
           />
         </FadeInOnView>
@@ -168,10 +171,12 @@ export default async function RetreatPage({ params }: PageProps) {
 
       <div className="md:hidden px-4 pt-4">
         <RetreatStickyInfoBar
+          retreatSlug={retreat.slug}
           date={retreat.date}
           location={retreat.location}
           maxPeople={maxPeople}
           spotsLeft={spotsLeft}
+          isSoldOut={isSoldOut}
           bookingHref={`/retreats/${retreat.slug}/book`}
           disableSticky
         />
@@ -300,10 +305,12 @@ export default async function RetreatPage({ params }: PageProps) {
 
       <div className="md:hidden px-4 mt-6">
         <RetreatStickyInfoBar
+          retreatSlug={retreat.slug}
           date={retreat.date}
           location={retreat.location}
           maxPeople={maxPeople}
           spotsLeft={spotsLeft}
+          isSoldOut={isSoldOut}
           bookingHref={`/retreats/${retreat.slug}/book`}
           disableSticky
         />

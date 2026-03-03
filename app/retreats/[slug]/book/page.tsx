@@ -104,10 +104,36 @@ export default async function BookingPage({ params }: PageProps) {
     notFound();
   }
 
+  const maxPeople = retreat.maxPeople ?? 12;
+  const bookingsCount = await prisma.booking.count({
+    where: {
+      retreatId: retreat.id,
+      status: { in: ["deposit", "paid"] },
+    },
+  });
+  const isSoldOut = bookingsCount >= maxPeople;
+
   const [roomTypes, extras] = await Promise.all([
     getRoomTypesWithAvailability(retreat.id),
     getExtraActivities(retreat.id),
   ]);
+
+  if (isSoldOut) {
+    return (
+      <div className="px-4 md:px-12 max-w-2xl mx-auto py-16 text-center">
+        <h1 className="text-2xl font-bold mb-4">No quedan plazas</h1>
+        <p className="text-black/70 mb-6">
+          Este retiro ya ha alcanzado su aforo máximo.
+        </p>
+        <Link
+          href={`/retreats/${slug}`}
+          className="text-green font-medium hover:underline"
+        >
+          Volver al retiro
+        </Link>
+      </div>
+    );
+  }
 
   if (roomTypes.length === 0) {
     return (
