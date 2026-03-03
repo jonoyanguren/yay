@@ -12,9 +12,9 @@ export type Retreat = {
   location: string;
   description: string;
   fullDescription: string;
-  activities: string[];
+  activities?: string[];
   activitiesImage?: string | null;
-  program: string[];
+  program?: string[];
   image: string;
   images: string[];
   date: string;

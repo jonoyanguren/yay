@@ -8,8 +8,6 @@ CREATE TABLE IF NOT EXISTS retreats (
   location TEXT NOT NULL DEFAULT '',
   description TEXT NOT NULL DEFAULT '',
   full_description TEXT NOT NULL DEFAULT '',
-  activities JSONB NOT NULL DEFAULT '[]',
-  program JSONB NOT NULL DEFAULT '[]',
   image TEXT NOT NULL DEFAULT '',
   date TEXT NOT NULL DEFAULT '',
   price TEXT NOT NULL DEFAULT '',

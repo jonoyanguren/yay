@@ -64,11 +64,9 @@ export async function PATCH(
       ...(data.fullDescription !== undefined && {
         fullDescription: data.fullDescription,
       }),
-      ...(data.activities !== undefined && { activities: data.activities }),
       ...(data.activitiesImage !== undefined && {
         activitiesImage: data.activitiesImage,
       }),
-      ...(data.program !== undefined && { program: data.program }),
       ...(data.image !== undefined && { image: data.image }),
       ...(data.images !== undefined && { images: data.images }),
       ...(data.date !== undefined && { date: data.date }),

@@ -12,9 +12,7 @@ interface Retreat {
   location: string;
   description: string;
   fullDescription: string;
-  activities: string[];
   activitiesImage?: string | null;
-  program: string[];
   image: string;
   images: string[];
   date: string;
@@ -285,23 +283,6 @@ export default function PreviewPage() {
               </>
             )}
 
-            <section>
-              <h2 className="text-2xl font-bold mb-6">
-                Actividades Destacadas
-              </h2>
-              <ul className="grid sm:grid-cols-2 gap-4">
-                {retreat.activities.map((activity, index) => (
-                  <li
-                    key={index}
-                    className="flex items-start gap-3 p-4 bg-sand-light border border-gray/10 rounded-lg"
-                  >
-                    <span className="text-green font-bold">0{index + 1}</span>
-                    <span>{activity}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-
             {activitiesImage && (
               <section className="space-y-4">
                 <h2 className="text-2xl font-bold">Collage de actividades</h2>
@@ -312,18 +293,6 @@ export default function PreviewPage() {
                 />
               </section>
             )}
-
-            <section>
-              <h2 className="text-2xl font-bold mb-6">Programa</h2>
-              <div className="space-y-4 border-l-2 border-gray/20 pl-6 ml-2">
-                {retreat.program.map((item, index) => (
-                  <div key={index} className="relative">
-                    <span className="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-black border-4 border-sand"></span>
-                    <p className="text-lg">{item}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
 
             {(includes.length > 0 || notIncludes.length > 0) && (
               <section className="grid md:grid-cols-2 gap-6">

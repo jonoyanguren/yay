@@ -84,10 +84,6 @@ export default function RetreatForm({
   );
 
   // Array states for structured data
-  const [activities, setActivities] = useState<string[]>(
-    retreat?.activities || [],
-  );
-  const [program, setProgram] = useState<string[]>(retreat?.program || []);
   const [arrivalOptions, setArrivalOptions] = useState<ArrivalOption[]>(
     retreat?.arrivalOptions || [],
   );
@@ -112,8 +108,6 @@ export default function RetreatForm({
   );
 
   // Temporary input states
-  const [newActivity, setNewActivity] = useState("");
-  const [newProgram, setNewProgram] = useState("");
   const [newArrivalOption, setNewArrivalOption] = useState({
     title: "",
     detail: "",
@@ -139,28 +133,6 @@ export default function RetreatForm({
   });
 
   // Add/Remove functions
-  const addActivity = () => {
-    if (newActivity.trim()) {
-      setActivities([...activities, newActivity.trim()]);
-      setNewActivity("");
-    }
-  };
-
-  const removeActivity = (index: number) => {
-    setActivities(activities.filter((_, i) => i !== index));
-  };
-
-  const addProgram = () => {
-    if (newProgram.trim()) {
-      setProgram([...program, newProgram.trim()]);
-      setNewProgram("");
-    }
-  };
-
-  const removeProgram = (index: number) => {
-    setProgram(program.filter((_, i) => i !== index));
-  };
-
   const addArrivalOption = () => {
     if (newArrivalOption.title.trim() && newArrivalOption.detail.trim()) {
       setArrivalOptions([...arrivalOptions, newArrivalOption]);
@@ -296,8 +268,6 @@ export default function RetreatForm({
         chargeFullAmount: formData.chargeFullAmount,
         images: retreatImages,
         activitiesImage: activitiesImage || null,
-        activities,
-        program,
         arrivalOptions: arrivalOptions.length > 0 ? arrivalOptions : null,
         hotelName: formData.hotelName || null,
         hotelUrl: formData.hotelUrl || null,
@@ -712,7 +682,7 @@ export default function RetreatForm({
       {/* Activities */}
       <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-100">
         <h2 className="text-xl font-bold mb-5 text-slate-800">
-          Actividades Destacadas
+          Actividades
         </h2>
         <div className="mb-5">
           <label className="block text-sm font-semibold mb-2 text-slate-700">
@@ -729,87 +699,6 @@ export default function RetreatForm({
             Esta imagen se mostrará como collage visual de actividades.
           </p>
         </div>
-        <div className="flex gap-2 mb-4">
-          <input
-            type="text"
-            value={newActivity}
-            onChange={(e) => setNewActivity(e.target.value)}
-            onKeyPress={(e) =>
-              e.key === "Enter" && (e.preventDefault(), addActivity())
-            }
-            placeholder="Ej: Yoga matinal"
-            className="flex-1 px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
-          />
-          <button
-            type="button"
-            onClick={addActivity}
-            className="px-6 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium whitespace-nowrap"
-          >
-            Añadir
-          </button>
-        </div>
-        {activities.length > 0 && (
-          <ul className="space-y-2">
-            {activities.map((activity, index) => (
-              <li
-                key={index}
-                className="flex items-center justify-between bg-slate-50 px-4 py-3 rounded-lg border border-slate-100"
-              >
-                <span className="text-slate-700">{activity}</span>
-                <button
-                  type="button"
-                  onClick={() => removeActivity(index)}
-                  className="text-rose-600 hover:text-rose-700 text-sm font-medium transition-colors"
-                >
-                  Eliminar
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {/* Program */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-100">
-        <h2 className="text-xl font-bold mb-5 text-slate-800">Programa</h2>
-        <div className="flex gap-2 mb-4">
-          <input
-            type="text"
-            value={newProgram}
-            onChange={(e) => setNewProgram(e.target.value)}
-            onKeyPress={(e) =>
-              e.key === "Enter" && (e.preventDefault(), addProgram())
-            }
-            placeholder="Ej: Día 1: Llegada y bienvenida"
-            className="flex-1 px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
-          />
-          <button
-            type="button"
-            onClick={addProgram}
-            className="px-6 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium whitespace-nowrap"
-          >
-            Añadir
-          </button>
-        </div>
-        {program.length > 0 && (
-          <ul className="space-y-2">
-            {program.map((item, index) => (
-              <li
-                key={index}
-                className="flex items-center justify-between bg-slate-50 px-4 py-3 rounded-lg border border-slate-100"
-              >
-                <span className="text-slate-700">{item}</span>
-                <button
-                  type="button"
-                  onClick={() => removeProgram(index)}
-                  className="text-rose-600 hover:text-rose-700 text-sm font-medium transition-colors"
-                >
-                  Eliminar
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
 
       {/* Arrival Options */}
