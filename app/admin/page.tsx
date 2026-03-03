@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FaEye, FaPencilAlt, FaTrash } from "react-icons/fa";
+import Swal from "sweetalert2";
 
 interface Retreat {
   id: string;
@@ -20,6 +21,15 @@ export default function AdminPage() {
   const [retreats, setRetreats] = useState<Retreat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [toast, setToast] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+
+  const showToast = (type: "success" | "error", message: string) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 3500);
+  };
 
   const fetchRetreats = async () => {
     const password = localStorage.getItem("adminPassword");
@@ -38,7 +48,7 @@ export default function AdminPage() {
       } else {
         setError("Error fetching retreats");
       }
-    } catch (err) {
+    } catch {
       setError("Error connecting to server");
     } finally {
       setIsLoading(false);
@@ -50,7 +60,17 @@ export default function AdminPage() {
   }, []);
 
   const handleDelete = async (slug: string, title: string) => {
-    if (!confirm(`Are you sure you want to delete "${title}"?`)) return;
+    const result = await Swal.fire({
+      icon: "warning",
+      title: "Eliminar retiro",
+      text: `¿Seguro que quieres borrar "${title}"?`,
+      showCancelButton: true,
+      confirmButtonText: "Sí, borrar",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#64748b",
+    });
+    if (!result.isConfirmed) return;
 
     const password = localStorage.getItem("adminPassword");
     if (!password) return;
@@ -65,11 +85,16 @@ export default function AdminPage() {
 
       if (res.ok) {
         setRetreats(retreats.filter((r) => r.slug !== slug));
+        showToast("success", "Retiro eliminado correctamente.");
       } else {
-        alert("Error deleting retreat");
+        const data = await res.json().catch(() => ({}));
+        showToast(
+          "error",
+          data.error || "No se ha podido borrar el retiro.",
+        );
       }
-    } catch (err) {
-      alert("Error deleting retreat");
+    } catch {
+      showToast("error", "No se ha podido borrar el retiro.");
     }
   };
 
@@ -93,10 +118,10 @@ export default function AdminPage() {
           )
         );
       } else {
-        alert("Error toggling publish status");
+        showToast("error", "No se pudo cambiar el estado de publicación.");
       }
-    } catch (err) {
-      alert("Error toggling publish status");
+    } catch {
+      showToast("error", "No se pudo cambiar el estado de publicación.");
     }
   };
 
@@ -115,6 +140,19 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 p-8">
+      {toast && (
+        <div className="fixed top-6 right-6 z-50">
+          <div
+            className={`px-4 py-3 rounded-lg shadow-lg border text-sm font-medium ${
+              toast.type === "success"
+                ? "bg-emerald-600 text-white border-emerald-500"
+                : "bg-rose-600 text-white border-rose-500"
+            }`}
+          >
+            {toast.message}
+          </div>
+        </div>
+      )}
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">

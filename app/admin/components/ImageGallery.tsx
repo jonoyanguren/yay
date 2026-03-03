@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import ImageUploadWidget from "./ImageUploadWidget";
+import Swal from "sweetalert2";
 
 interface ImageGalleryProps {
   images: string[];
@@ -22,10 +23,17 @@ export default function ImageGallery({
   const handleDelete = async (index: number, imageUrl: string) => {
     if (deletingIndex !== null) return; // Prevent multiple simultaneous deletions
 
-    const confirmed = confirm(
-      "¿Estás seguro de que quieres eliminar esta imagen? Se borrará permanentemente de Cloudinary.",
-    );
-    if (!confirmed) return;
+    const confirmation = await Swal.fire({
+      icon: "warning",
+      title: "Eliminar imagen",
+      text: "Se intentará borrar de Cloudinary y del formulario.",
+      showCancelButton: true,
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#64748b",
+    });
+    if (!confirmation.isConfirmed) return;
 
     setDeletingIndex(index);
 
@@ -33,7 +41,11 @@ export default function ImageGallery({
       // Get password from localStorage
       const password = localStorage.getItem("adminPassword");
       if (!password) {
-        alert("No estás autenticado");
+        await Swal.fire({
+          icon: "error",
+          title: "No autenticado",
+          text: "Inicia sesión de admin para eliminar imágenes.",
+        });
         setDeletingIndex(null);
         return;
       }
@@ -67,12 +79,19 @@ export default function ImageGallery({
         result,
       );
       onRemove(index);
-      console.info(
-        "No se pudo borrar en Cloudinary, pero la imagen se quitó del formulario. Guarda para aplicar el cambio en la BD.",
-      );
+      await Swal.fire({
+        icon: "warning",
+        title: "Eliminada solo del formulario",
+        text:
+          "No se pudo borrar en Cloudinary. Guarda para aplicar el cambio en la BD.",
+      });
     } catch (error: any) {
       console.error("Error deleting image:", error);
-      alert("Error al eliminar la imagen. Por favor, intenta de nuevo.");
+      await Swal.fire({
+        icon: "error",
+        title: "Error al eliminar imagen",
+        text: "Por favor, intenta de nuevo.",
+      });
     } finally {
       setDeletingIndex(null);
     }

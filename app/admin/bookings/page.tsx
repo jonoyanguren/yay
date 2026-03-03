@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Swal from "sweetalert2";
 
 interface Booking {
   id: string;
@@ -118,6 +119,20 @@ export default function BookingsPage() {
     status: "paid" as "paid" | "deposit" | "pending" | "cancelled",
   });
 
+  const showToast = (
+    icon: "success" | "error" | "warning" | "info",
+    title: string,
+  ) =>
+    Swal.fire({
+      toast: true,
+      position: "top-end",
+      icon,
+      title,
+      showConfirmButton: false,
+      timer: 2600,
+      timerProgressBar: true,
+    });
+
   const fetchBookings = async () => {
     const password = localStorage.getItem("adminPassword");
     if (!password) return;
@@ -135,7 +150,7 @@ export default function BookingsPage() {
       } else {
         setError("Error fetching bookings");
       }
-    } catch (err) {
+    } catch {
       setError("Error connecting to server");
     } finally {
       setIsLoading(false);
@@ -160,8 +175,8 @@ export default function BookingsPage() {
       } else {
         console.error("Error fetching retreats, status:", res.status);
       }
-    } catch (err) {
-      console.error("Error fetching retreats:", err);
+    } catch {
+      console.error("Error fetching retreats");
     }
   };
 
@@ -190,10 +205,10 @@ export default function BookingsPage() {
           bookings.map((b) => (b.id === bookingId ? updatedBooking : b))
         );
       } else {
-        alert("Error actualizando el estado");
+        await showToast("error", "Error actualizando el estado");
       }
-    } catch (err) {
-      alert("Error actualizando el estado");
+    } catch {
+      await showToast("error", "Error actualizando el estado");
     }
   };
 
@@ -225,17 +240,28 @@ export default function BookingsPage() {
           extras: [],
           status: "paid",
         });
+        await showToast("success", "Reserva creada correctamente");
       } else {
         const data = await res.json();
-        alert(data.error || "Error creando la reserva");
+        await showToast("error", data.error || "Error creando la reserva");
       }
-    } catch (err) {
-      alert("Error creando la reserva");
+    } catch {
+      await showToast("error", "Error creando la reserva");
     }
   };
 
   const handleSendEmail = async (bookingId: string, customerEmail: string) => {
-    if (!confirm(`¿Enviar email de confirmación a ${customerEmail}?`)) return;
+    const result = await Swal.fire({
+      icon: "question",
+      title: "Enviar email",
+      text: `¿Enviar email de confirmación a ${customerEmail}?`,
+      showCancelButton: true,
+      confirmButtonText: "Sí, enviar",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#2563eb",
+      cancelButtonColor: "#64748b",
+    });
+    if (!result.isConfirmed) return;
 
     const password = localStorage.getItem("adminPassword");
     if (!password) return;
@@ -249,18 +275,28 @@ export default function BookingsPage() {
       });
 
       if (res.ok) {
-        alert("Email enviado correctamente ✓");
+        await showToast("success", "Email enviado correctamente");
       } else {
         const data = await res.json();
-        alert(data.error || "Error enviando el email");
+        await showToast("error", data.error || "Error enviando el email");
       }
-    } catch (err) {
-      alert("Error enviando el email");
+    } catch {
+      await showToast("error", "Error enviando el email");
     }
   };
 
   const handleDeleteBooking = async (bookingId: string, customerEmail: string) => {
-    if (!confirm(`¿Borrar la reserva de ${customerEmail}? Esta acción no se puede deshacer.`)) {
+    const result = await Swal.fire({
+      icon: "warning",
+      title: "Borrar reserva",
+      text: `¿Borrar la reserva de ${customerEmail}? Esta acción no se puede deshacer.`,
+      showCancelButton: true,
+      confirmButtonText: "Sí, borrar",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#64748b",
+    });
+    if (!result.isConfirmed) {
       return;
     }
 
@@ -278,12 +314,13 @@ export default function BookingsPage() {
 
       if (res.ok) {
         setBookings((prev) => prev.filter((b) => b.id !== bookingId));
+        await showToast("success", "Reserva borrada");
       } else {
         const data = await res.json();
-        alert(data.error || "Error borrando la reserva");
+        await showToast("error", data.error || "Error borrando la reserva");
       }
-    } catch (err) {
-      alert("Error borrando la reserva");
+    } catch {
+      await showToast("error", "Error borrando la reserva");
     } finally {
       setDeletingBookingId(null);
     }

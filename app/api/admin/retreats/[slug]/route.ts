@@ -258,14 +258,35 @@ export async function DELETE(
 
   try {
     const { slug } = await params;
+    const retreat = await prisma.retreat.findUnique({
+      where: { slug },
+      select: { id: true, slug: true },
+    });
+    if (!retreat) {
+      return NextResponse.json({ error: "Retreat not found" }, { status: 404 });
+    }
+
+    const bookingsCount = await prisma.booking.count({
+      where: { retreatId: retreat.id },
+    });
+    if (bookingsCount > 0) {
+      return NextResponse.json(
+        {
+          error:
+            "No se puede borrar este retiro porque tiene reservas asociadas.",
+        },
+        { status: 409 },
+      );
+    }
 
     await prisma.retreat.delete({
-      where: { slug },
+      where: { id: retreat.id },
     });
 
     // Revalidate public pages
     revalidatePath("/");
     revalidatePath("/retreats");
+    revalidatePath(`/retreats/${slug}`);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

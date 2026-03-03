@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Swal from "sweetalert2";
 
 interface CloudinaryWidget {
   open: () => void;
@@ -51,14 +52,21 @@ export default function ImageUploadWidget({
 
   const openWidget = () => {
     if (!cloudName || !uploadPreset) {
-      alert(
+      void Swal.fire({
+        icon: "error",
+        title: "Cloudinary no configurado",
+        text:
         "Error: Cloudinary no está configurado. Agrega NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME y NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET en tu archivo .env"
-      );
+      });
       return;
     }
 
     if (!window.cloudinary) {
-      alert("Cloudinary widget aún no está cargado. Intenta de nuevo.");
+      void Swal.fire({
+        icon: "warning",
+        title: "Widget no cargado",
+        text: "Cloudinary widget aún no está cargado. Intenta de nuevo.",
+      });
       return;
     }
 
@@ -98,7 +106,11 @@ export default function ImageUploadWidget({
       (error, result) => {
         if (error) {
           console.error("Cloudinary upload error:", error);
-          alert("Error al subir la imagen. Intenta de nuevo.");
+          void Swal.fire({
+            icon: "error",
+            title: "Error al subir imagen",
+            text: "Intenta de nuevo en unos segundos.",
+          });
           return;
         }
 
