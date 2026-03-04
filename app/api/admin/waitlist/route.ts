@@ -13,15 +13,20 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
-    const where =
-      status && status !== "all"
-        ? {
-            status,
-          }
-        : undefined;
+    const retreatId = searchParams.get("retreatId");
+    const where: {
+      status?: string;
+      retreatId?: string;
+    } = {};
+    if (status && status !== "all") {
+      where.status = status;
+    }
+    if (retreatId && retreatId !== "all") {
+      where.retreatId = retreatId;
+    }
 
     const entries = await prisma.waitlistEntry.findMany({
-      where,
+      where: Object.keys(where).length > 0 ? where : undefined,
       orderBy: { createdAt: "desc" },
       include: {
         retreat: {

@@ -4,10 +4,12 @@ import { FormEvent, useState } from "react";
 
 interface RetreatSoldOutEmailFormProps {
   retreatSlug: string;
+  large?: boolean;
 }
 
 export default function RetreatSoldOutEmailForm({
   retreatSlug,
+  large = false,
 }: RetreatSoldOutEmailFormProps) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -41,7 +43,9 @@ export default function RetreatSoldOutEmailForm({
         return;
       }
 
-      setMessage("Perfecto. Te avisaremos si se libera una plaza.");
+      setMessage(
+        "Perfecto. Te avisaremos si se libera una plaza y, si se apunta suficiente gente, podremos abrir otro retiro.",
+      );
       setEmail("");
     } catch {
       setError("Error de conexión. Inténtalo de nuevo.");
@@ -58,19 +62,29 @@ export default function RetreatSoldOutEmailForm({
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           placeholder="tu@email.com"
-          className="w-full sm:w-64 rounded-full border border-gray/20 bg-white px-4 py-2.5 text-sm"
+          className={
+            large
+              ? "w-full sm:w-[28rem] rounded-full border border-gray/20 bg-white px-6 py-4 text-base"
+              : "w-full sm:w-64 rounded-full border border-gray/20 bg-white px-4 py-2.5 text-sm"
+          }
           required
         />
         <button
           type="submit"
           disabled={loading}
-          className="rounded-full bg-black text-white px-5 py-2.5 text-sm font-medium hover:bg-gray-dark disabled:opacity-60 disabled:cursor-not-allowed"
+          className={
+            large
+              ? "rounded-full bg-black text-white px-7 py-4 text-base font-medium hover:bg-gray-dark disabled:opacity-60 disabled:cursor-not-allowed"
+              : "rounded-full bg-black text-white px-5 py-2.5 text-sm font-medium hover:bg-gray-dark disabled:opacity-60 disabled:cursor-not-allowed"
+          }
         >
           {loading ? "Enviando..." : "Avisadme"}
         </button>
       </div>
-      {message && <p className="text-xs text-green mt-2">{message}</p>}
-      {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
+      {message && (
+        <p className="text-sm md:text-base font-medium text-green mt-3">{message}</p>
+      )}
+      {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
     </form>
   );
 }

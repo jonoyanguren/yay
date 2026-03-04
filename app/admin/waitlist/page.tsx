@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
@@ -19,6 +19,11 @@ type WaitlistEntry = {
   };
 };
 
+type RetreatOption = {
+  id: string;
+  title: string;
+};
+
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleString("es-ES", {
     year: "numeric",
@@ -35,6 +40,8 @@ export default function WaitlistPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | WaitlistEntry["status"]>("all");
+  const [filterRetreatId, setFilterRetreatId] = useState<string>("all");
+  const [retreats, setRetreats] = useState<RetreatOption[]>([]);
   const [savingId, setSavingId] = useState<string | null>(null);
 
   const showToast = (
@@ -51,12 +58,15 @@ export default function WaitlistPage() {
       timerProgressBar: true,
     });
 
-  const fetchWaitlist = async () => {
+  const fetchWaitlist = useCallback(async () => {
     const password = localStorage.getItem("adminPassword");
     if (!password) return;
 
     try {
-      const query = filterStatus === "all" ? "" : `?status=${filterStatus}`;
+      const params = new URLSearchParams();
+      if (filterStatus !== "all") params.set("status", filterStatus);
+      if (filterRetreatId !== "all") params.set("retreatId", filterRetreatId);
+      const query = params.toString() ? `?${params.toString()}` : "";
       const res = await fetch(`/api/admin/waitlist${query}`, {
         headers: {
           Authorization: `Bearer ${password}`,
@@ -73,11 +83,41 @@ export default function WaitlistPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterRetreatId, filterStatus]);
+
+  const fetchRetreats = useCallback(async () => {
+    const password = localStorage.getItem("adminPassword");
+    if (!password) return;
+
+    try {
+      const res = await fetch("/api/admin/retreats", {
+        headers: {
+          Authorization: `Bearer ${password}`,
+        },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const mapped = (Array.isArray(data) ? data : [])
+        .map((retreat: { id: string; title: string }) => ({
+          id: retreat.id,
+          title: retreat.title,
+        }))
+        .sort((a: RetreatOption, b: RetreatOption) =>
+          a.title.localeCompare(b.title, "es"),
+        );
+      setRetreats(mapped);
+    } catch {
+      // Silent fail: waitlist page still works without this filter
+    }
+  }, []);
 
   useEffect(() => {
     fetchWaitlist();
-  }, [filterStatus]);
+  }, [fetchWaitlist]);
+
+  useEffect(() => {
+    fetchRetreats();
+  }, [fetchRetreats]);
 
   const stats = useMemo(
     () => ({
@@ -217,7 +257,7 @@ export default function WaitlistPage() {
           </div>
         </div>
 
-        <div className="mb-5 flex gap-2">
+        <div className="mb-5 flex flex-wrap gap-2 items-center">
           {(["all", "pending", "contacted", "closed"] as const).map((status) => (
             <button
               key={status}
@@ -237,6 +277,18 @@ export default function WaitlistPage() {
                     : "Cerrados"}
             </button>
           ))}
+          <select
+            value={filterRetreatId}
+            onChange={(event) => setFilterRetreatId(event.target.value)}
+            className="ml-auto px-3 py-2 rounded-lg text-sm font-medium bg-white border border-slate-200 text-slate-700"
+          >
+            <option value="all">Todos los retiros</option>
+            {retreats.map((retreat) => (
+              <option key={retreat.id} value={retreat.id}>
+                {retreat.title}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">

@@ -13,6 +13,7 @@ import RetreatHero from "@/components/retreats/RetreatHero";
 import RetreatSection from "@/components/retreats/RetreatSection";
 import ScrollToTopOnMount from "@/components/retreats/ScrollToTopOnMount";
 import RetreatStickyInfoBar from "@/components/retreats/RetreatStickyInfoBar";
+import WaitlistForm from "@/components/retreats/WaitlistForm";
 import WaveSeparator from "@/components/retreats/WaveSeparator";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -153,29 +154,33 @@ export default async function RetreatPage({ params }: PageProps) {
 
       <div className="hidden md:block">
         <FadeInOnView>
-          <RetreatStickyInfoBar
-            retreatSlug={retreat.slug}
-            date={retreat.date}
-            location={retreat.location}
-            maxPeople={maxPeople}
-            spotsLeft={spotsLeft}
-            isSoldOut={isSoldOut}
-            bookingHref={`/retreats/${retreat.slug}/book`}
-          />
+          {isSoldOut ? (
+            <WaitlistForm retreatSlug={retreat.slug} />
+          ) : (
+            <RetreatStickyInfoBar
+              date={retreat.date}
+              location={retreat.location}
+              maxPeople={maxPeople}
+              spotsLeft={spotsLeft}
+              bookingHref={`/retreats/${retreat.slug}/book`}
+            />
+          )}
         </FadeInOnView>
       </div>
 
       <div className="md:hidden px-4 pt-4">
-        <RetreatStickyInfoBar
-          retreatSlug={retreat.slug}
-          date={retreat.date}
-          location={retreat.location}
-          maxPeople={maxPeople}
-          spotsLeft={spotsLeft}
-          isSoldOut={isSoldOut}
-          bookingHref={`/retreats/${retreat.slug}/book`}
-          disableSticky
-        />
+        {isSoldOut ? (
+          <WaitlistForm retreatSlug={retreat.slug} />
+        ) : (
+          <RetreatStickyInfoBar
+            date={retreat.date}
+            location={retreat.location}
+            maxPeople={maxPeople}
+            spotsLeft={spotsLeft}
+            bookingHref={`/retreats/${retreat.slug}/book`}
+            disableSticky
+          />
+        )}
       </div>
 
       <RetreatSection>
@@ -300,16 +305,18 @@ export default async function RetreatPage({ params }: PageProps) {
       )}
 
       <div className="md:hidden px-4 mt-6">
-        <RetreatStickyInfoBar
-          retreatSlug={retreat.slug}
-          date={retreat.date}
-          location={retreat.location}
-          maxPeople={maxPeople}
-          spotsLeft={spotsLeft}
-          isSoldOut={isSoldOut}
-          bookingHref={`/retreats/${retreat.slug}/book`}
-          disableSticky
-        />
+        {isSoldOut ? (
+          <WaitlistForm retreatSlug={retreat.slug} />
+        ) : (
+          <RetreatStickyInfoBar
+            date={retreat.date}
+            location={retreat.location}
+            maxPeople={maxPeople}
+            spotsLeft={spotsLeft}
+            bookingHref={`/retreats/${retreat.slug}/book`}
+            disableSticky
+          />
+        )}
       </div>
     </div>
   );

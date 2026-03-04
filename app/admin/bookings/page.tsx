@@ -107,6 +107,7 @@ export default function BookingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterRetreatId, setFilterRetreatId] = useState<string>("all");
   const [showNewBookingModal, setShowNewBookingModal] = useState(false);
   const [retreats, setRetreats] = useState<Retreat[]>([]);
   const [newBooking, setNewBooking] = useState({
@@ -341,9 +342,12 @@ export default function BookingsPage() {
     );
   }
 
-  const filteredBookings = filterStatus === "all" 
-    ? bookings 
-    : bookings.filter(b => b.status === filterStatus);
+  const filteredBookings = bookings.filter((booking) => {
+    const statusMatches = filterStatus === "all" || booking.status === filterStatus;
+    const retreatMatches =
+      filterRetreatId === "all" || booking.retreat.id === filterRetreatId;
+    return statusMatches && retreatMatches;
+  });
 
   const stats = {
     total: bookings.length,
@@ -453,7 +457,7 @@ export default function BookingsPage() {
         </div>
 
         {/* Filters */}
-        <div className="mb-6 flex gap-2">
+        <div className="mb-6 flex flex-wrap gap-2 items-center">
           <button
             onClick={() => setFilterStatus("all")}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -506,6 +510,18 @@ export default function BookingsPage() {
               Canceladas ({stats.cancelled})
             </button>
           )}
+          <select
+            value={filterRetreatId}
+            onChange={(event) => setFilterRetreatId(event.target.value)}
+            className="ml-auto px-3 py-2 rounded-lg text-sm font-medium bg-white border border-slate-200 text-slate-700"
+          >
+            <option value="all">Todos los retiros</option>
+            {retreats.map((retreat) => (
+              <option key={retreat.id} value={retreat.id}>
+                {retreat.title}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Bookings Table */}
