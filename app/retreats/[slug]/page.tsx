@@ -16,6 +16,7 @@ import RetreatStickyInfoBar from "@/components/retreats/RetreatStickyInfoBar";
 import WaveSeparator from "@/components/retreats/WaveSeparator";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getRetreatCapacity } from "@/lib/retreat-capacity";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -88,12 +89,7 @@ export default async function RetreatPage({ params }: PageProps) {
     notFound();
   }
 
-  const paidCount = await prisma.booking.count({
-    where: { retreatId: retreat.id, status: { in: ["deposit", "paid"] } },
-  });
-  const maxPeople = retreat.maxPeople ?? 12;
-  const isSoldOut = paidCount >= maxPeople;
-  const spotsLeft = Math.max(0, maxPeople - paidCount);
+  const { maxPeople, spotsLeft, isSoldOut } = await getRetreatCapacity(retreat.id);
 
   const arrivalOptions = (Array.isArray(retreat.arrivalOptions)
     ? retreat.arrivalOptions

@@ -1,0 +1,143 @@
+{
+  "id": "ef1490d6-cb49-4b45-87bd-5708bb28064f",
+  "slug": "sahara-calm",
+  "title": "Sahara Calm",
+  "location": "Desierto del Sahara, Marruecos",
+  "description": "Sahara Calm es un retiro de 10 días en las puertas del desierto del Sahara (Marruecos) para desconectar de verdad. Yoga funcional, cultura nómada, silencio bajo las estrellas y actividades diseñadas para disfrutar, compartir y volver a casa con la mente despejada y el cuerpo renovado.",
+  "fullDescription": "Durante 10 días nos instalamos a las puertas de las dunas del desierto del Sahara. Un lugar donde el silencio no es incómodo, es necesario. Donde el cielo estrellado parece irreal y donde el tiempo deja de medirse en notificaciones.\n\nHemos diseñado esta experiencia combinando yoga funcional con actividades pensadas para disfrutar y sumergirnos en la cultura nómada marroquí.\n\nEl desierto tiene algo que no se puede explicar hasta que lo vives. La inmensidad, la textura de la arena al amanecer, el contraste entre el calor del día y el frío bajo las estrellas. Es un entorno que te obliga a simplificar.",
+  "activitiesImage": "https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&w=1600&q=80",
+  "image": "/assets/sahara.jpg",
+  "images": [],
+  "date": "03 Octubre - 12 Octubre 2026",
+  "price": "1600",
+  "reservationDepositCents": 60000,
+  "chargeFullAmount": false,
+  "published": true,
+  "arrivalIntro": "Llega como prefieras: te ayudamos a coordinar vuelos, coche o transfer para que encaje con tus horarios y con el grupo. No te preocupes por nada que nosotros nos conocemos todos los caminos.",
+  "arrivalOptions": [
+    {
+      "title": "Opción Yay (propuesta)",
+      "detail": "Te proponemos vuelo combinado a Errachidia y transfer grupal desde el aeropuerto. Última noche en Errachidia para salir temprano sin prisas."
+    },
+    {
+      "title": "Opción híbrida",
+      "detail": "Vuelas a Marruecos y alquilas coche allí (recomendamos híbrida). Ruta hasta Merzouga con parking en el alojamiento. Te compartimos puntos de interés en el camino."
+    },
+    {
+      "title": "Opción aventurera",
+      "detail": "Vienes con tu propio coche hasta Merzouga. Ruta libre y flexible. Coordinamos horario de llegada al alojamiento para que entres con el grupo."
+    }
+  ],
+  "hotelName": "Riad Ali el Cojo Luxury",
+  "hotelUrl": null,
+  "videoUrl": null,
+  "accommodationTitle": "¿Dónde vamos a estar?",
+  "accommodationDescription": "El alojamiento será mucho más que un lugar donde dormir: será nuestro refugio en mitad del desierto. Un hotel reservado en exclusiva para el retiro, situado a las puertas de las dunas, donde la arquitectura tradicional marroquí se integra con la calma del entorno. Espacios amplios, luz natural, piscina para refrescarse durante el día y rincones tranquilos donde leer o simplemente no hacer nada. Cada detalle está pensado para que descanses de verdad, duermas profundamente y sientas que, durante estos días, el mundo puede esperar.",
+  "accommodationImages": ["/assets/sahara.jpg", "/assets/caribe.jpg"],
+  "dayByDay": [
+    {
+      "day": "Día 1",
+      "items": [
+        "8:00 Llegada libre (te estaremos esperando desde primera hora)",
+        "16:00 Actividad de bienvenida",
+        "19:00 Yin Yoga",
+        "21:00 Cena"
+      ]
+    },
+    {
+      "day": "Día 2",
+      "items": [
+        "8:00 Amanecer y té",
+        "8:30 Meditación+Yoga",
+        "10:00 Desayuno",
+        "11:00 Actividad de desconexión",
+        "14:00 Comida",
+        "17:00 Actividad cultural",
+        "20:00 Yin Yoga",
+        "21:00 Cena"
+      ]
+    },
+    {
+      "day": "Día 3-9",
+      "items": [
+        "8:00 Amanecer y té",
+        "8:30 Meditación + Yoga",
+        "10:00 Desayuno",
+        "14:00 Comida",
+        "17:00 Actividad cultural*",
+        "20:00 Yin Yoga",
+        "21:00 Cena",
+        "*La hora es orientativa, depende de la actividad se hará por la mañana"
+      ]
+    },
+    {
+      "day": "Día 10",
+      "items": ["8:30 Yoga", "10:00 Desayuno", "11:00 Actividad de despedida"]
+    }
+  ],
+  "includes": [
+    "9 noches en alojamiento en el desierto",
+    "Todas las comidas (desayuno, comida y cena)",
+    "Clases diarias de meditación y yoga",
+    "Actividades y talleres de tarde incluidos en programa",
+    "Regalo de bienvenida"
+  ],
+  "notIncludes": [
+    "Vuelos y traslados (te ayudamos a organizarlos)",
+    "Seguro de viaje recomendado (enviamos descuento Iati)"
+  ],
+  "bgColor": "#d4a373",
+  "textHighlights": {
+    "fullDescription": [
+      "reset práctico",
+      "Errachidia",
+      "desierto",
+      "calma",
+      "yoga",
+      "meditación",
+      "Yin Yoga",
+      "Sin pantallas",
+      "sin prisa"
+    ]
+  },
+  "createdAt": "2026-02-20T10:52:27.692Z",
+  "roomTypes": [
+    {
+      "id": "14240d0d-57af-40d4-93bd-97bd3c3016c7",
+      "retreatId": "ef1490d6-cb49-4b45-87bd-5708bb28064f",
+      "name": "Habitación en jaima",
+      "description": "Habitación compartida en el campamento de las jaimas con baño privado. Este campamento está a 1 minuto andando del hotel donde se van a realizar todas las actividades.",
+      "images": [],
+      "priceCents": 155000,
+      "maxPeople": 12,
+      "maxQuantity": 12
+    },
+    {
+      "id": "4cb4604c-9a1e-4e77-a67c-fabf03a36c26",
+      "retreatId": "ef1490d6-cb49-4b45-87bd-5708bb28064f",
+      "name": "Habitación en hotel",
+      "description": "Habitación compartida (para 2 o 3 personas) con baño privado dentro del hotel donde se van a realizar todas las actividades.",
+      "images": [],
+      "priceCents": 160000,
+      "maxPeople": 6,
+      "maxQuantity": 6
+    }
+  ],
+  "extraActivities": [
+    {
+      "id": "c6e4aee3-66af-4493-8ee7-b39a886d7e0a",
+      "retreatId": "ef1490d6-cb49-4b45-87bd-5708bb28064f",
+      "name": "Sesión de fotos en las dunas",
+      "description": "Sesión de fotos con Hamza, nuestro fotógrafo de confianza en Merzouga. Para llevarte un bonito recuerdo de tu estancia en el desierto.",
+      "images": [
+        "https://res.cloudinary.com/citrusdesigner/image/upload/v1772545112/yay/extras/ikfeb441sllwtwbkzcb0.png"
+      ],
+      "priceCents": 13000,
+      "allowMultiple": false,
+      "maxQuantity": 1,
+      "link": null
+    }
+  ],
+  "bookings": [],
+  "waitlistEntries": []
+}

@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS retreat_room_types (
   retreat_id UUID NOT NULL REFERENCES retreats(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   price_cents INTEGER NOT NULL CHECK (price_cents >= 0),
-  max_quantity INTEGER NOT NULL CHECK (max_quantity > 0)
+  max_people INTEGER NOT NULL CHECK (max_people > 0)
 );
 
 -- Extra activities per retreat: name, price in cents (optional add-ons)

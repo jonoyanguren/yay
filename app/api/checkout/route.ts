@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 import { RESERVATION_PAYMENT_CENTS } from "@/lib/stripe-config";
 import { sendMetaLeadEvent } from "@/lib/meta-conversions";
+import { getRoomTypeAvailability } from "@/lib/retreat-capacity";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -69,29 +70,23 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const maxPeople = retreat.maxPeople ?? 12;
-  const bookingsCount = await prisma.booking.count({
-    where: {
-      retreatId,
-      status: { in: ["deposit", "paid"] },
-    },
-  });
-
-  if (bookingsCount >= maxPeople) {
-    return NextResponse.json(
-      { error: "No quedan plazas para este retiro" },
-      { status: 400 },
-    );
-  }
-
   const roomType = await prisma.retreatRoomType.findFirst({
     where: { id: roomTypeId, retreatId },
-    select: { name: true, priceCents: true },
+    select: { id: true, name: true, priceCents: true },
   });
   if (!roomType) {
     return NextResponse.json(
       { error: "Tipo de habitación no válido para este retiro" },
       { status: 400 }
+    );
+  }
+
+  const roomAvailability = await getRoomTypeAvailability(roomType.id);
+  const roomAvailable = roomAvailability?.available ?? 0;
+  if (roomQuantity > roomAvailable) {
+    return NextResponse.json(
+      { error: "Esta habitacion ya no tiene plazas disponibles" },
+      { status: 400 },
     );
   }
 

@@ -17,7 +17,7 @@ interface Retreat {
   images: string[];
   date: string;
   price: string;
-  maxPeople?: number;
+  roomTypes?: { id: string; maxPeople?: number }[];
   published: boolean;
   arrivalIntro?: string;
   arrivalOptions?: { title: string; detail: string }[];
@@ -61,7 +61,7 @@ export default function PreviewPage() {
         } else {
           setError("Failed to load retreat");
         }
-      } catch (err) {
+      } catch {
         setError("Error connecting to server");
       } finally {
         setIsLoading(false);
@@ -112,6 +112,10 @@ export default function PreviewPage() {
   const imageUrl = retreat.images?.[0] || retreat.image || "/assets/placeholder.jpg";
   const galleryImages = retreat.images || [];
   const bgColor = retreat.bgColor?.trim() || "#d77a61";
+  const totalRoomTypeSpots = (retreat.roomTypes || []).reduce(
+    (sum, room) => sum + Math.max(1, Number(room.maxPeople ?? 1)),
+    0,
+  );
 
   return (
     <>
@@ -339,7 +343,9 @@ export default function PreviewPage() {
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray/10">
                   <span className="text-black/60">Grupo</span>
-                  <span className="font-medium">Max {retreat.maxPeople ?? 12} personas</span>
+                  <span className="font-medium">
+                    Max {totalRoomTypeSpots} personas
+                  </span>
                 </div>
               </div>
 

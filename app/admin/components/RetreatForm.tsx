@@ -27,7 +27,7 @@ interface RoomType {
   description?: string;
   images?: string[];
   priceCents: number;
-  maxQuantity: number;
+  maxPeople: number;
   priceEuros?: number; // For display only
 }
 
@@ -50,8 +50,8 @@ type RoomTypeRaw = {
   images?: string[];
   priceCents?: number;
   price_cents?: number;
-  maxQuantity?: number;
-  max_quantity?: number;
+  maxPeople?: number;
+  max_people?: number;
 };
 
 type ExtraActivityRaw = {
@@ -77,7 +77,7 @@ function normalizeRoomTypes(input: RoomTypeRaw[] | undefined): RoomType[] {
       description: rt.description ?? "",
       images: rt.images || [],
       priceCents,
-      maxQuantity: rt.maxQuantity ?? rt.max_quantity ?? 1,
+      maxPeople: rt.maxPeople ?? rt.max_people ?? 1,
       priceEuros: priceCents / 100,
     };
   });
@@ -121,7 +121,6 @@ export default function RetreatForm({
     price: retreat?.price || "",
     reservationDepositCents: retreat?.reservationDepositCents ?? 60000,
     chargeFullAmount: retreat?.chargeFullAmount || false,
-    maxPeople: retreat?.maxPeople ?? 12,
     published: retreat?.published || false,
     arrivalIntro: retreat?.arrivalIntro || "",
     hotelName: retreat?.hotelName || "",
@@ -167,6 +166,10 @@ export default function RetreatForm({
   const [extraActivities, setExtraActivities] = useState<ExtraActivity[]>(
     normalizeExtraActivities(retreat?.extraActivities),
   );
+  const totalRoomTypeSpots = roomTypes.reduce(
+    (sum, room) => sum + Math.max(1, Number(room.maxPeople) || 1),
+    0,
+  );
 
   // Temporary input states
   const [newArrivalOption, setNewArrivalOption] = useState({
@@ -198,7 +201,7 @@ export default function RetreatForm({
     description: "",
     images: [] as string[],
     priceCents: "",
-    maxQuantity: "",
+    maxPeople: "",
   });
   const [editingRoomTypeIndex, setEditingRoomTypeIndex] = useState<number | null>(
     null,
@@ -208,7 +211,7 @@ export default function RetreatForm({
     description: "",
     images: [] as string[],
     priceCents: "",
-    maxQuantity: "",
+    maxPeople: "",
   });
   const [newExtraActivity, setNewExtraActivity] = useState({
     name: "",
@@ -252,7 +255,7 @@ export default function RetreatForm({
         description: rt.description || "",
         images: rt.images || [],
         priceCents: rt.priceCents,
-        maxQuantity: rt.maxQuantity,
+        maxPeople: rt.maxPeople,
       }));
     }
     if (payload.extraActivities) {
@@ -488,10 +491,12 @@ export default function RetreatForm({
     if (
       newRoomType.name.trim() &&
       newRoomType.priceCents &&
-      newRoomType.maxQuantity
+      newRoomType.maxPeople
     ) {
       const priceEuros = parseFloat(newRoomType.priceCents);
       const priceCents = Math.round(priceEuros * 100);
+      const maxPeople = parseInt(newRoomType.maxPeople);
+      if (Number.isNaN(priceEuros) || Number.isNaN(maxPeople)) return;
       const nextRoomTypes = [
         ...roomTypes,
         {
@@ -500,7 +505,7 @@ export default function RetreatForm({
           images: newRoomType.images,
           priceCents,
           priceEuros,
-          maxQuantity: parseInt(newRoomType.maxQuantity),
+          maxPeople,
         },
       ];
       setRoomTypes(nextRoomTypes);
@@ -509,7 +514,7 @@ export default function RetreatForm({
         description: "",
         images: [],
         priceCents: "",
-        maxQuantity: "",
+        maxPeople: "",
       });
       if (isEdit) {
         persistCollections({ roomTypes: nextRoomTypes }).catch((err: unknown) =>
@@ -529,7 +534,7 @@ export default function RetreatForm({
         description: "",
         images: [],
         priceCents: "",
-        maxQuantity: "",
+        maxPeople: "",
       });
     }
     const nextRoomTypes = roomTypes.filter((_, i) => i !== index);
@@ -552,7 +557,7 @@ export default function RetreatForm({
       description: room.description || "",
       images: room.images || [],
       priceCents: (room.priceEuros ?? room.priceCents / 100).toString(),
-      maxQuantity: room.maxQuantity.toString(),
+      maxPeople: room.maxPeople.toString(),
     });
   };
 
@@ -563,7 +568,7 @@ export default function RetreatForm({
       description: "",
       images: [],
       priceCents: "",
-      maxQuantity: "",
+      maxPeople: "",
     });
   };
 
@@ -572,14 +577,16 @@ export default function RetreatForm({
     if (
       !editingRoomType.name.trim() ||
       !editingRoomType.priceCents ||
-      !editingRoomType.maxQuantity
+      !editingRoomType.maxPeople
     ) {
       return;
     }
 
     const priceEuros = parseFloat(editingRoomType.priceCents);
-    const maxQuantity = parseInt(editingRoomType.maxQuantity);
-    if (Number.isNaN(priceEuros) || Number.isNaN(maxQuantity)) return;
+    const maxPeople = parseInt(editingRoomType.maxPeople);
+    if (Number.isNaN(priceEuros) || Number.isNaN(maxPeople)) {
+      return;
+    }
 
     const priceCents = Math.round(priceEuros * 100);
     const nextRoomTypes = roomTypes.map((room, index) =>
@@ -591,7 +598,7 @@ export default function RetreatForm({
             images: editingRoomType.images,
             priceCents,
             priceEuros,
-            maxQuantity,
+            maxPeople,
           }
         : room,
     );
@@ -769,7 +776,6 @@ export default function RetreatForm({
     try {
       const data = {
         ...formData,
-        maxPeople: Number(formData.maxPeople) || 12,
         reservationDepositCents: Math.max(
           0,
           Number(formData.reservationDepositCents) || 0,
@@ -802,7 +808,7 @@ export default function RetreatForm({
             description: rt.description || "",
             images: rt.images || [],
             priceCents: rt.priceCents,
-            maxQuantity: rt.maxQuantity,
+            maxPeople: rt.maxPeople,
           })),
           extraActivities: extraActivities.map((ea) => ({
             id: ea.id,
@@ -1023,18 +1029,13 @@ export default function RetreatForm({
 
           <div>
             <label className="block text-sm font-semibold mb-2 text-slate-700">
-              Máx. personas
+              Plazas totales (auto)
             </label>
-            <input
-              type="number"
-              name="maxPeople"
-              min={1}
-              value={formData.maxPeople}
-              onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
-            />
+            <div className="w-full px-4 py-2.5 border border-slate-200 bg-slate-50 rounded-lg text-slate-700 font-medium">
+              {totalRoomTypeSpots > 0 ? totalRoomTypeSpots : "Define habitaciones"}
+            </div>
             <p className="text-xs text-slate-500 mt-1.5">
-              Número máximo de plazas del retiro
+              Se calcula sumando el campo &quot;Plazas máximas&quot; de cada tipo de habitación.
             </p>
           </div>
         </div>
@@ -1676,6 +1677,9 @@ export default function RetreatForm({
         <p className="text-sm text-slate-600 mb-4">
           Define las opciones de alojamiento y sus precios
         </p>
+        <p className="text-sm text-emerald-700 mb-4 font-medium">
+          Plazas totales del retiro: {totalRoomTypeSpots}
+        </p>
         <div className="grid grid-cols-1 gap-3 mb-4">
           <input
             type="text"
@@ -1710,11 +1714,11 @@ export default function RetreatForm({
             <input
               type="number"
               min="1"
-              value={newRoomType.maxQuantity}
+              value={newRoomType.maxPeople}
               onChange={(e) =>
-                setNewRoomType({ ...newRoomType, maxQuantity: e.target.value })
+                setNewRoomType({ ...newRoomType, maxPeople: e.target.value })
               }
-              placeholder="Cantidad máxima"
+              placeholder="Plazas máximas (Ej: 20)"
               className="px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
             />
           </div>
@@ -1798,14 +1802,14 @@ export default function RetreatForm({
                       <input
                         type="number"
                         min="1"
-                        value={editingRoomType.maxQuantity}
+                        value={editingRoomType.maxPeople}
                         onChange={(e) =>
                           setEditingRoomType({
                             ...editingRoomType,
-                            maxQuantity: e.target.value,
+                            maxPeople: e.target.value,
                           })
                         }
-                        placeholder="Cantidad máxima"
+                        placeholder="Plazas máximas"
                         className="px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
                       />
                     </div>
@@ -1876,7 +1880,7 @@ export default function RetreatForm({
                           💰{" "}
                           {(room.priceEuros ?? room.priceCents / 100).toFixed(2)}€
                         </span>
-                        <span>📦 Max: {room.maxQuantity}</span>
+                        <span>👥 Plazas: {room.maxPeople}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">

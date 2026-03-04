@@ -1,9 +1,17 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Retreat } from "@/lib/data";
 
 interface RetreatCardProps {
-  retreat: Retreat & { spotsLeft?: number };
+  retreat: {
+    slug: string;
+    title: string;
+    image: string;
+    images: string[];
+    location: string;
+    description: string;
+    published: boolean;
+    spotsLeft?: number;
+  };
 }
 
 export default function RetreatCard({ retreat }: RetreatCardProps) {

@@ -2,6 +2,7 @@ import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@prisma/client";
 
 /**
  * GET /api/admin/retreats
@@ -49,6 +50,8 @@ export async function POST(request: Request) {
       );
     }
 
+    const roomTypesPayload = Array.isArray(data.roomTypes) ? data.roomTypes : [];
+
     const retreat = await prisma.retreat.create({
       data: {
         slug: data.slug,
@@ -66,7 +69,6 @@ export async function POST(request: Request) {
             ? Math.max(0, Number(data.reservationDepositCents) || 0)
             : 60000,
         chargeFullAmount: Boolean(data.chargeFullAmount),
-        maxPeople: data.maxPeople ?? 12,
         published: data.published || false,
         arrivalIntro: data.arrivalIntro || null,
         arrivalOptions: data.arrivalOptions || null,
@@ -81,15 +83,17 @@ export async function POST(request: Request) {
         notIncludes: data.notIncludes || null,
         bgColor: data.bgColor || null,
         textHighlights: data.textHighlights || null,
-        roomTypes: data.roomTypes
+        roomTypes: roomTypesPayload.length > 0
           ? {
-              create: data.roomTypes.map((rt: any) => ({
+              create: roomTypesPayload.map(
+                (rt: { name: string; description?: string; images?: string[]; priceCents: number; maxPeople?: number }) => ({
                 name: rt.name,
                 description: rt.description || "",
                 images: rt.images || [],
                 priceCents: rt.priceCents,
-                maxQuantity: rt.maxQuantity,
-              })),
+                maxPeople: Math.max(1, Number(rt.maxPeople ?? 1)),
+              }),
+            ),
             }
           : undefined,
         extraActivities: data.extraActivities
@@ -113,7 +117,7 @@ export async function POST(request: Request) {
               })),
             }
           : undefined,
-      } as any,
+      },
       include: {
         roomTypes: true,
         extraActivities: true,
@@ -125,11 +129,14 @@ export async function POST(request: Request) {
     revalidatePath("/retreats");
 
     return NextResponse.json(retreat, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error creating retreat:", error);
     
     // Handle unique constraint violation
-    if (error.code === "P2002") {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
       return NextResponse.json(
         { error: "A retreat with this slug already exists" },
         { status: 409 }

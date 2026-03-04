@@ -4,6 +4,7 @@ import HeroTextLoop from "@/components/HeroTextLoop";
 import Image from "next/image";
 import { FaInstagram, FaWhatsapp } from "react-icons/fa";
 import { prisma } from "@/lib/prisma";
+import { getRetreatSpotsLeftMap } from "@/lib/retreat-capacity";
 
 async function getRetreats() {
   try {
@@ -17,22 +18,17 @@ async function getRetreats() {
         description: true,
         image: true,
         images: true,
-        maxPeople: true,
         published: true,
         createdAt: true,
       },
     });
-    const paidCounts = await prisma.booking.groupBy({
-      by: ["retreatId"],
-      where: { status: { in: ["deposit", "paid"] } },
-      _count: true,
-    });
-    const countByRetreat = Object.fromEntries(
-      paidCounts.map((c) => [c.retreatId, c._count])
+    const spotsLeftByRetreat = await getRetreatSpotsLeftMap(
+      retreats.map((retreat) => retreat.id),
     );
+
     return retreats.map((r) => ({
       ...r,
-      spotsLeft: Math.max(0, (r.maxPeople ?? 12) - (countByRetreat[r.id] ?? 0)),
+      spotsLeft: spotsLeftByRetreat.get(r.id) ?? 0,
     }));
   } catch (error) {
     console.error("Error fetching retreats:", error);
@@ -150,7 +146,7 @@ export default async function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {retreats.map((retreat: any) => (
+          {retreats.map((retreat) => (
             <RetreatCard key={retreat.id} retreat={retreat} />
           ))}
         </div>

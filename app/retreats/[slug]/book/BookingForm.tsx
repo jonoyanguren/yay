@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ImageGallery from "@/components/ImageGallery";
 import type { RetreatRoomTypeWithAvailability } from "@/lib/types";
 import type { RetreatExtraActivityRow } from "@/lib/types";
@@ -32,8 +32,10 @@ export default function BookingForm({
   roomTypes,
   extras,
 }: Props) {
+  const firstAvailableRoomId =
+    roomTypes.find((room) => room.available > 0)?.id ?? roomTypes[0]?.id ?? "";
   const [selectedRoomTypeId, setSelectedRoomTypeId] = useState<string>(
-    roomTypes[0]?.id ?? "",
+    firstAvailableRoomId,
   );
   const [extraQuantities, setExtraQuantities] = useState<
     Record<string, number>
@@ -56,11 +58,20 @@ export default function BookingForm({
     ? bookingTotalCents
     : Math.min(reservationDepositCents, bookingTotalCents);
 
+  useEffect(() => {
+    if (selectedRoom && selectedRoom.available > 0) return;
+    setSelectedRoomTypeId(firstAvailableRoomId);
+  }, [firstAvailableRoomId, selectedRoom]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     if (!selectedRoomTypeId || !email.trim()) {
       setError("Elige una habitación e indica tu email.");
+      return;
+    }
+    if (!selectedRoom || selectedRoom.available <= 0) {
+      setError("La habitación seleccionada ya no tiene plazas disponibles.");
       return;
     }
     setLoading(true);
@@ -119,10 +130,12 @@ export default function BookingForm({
           {roomTypes.map((room) => (
             <label
               key={room.id}
-              className={`relative flex items-start gap-5 p-6 rounded-xl border-2 cursor-pointer transition-colors ${
-                selectedRoomTypeId === room.id
+              className={`relative flex items-start gap-5 p-6 rounded-xl border-2 transition-colors ${
+                room.available <= 0
+                  ? "border-gray/10 bg-gray/5 cursor-not-allowed opacity-70"
+                  : selectedRoomTypeId === room.id
                   ? "border-black bg-sand-light"
-                  : "border-gray/15 bg-white hover:border-gray/30"
+                  : "border-gray/15 bg-white hover:border-gray/30 cursor-pointer"
               }`}
             >
               <input
@@ -131,6 +144,7 @@ export default function BookingForm({
                 value={room.id}
                 checked={selectedRoomTypeId === room.id}
                 onChange={() => setSelectedRoomTypeId(room.id)}
+                disabled={room.available <= 0}
                 className="h-5 w-5 shrink-0 accent-black cursor-pointer mt-1"
               />
 
@@ -154,6 +168,11 @@ export default function BookingForm({
                 )}
                 <span className="text-xl mt-2 font-semibold text-green">
                   {formatPrice(room.price_cents)}
+                </span>
+                <span className="text-sm mt-1 text-black/60">
+                  {room.available <= 0
+                    ? "Completa"
+                    : `${room.available} ${room.available === 1 ? "plaza" : "plazas"} disponibles`}
                 </span>
               </div>
             </label>

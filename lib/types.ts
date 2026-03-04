@@ -21,7 +21,6 @@ export type Retreat = {
   price: string;
   reservationDepositCents: number;
   chargeFullAmount: boolean;
-  maxPeople: number;
   arrivalIntro?: string | null;
   arrivalOptions?: { title: string; detail: string }[] | null;
   hotelName?: string | null;
@@ -52,7 +51,6 @@ export type RetreatSeedData = Omit<
   | "roomTypes"
   | "extraActivities"
   | "bookings"
-  | "maxPeople"
   | "reservationDepositCents"
   | "chargeFullAmount"
 >;
@@ -64,7 +62,7 @@ export type RetreatRoomTypeRow = {
   description?: string;
   images: string[];
   price_cents: number;
-  max_quantity: number;
+  max_people: number;
 };
 
 export type RetreatExtraActivityRow = {

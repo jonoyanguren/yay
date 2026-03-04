@@ -56,7 +56,7 @@ export async function PATCH(
     const data = await request.json();
 
     // Update retreat with nested relations
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       ...(data.slug !== undefined && { slug: data.slug }),
       ...(data.title !== undefined && { title: data.title }),
       ...(data.location !== undefined && { location: data.location }),
@@ -80,7 +80,6 @@ export async function PATCH(
       ...(data.chargeFullAmount !== undefined && {
         chargeFullAmount: Boolean(data.chargeFullAmount),
       }),
-      ...(data.maxPeople !== undefined && { maxPeople: data.maxPeople }),
       ...(data.published !== undefined && { published: data.published }),
       ...(data.arrivalIntro !== undefined && {
         arrivalIntro: data.arrivalIntro,
@@ -137,7 +136,7 @@ export async function PATCH(
         description?: string;
         images?: string[];
         priceCents: number;
-        maxQuantity: number;
+        maxPeople?: number;
       }>;
       const incomingRoomIds = roomPayload
         .map((rt) => rt.id)
@@ -162,7 +161,7 @@ export async function PATCH(
           description: rt.description ?? "",
           images: rt.images ?? [],
           priceCents: rt.priceCents,
-          maxQuantity: rt.maxQuantity,
+          maxPeople: Math.max(1, Number(rt.maxPeople ?? 1)),
         };
         if (rt.id && existingRoomIds.has(rt.id)) {
           await prisma.retreatRoomType.update({
@@ -175,6 +174,7 @@ export async function PATCH(
           });
         }
       }
+
     }
 
     // Extra activities: sync exact payload (update/create/delete).
@@ -325,10 +325,13 @@ export async function DELETE(
     revalidatePath(`/retreats/${slug}`);
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error deleting retreat:", error);
 
-    if (error.code === "P2025") {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
       return NextResponse.json({ error: "Retreat not found" }, { status: 404 });
     }
 

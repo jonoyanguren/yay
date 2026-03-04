@@ -21,7 +21,6 @@ model Retreat {
   price           String   @default("")
   reservationDepositCents Int @default(60000) @map("reservation_deposit_cents")
   chargeFullAmount Boolean @default(false) @map("charge_full_amount")
-  maxPeople       Int      @default(12) @map("max_people")
   published       Boolean  @default(false)
   arrivalIntro    String?  @map("arrival_intro")
   arrivalOptions  Json?    @map("arrival_options")
@@ -53,7 +52,7 @@ model RetreatRoomType {
   description String?  @default("")
   images      String[] @default([])
   priceCents  Int      @map("price_cents")
-  maxQuantity Int      @map("max_quantity")
+  maxPeople   Int      @default(1) @map("max_people")
 
   retreat   Retreat           @relation(fields: [retreatId], references: [id], onDelete: Cascade)
   roomSlots BookingRoomSlot[]
