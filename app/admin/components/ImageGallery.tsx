@@ -38,24 +38,11 @@ export default function ImageGallery({
     setDeletingIndex(index);
 
     try {
-      // Get password from localStorage
-      const password = localStorage.getItem("adminPassword");
-      if (!password) {
-        await Swal.fire({
-          icon: "error",
-          title: "No autenticado",
-          text: "Inicia sesión de admin para eliminar imágenes.",
-        });
-        setDeletingIndex(null);
-        return;
-      }
-
       // Delete from Cloudinary via API
       const response = await fetch("/api/cloudinary/delete", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${password}`,
         },
         body: JSON.stringify({ imageUrl }),
       });

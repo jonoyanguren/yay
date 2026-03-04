@@ -1,4 +1,4 @@
-import { requireAuth } from "@/lib/auth";
+import { requireAdminAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
@@ -7,8 +7,8 @@ import { NextResponse } from "next/server";
  * Returns waitlist entries with retreat info
  */
 export async function GET(request: Request) {
-  const authError = await requireAuth(request);
-  if (authError) return authError;
+  const auth = await requireAdminAuth(request, "waitlist:read");
+  if (auth instanceof Response) return auth;
 
   try {
     const { searchParams } = new URL(request.url);

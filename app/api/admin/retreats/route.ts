@@ -1,4 +1,4 @@
-import { requireAuth } from "@/lib/auth";
+import { requireAdminAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
@@ -9,8 +9,8 @@ import { Prisma } from "@prisma/client";
  * Returns all retreats (published and unpublished)
  */
 export async function GET(request: Request) {
-  const authError = await requireAuth(request);
-  if (authError) return authError;
+  const auth = await requireAdminAuth(request, "retreats:read");
+  if (auth instanceof Response) return auth;
 
   try {
     const retreats = await prisma.retreat.findMany({
@@ -36,8 +36,8 @@ export async function GET(request: Request) {
  * Creates a new retreat
  */
 export async function POST(request: Request) {
-  const authError = await requireAuth(request);
-  if (authError) return authError;
+  const auth = await requireAdminAuth(request, "retreats:write");
+  if (auth instanceof Response) return auth;
 
   try {
     const data = await request.json();

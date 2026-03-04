@@ -32,7 +32,7 @@ export async function POST(
   }
 
   const retreat = await prisma.retreat.findUnique({
-    where: { slug },
+    where: { slug, published: true },
     select: { id: true, title: true, slug: true },
   });
 

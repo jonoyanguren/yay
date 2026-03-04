@@ -32,19 +32,14 @@ export default function AdminPage() {
   };
 
   const fetchRetreats = async () => {
-    const password = localStorage.getItem("adminPassword");
-    if (!password) return;
-
     try {
-      const res = await fetch("/api/admin/retreats", {
-        headers: {
-          Authorization: `Bearer ${password}`,
-        },
-      });
+      const res = await fetch("/api/admin/retreats");
 
       if (res.ok) {
         const data = await res.json();
         setRetreats(data);
+      } else if (res.status === 401) {
+        router.push("/admin/login");
       } else {
         setError("Error fetching retreats");
       }
@@ -72,15 +67,9 @@ export default function AdminPage() {
     });
     if (!result.isConfirmed) return;
 
-    const password = localStorage.getItem("adminPassword");
-    if (!password) return;
-
     try {
       const res = await fetch(`/api/admin/retreats/${slug}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${password}`,
-        },
       });
 
       if (res.ok) {
@@ -99,15 +88,9 @@ export default function AdminPage() {
   };
 
   const handleTogglePublish = async (slug: string) => {
-    const password = localStorage.getItem("adminPassword");
-    if (!password) return;
-
     try {
       const res = await fetch(`/api/admin/retreats/${slug}/publish`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${password}`,
-        },
       });
 
       if (res.ok) {
@@ -125,8 +108,8 @@ export default function AdminPage() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("adminPassword");
+  const handleLogout = async () => {
+    await fetch("/api/admin/auth/logout", { method: "POST" });
     router.push("/admin/login");
   };
 

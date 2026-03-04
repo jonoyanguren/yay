@@ -14,8 +14,8 @@ export async function GET(
     const { slug } = await params;
     
     // First get the retreat ID from slug
-    const retreat = await prisma.retreat.findUnique({
-      where: { slug },
+    const retreat = await prisma.retreat.findFirst({
+      where: { slug, published: true },
       select: { id: true },
     });
 

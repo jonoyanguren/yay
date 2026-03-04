@@ -1,4 +1,4 @@
-import { requireAuth } from "@/lib/auth";
+import { requireAdminAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
@@ -12,8 +12,8 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const authError = await requireAuth(request);
-  if (authError) return authError;
+  const auth = await requireAdminAuth(request, "waitlist:write");
+  if (auth instanceof Response) return auth;
 
   try {
     const { id } = await params;
@@ -73,8 +73,8 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const authError = await requireAuth(request);
-  if (authError) return authError;
+  const auth = await requireAdminAuth(request, "waitlist:write");
+  if (auth instanceof Response) return auth;
 
   try {
     const { id } = await params;

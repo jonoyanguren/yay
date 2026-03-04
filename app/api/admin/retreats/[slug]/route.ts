@@ -1,4 +1,4 @@
-import { requireAuth } from "@/lib/auth";
+import { requireAdminAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
@@ -12,8 +12,8 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ slug: string }> },
 ) {
-  const authError = await requireAuth(request);
-  if (authError) return authError;
+  const auth = await requireAdminAuth(request, "retreats:read");
+  if (auth instanceof Response) return auth;
 
   try {
     const { slug } = await params;
@@ -48,8 +48,8 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ slug: string }> },
 ) {
-  const authError = await requireAuth(request);
-  if (authError) return authError;
+  const auth = await requireAdminAuth(request, "retreats:write");
+  if (auth instanceof Response) return auth;
 
   try {
     const { slug } = await params;
@@ -289,8 +289,8 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ slug: string }> },
 ) {
-  const authError = await requireAuth(request);
-  if (authError) return authError;
+  const auth = await requireAdminAuth(request, "retreats:write");
+  if (auth instanceof Response) return auth;
 
   try {
     const { slug } = await params;

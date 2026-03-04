@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
-import { requireAuth } from "@/lib/auth";
+import { requireAdminAuth } from "@/lib/auth";
 
 /**
  * DELETE /api/cloudinary/delete
  * Deletes an image from Cloudinary
  */
 export async function DELETE(request: Request) {
-  const authError = await requireAuth(request);
-  if (authError) return authError;
+  const auth = await requireAdminAuth(request, "media:delete");
+  if (auth instanceof Response) return auth;
 
   try {
     const { imageUrl } = await request.json();

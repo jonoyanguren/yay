@@ -15,19 +15,14 @@ export default function EditRetreatPage() {
 
   useEffect(() => {
     const fetchRetreat = async () => {
-      const password = localStorage.getItem("adminPassword");
-      if (!password) return;
-
       try {
-        const res = await fetch(`/api/admin/retreats/${id}`, {
-          headers: {
-            Authorization: `Bearer ${password}`,
-          },
-        });
+        const res = await fetch(`/api/admin/retreats/${id}`);
 
         if (res.ok) {
           const data = await res.json();
           setRetreat(data);
+        } else if (res.status === 401) {
+          setError("Not authenticated");
         } else {
           setError("Error fetching retreat");
         }

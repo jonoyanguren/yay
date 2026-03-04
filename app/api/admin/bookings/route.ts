@@ -1,4 +1,4 @@
-import { requireAuth } from "@/lib/auth";
+import { requireAdminAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { sendBookingConfirmationEmail } from "@/lib/email";
@@ -8,8 +8,8 @@ import { sendBookingConfirmationEmail } from "@/lib/email";
  * Returns all bookings with related data
  */
 export async function GET(request: Request) {
-  const authError = await requireAuth(request);
-  if (authError) return authError;
+  const auth = await requireAdminAuth(request, "bookings:read");
+  if (auth instanceof Response) return auth;
 
   try {
     const bookings = await prisma.booking.findMany({
@@ -61,8 +61,8 @@ export async function GET(request: Request) {
  * Creates a new booking manually
  */
 export async function POST(request: Request) {
-  const authError = await requireAuth(request);
-  if (authError) return authError;
+  const auth = await requireAdminAuth(request, "bookings:write");
+  if (auth instanceof Response) return auth;
 
   try {
     const data = await request.json();

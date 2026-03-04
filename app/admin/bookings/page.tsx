@@ -135,19 +135,14 @@ export default function BookingsPage() {
     });
 
   const fetchBookings = async () => {
-    const password = localStorage.getItem("adminPassword");
-    if (!password) return;
-
     try {
-      const res = await fetch("/api/admin/bookings", {
-        headers: {
-          Authorization: `Bearer ${password}`,
-        },
-      });
+      const res = await fetch("/api/admin/bookings");
 
       if (res.ok) {
         const data = await res.json();
         setBookings(data);
+      } else if (res.status === 401) {
+        router.push("/admin/login");
       } else {
         setError("Error fetching bookings");
       }
@@ -159,15 +154,8 @@ export default function BookingsPage() {
   };
 
   const fetchRetreats = async () => {
-    const password = localStorage.getItem("adminPassword");
-    if (!password) return;
-
     try {
-      const res = await fetch("/api/admin/retreats", {
-        headers: {
-          Authorization: `Bearer ${password}`,
-        },
-      });
+      const res = await fetch("/api/admin/retreats");
 
       if (res.ok) {
         const data = await res.json();
@@ -187,15 +175,11 @@ export default function BookingsPage() {
   }, []);
 
   const handleStatusChange = async (bookingId: string, newStatus: string) => {
-    const password = localStorage.getItem("adminPassword");
-    if (!password) return;
-
     try {
       const res = await fetch(`/api/admin/bookings/${bookingId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${password}`,
         },
         body: JSON.stringify({ status: newStatus }),
       });
@@ -215,15 +199,11 @@ export default function BookingsPage() {
 
   const handleCreateBooking = async (e: React.FormEvent) => {
     e.preventDefault();
-    const password = localStorage.getItem("adminPassword");
-    if (!password) return;
-
     try {
       const res = await fetch("/api/admin/bookings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${password}`,
         },
         body: JSON.stringify(newBooking),
       });
@@ -264,15 +244,9 @@ export default function BookingsPage() {
     });
     if (!result.isConfirmed) return;
 
-    const password = localStorage.getItem("adminPassword");
-    if (!password) return;
-
     try {
       const res = await fetch(`/api/admin/bookings/${bookingId}/send-email`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${password}`,
-        },
       });
 
       if (res.ok) {
@@ -301,16 +275,10 @@ export default function BookingsPage() {
       return;
     }
 
-    const password = localStorage.getItem("adminPassword");
-    if (!password) return;
-
     setDeletingBookingId(bookingId);
     try {
       const res = await fetch(`/api/admin/bookings/${bookingId}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${password}`,
-        },
       });
 
       if (res.ok) {
@@ -329,8 +297,8 @@ export default function BookingsPage() {
 
   const selectedRetreat = retreats.find((r) => r.id === newBooking.retreatId);
 
-  const handleLogout = () => {
-    localStorage.removeItem("adminPassword");
+  const handleLogout = async () => {
+    await fetch("/api/admin/auth/logout", { method: "POST" });
     router.push("/admin/login");
   };
 

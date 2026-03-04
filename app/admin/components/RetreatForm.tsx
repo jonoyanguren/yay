@@ -241,11 +241,6 @@ export default function RetreatForm({
       | { roomTypes?: undefined; extraActivities: ExtraActivity[] },
   ) => {
     if (!isEdit || !retreat?.slug) return;
-    const password = localStorage.getItem("adminPassword");
-    if (!password) {
-      router.push("/admin/login");
-      return;
-    }
 
     const body: Record<string, unknown> = {};
     if (payload.roomTypes) {
@@ -275,7 +270,6 @@ export default function RetreatForm({
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${password}`,
       },
       body: JSON.stringify(body),
     });
@@ -767,12 +761,6 @@ export default function RetreatForm({
     setSuccessMessage("");
     setIsLoading(true);
 
-    const password = localStorage.getItem("adminPassword");
-    if (!password) {
-      router.push("/admin/login");
-      return;
-    }
-
     try {
       const data = {
         ...formData,
@@ -833,7 +821,6 @@ export default function RetreatForm({
         method,
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${password}`,
         },
         body: JSON.stringify(data),
       });

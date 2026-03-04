@@ -7,35 +7,81 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum AdminRole {
+  SUPERADMIN
+  EDITOR
+  SUPPORT
+}
+
+model AdminUser {
+  id                String         @id @default(uuid())
+  singletonKey      Int            @default(1) @unique @map("singleton_key")
+  email             String         @unique
+  passwordHash      String         @map("password_hash")
+  role              AdminRole      @default(SUPERADMIN)
+  isActive          Boolean        @default(true) @map("is_active")
+  tokenVersion      Int            @default(0) @map("token_version")
+  failedLoginCount  Int            @default(0) @map("failed_login_count")
+  lockedUntil       DateTime?      @map("locked_until")
+  lastLoginAt       DateTime?      @map("last_login_at")
+  passwordChangedAt DateTime?      @map("password_changed_at")
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+
+  sessions          AdminSession[]
+
+  @@index([isActive])
+  @@map("admin_users")
+}
+
+model AdminSession {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  tokenId   String    @unique @map("token_id")
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  ipAddress String?   @map("ip_address")
+  userAgent String?   @map("user_agent")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  user      AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@index([revokedAt])
+  @@map("admin_sessions")
+}
+
 model Retreat {
-  id              String   @id @default(uuid())
-  slug            String   @unique
-  title           String
-  location        String   @default("")
-  description     String   @default("")
-  fullDescription String   @default("") @map("full_description")
-  activitiesImage String?  @map("activities_image")
-  image           String   @default("")
-  images          String[] @default([])
-  date            String   @default("")
-  price           String   @default("")
-  reservationDepositCents Int @default(60000) @map("reservation_deposit_cents")
-  chargeFullAmount Boolean @default(false) @map("charge_full_amount")
-  published       Boolean  @default(false)
-  arrivalIntro    String?  @map("arrival_intro")
-  arrivalOptions  Json?    @map("arrival_options")
-  hotelName       String?  @map("hotel_name")
-  hotelUrl        String?  @map("hotel_url")
-  videoUrl        String?  @map("video_url")
-  accommodationTitle       String?   @map("accommodation_title")
-  accommodationDescription String?   @map("accommodation_description")
-  accommodationImages      String[]  @default([]) @map("accommodation_images")
-  dayByDay        Json?    @map("day_by_day")
-  includes        Json?    @map("includes")
-  notIncludes     Json?    @map("not_includes")
-  bgColor         String?  @map("bg_color")
-  textHighlights  Json?    @map("text_highlights")
-  createdAt       DateTime @default(now()) @map("created_at")
+  id                       String   @id @default(uuid())
+  slug                     String   @unique
+  title                    String
+  location                 String   @default("")
+  description              String   @default("")
+  fullDescription          String   @default("") @map("full_description")
+  activitiesImage          String?  @map("activities_image")
+  image                    String   @default("")
+  images                   String[] @default([])
+  date                     String   @default("")
+  price                    String   @default("")
+  reservationDepositCents  Int      @default(60000) @map("reservation_deposit_cents")
+  chargeFullAmount         Boolean  @default(false) @map("charge_full_amount")
+  published                Boolean  @default(false)
+  arrivalIntro             String?  @map("arrival_intro")
+  arrivalOptions           Json?    @map("arrival_options")
+  hotelName                String?  @map("hotel_name")
+  hotelUrl                 String?  @map("hotel_url")
+  videoUrl                 String?  @map("video_url")
+  accommodationTitle       String?  @map("accommodation_title")
+  accommodationDescription String?  @map("accommodation_description")
+  accommodationImages      String[] @default([]) @map("accommodation_images")
+  dayByDay                 Json?    @map("day_by_day")
+  includes                 Json?    @map("includes")
+  notIncludes              Json?    @map("not_includes")
+  bgColor                  String?  @map("bg_color")
+  textHighlights           Json?    @map("text_highlights")
+  createdAt                DateTime @default(now()) @map("created_at")
 
   roomTypes       RetreatRoomType[]
   extraActivities RetreatExtraActivity[]
@@ -78,16 +124,16 @@ model RetreatExtraActivity {
 }
 
 model Booking {
-  id              String   @id @default(uuid())
-  retreatId       String   @map("retreat_id")
-  stripeSessionId String?  @unique @map("stripe_session_id")
-  stripeCustomerId String? @map("stripe_customer_id")
-  stripeAmountTotalCents Int? @map("stripe_amount_total_cents")
-  stripePaymentType String? @map("stripe_payment_type")
-  customerEmail   String   @map("customer_email")
-  customerName    String?  @map("customer_name")
-  status          String   @default("pending")
-  createdAt       DateTime @default(now()) @map("created_at")
+  id                     String   @id @default(uuid())
+  retreatId              String   @map("retreat_id")
+  stripeSessionId        String?  @unique @map("stripe_session_id")
+  stripeCustomerId       String?  @map("stripe_customer_id")
+  stripeAmountTotalCents Int?     @map("stripe_amount_total_cents")
+  stripePaymentType      String?  @map("stripe_payment_type")
+  customerEmail          String   @map("customer_email")
+  customerName           String?  @map("customer_name")
+  status                 String   @default("pending")
+  createdAt              DateTime @default(now()) @map("created_at")
 
   retreat   Retreat           @relation(fields: [retreatId], references: [id])
   roomSlots BookingRoomSlot[]
@@ -121,13 +167,13 @@ model BookingExtra {
 }
 
 model WaitlistEntry {
-  id          String   @id @default(uuid())
-  retreatId   String   @map("retreat_id")
-  email       String
-  status      String   @default("pending")
-  notes       String?  @default("")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id        String   @id @default(uuid())
+  retreatId String   @map("retreat_id")
+  email     String
+  status    String   @default("pending")
+  notes     String?  @default("")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   retreat Retreat @relation(fields: [retreatId], references: [id], onDelete: Cascade)
 

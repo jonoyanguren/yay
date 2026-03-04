@@ -59,20 +59,17 @@ export default function WaitlistPage() {
     });
 
   const fetchWaitlist = useCallback(async () => {
-    const password = localStorage.getItem("adminPassword");
-    if (!password) return;
-
     try {
       const params = new URLSearchParams();
       if (filterStatus !== "all") params.set("status", filterStatus);
       if (filterRetreatId !== "all") params.set("retreatId", filterRetreatId);
       const query = params.toString() ? `?${params.toString()}` : "";
-      const res = await fetch(`/api/admin/waitlist${query}`, {
-        headers: {
-          Authorization: `Bearer ${password}`,
-        },
-      });
+      const res = await fetch(`/api/admin/waitlist${query}`);
       if (!res.ok) {
+        if (res.status === 401) {
+          router.push("/admin/login");
+          return;
+        }
         setError("Error cargando waitlist");
         return;
       }
@@ -86,15 +83,8 @@ export default function WaitlistPage() {
   }, [filterRetreatId, filterStatus]);
 
   const fetchRetreats = useCallback(async () => {
-    const password = localStorage.getItem("adminPassword");
-    if (!password) return;
-
     try {
-      const res = await fetch("/api/admin/retreats", {
-        headers: {
-          Authorization: `Bearer ${password}`,
-        },
-      });
+      const res = await fetch("/api/admin/retreats");
       if (!res.ok) return;
       const data = await res.json();
       const mapped = (Array.isArray(data) ? data : [])
@@ -133,15 +123,12 @@ export default function WaitlistPage() {
     id: string,
     status: WaitlistEntry["status"],
   ) => {
-    const password = localStorage.getItem("adminPassword");
-    if (!password) return;
     setSavingId(id);
     try {
       const res = await fetch(`/api/admin/waitlist/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${password}`,
         },
         body: JSON.stringify({ status }),
       });
@@ -172,15 +159,10 @@ export default function WaitlistPage() {
     });
     if (!result.isConfirmed) return;
 
-    const password = localStorage.getItem("adminPassword");
-    if (!password) return;
     setSavingId(entry.id);
     try {
       const res = await fetch(`/api/admin/waitlist/${entry.id}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${password}`,
-        },
       });
       if (!res.ok) {
         await showToast("error", "No se pudo borrar");
@@ -195,8 +177,8 @@ export default function WaitlistPage() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("adminPassword");
+  const handleLogout = async () => {
+    await fetch("/api/admin/auth/logout", { method: "POST" });
     router.push("/admin/login");
   };
 
