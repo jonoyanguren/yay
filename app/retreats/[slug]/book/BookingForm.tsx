@@ -32,11 +32,7 @@ export default function BookingForm({
   roomTypes,
   extras,
 }: Props) {
-  const firstAvailableRoomId =
-    roomTypes.find((room) => room.available > 0)?.id ?? roomTypes[0]?.id ?? "";
-  const [selectedRoomTypeId, setSelectedRoomTypeId] = useState<string>(
-    firstAvailableRoomId,
-  );
+  const [selectedRoomTypeId, setSelectedRoomTypeId] = useState<string>("");
   const [extraQuantities, setExtraQuantities] = useState<
     Record<string, number>
   >(() => Object.fromEntries(extras.map((e) => [e.id, 0])));
@@ -48,6 +44,10 @@ export default function BookingForm({
     useState(false);
 
   const selectedRoom = roomTypes.find((r) => r.id === selectedRoomTypeId);
+  const hasValidSelectedRoom =
+    Boolean(selectedRoomTypeId) &&
+    Boolean(selectedRoom) &&
+    (selectedRoom?.available ?? 0) > 0;
   const roomTotal = selectedRoom ? selectedRoom.price_cents : 0;
   const extrasTotal = extras.reduce(
     (sum, e) => sum + e.price_cents * (extraQuantities[e.id] ?? 0),
@@ -59,9 +59,10 @@ export default function BookingForm({
     : Math.min(reservationDepositCents, bookingTotalCents);
 
   useEffect(() => {
+    if (!selectedRoomTypeId) return;
     if (selectedRoom && selectedRoom.available > 0) return;
-    setSelectedRoomTypeId(firstAvailableRoomId);
-  }, [firstAvailableRoomId, selectedRoom]);
+    setSelectedRoomTypeId("");
+  }, [selectedRoomTypeId, selectedRoom]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -432,9 +433,18 @@ export default function BookingForm({
           type="submit"
           size="lg"
           className="w-full mt-8"
-          disabled={loading || totalCents <= 0 || !acceptedCancellationPolicy}
+          disabled={
+            loading ||
+            totalCents <= 0 ||
+            !acceptedCancellationPolicy ||
+            !hasValidSelectedRoom
+          }
         >
-          {loading ? "Preparando pago…" : "Pagar con Stripe"}
+          {loading
+            ? "Preparando pago…"
+            : !hasValidSelectedRoom
+              ? "Selecciona una habitación"
+              : "Pagar con Stripe"}
         </Button>
       </section>
     </form>

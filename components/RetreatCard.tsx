@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useState } from "react";
 
 interface RetreatCardProps {
   retreat: {
@@ -15,6 +18,7 @@ interface RetreatCardProps {
 }
 
 export default function RetreatCard({ retreat }: RetreatCardProps) {
+  const [isNavigating, setIsNavigating] = useState(false);
   const imageUrl =
     retreat.images?.[0] || retreat.image || "/assets/placeholder.jpg";
   const spotsLeft = retreat.spotsLeft;
@@ -44,6 +48,11 @@ export default function RetreatCard({ retreat }: RetreatCardProps) {
             {spotsLeft <= 0
               ? "No quedan plazas"
               : `${spotsLeft} ${spotsLeft === 1 ? "plaza" : "plazas"} disponibles`}
+          </span>
+        )}
+        {isPublished && isNavigating && (
+          <span className="absolute bottom-3 left-3 px-3 py-1.5 rounded-full text-sm font-bold bg-black/80 text-white shadow-md">
+            Abriendo...
           </span>
         )}
       </div>
@@ -80,8 +89,17 @@ export default function RetreatCard({ retreat }: RetreatCardProps) {
   return (
     <Link
       href={`/retreats/${retreat.slug}`}
-      prefetch={false}
-      className="group block h-full rounded-xl overflow-hidden"
+      onClick={(event) => {
+        if (isNavigating) {
+          event.preventDefault();
+          return;
+        }
+        setIsNavigating(true);
+      }}
+      aria-disabled={isNavigating}
+      className={`group block h-full rounded-xl overflow-hidden ${
+        isNavigating ? "pointer-events-none cursor-progress opacity-90" : ""
+      }`}
     >
       {cardContent}
     </Link>
