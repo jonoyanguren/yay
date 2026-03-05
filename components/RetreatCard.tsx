@@ -29,7 +29,7 @@ export default function RetreatCard({ retreat }: RetreatCardProps) {
       <div className="aspect-4/3 bg-gray/20 relative">
         <Image
           src={imageUrl}
-          alt={retreat.title}
+          alt={`${retreat.title}, retiro de bienestar en ${retreat.location}`}
           fill
           className={`object-cover transition-transform duration-500 ${
             isPublished ? "group-hover:scale-105" : "grayscale"

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { Metadata } from "next";
 import Title from "@/components/ui/Title";
 import ImageGallery from "@/components/ImageGallery";
 import TrackMetaOnMount from "@/components/analytics/TrackMetaOnMount";
@@ -31,6 +32,8 @@ interface DayItem {
 interface RetreatTextHighlights {
   fullDescription?: string[];
 }
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 function normalizeHighlights(value: unknown): RetreatTextHighlights {
   const empty: RetreatTextHighlights = {
@@ -84,6 +87,57 @@ async function getRetreatBySlug(slug: string) {
   });
 }
 
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const retreat = await getRetreatBySlug(slug);
+
+  if (!retreat) {
+    return {
+      title: "Retiro no encontrado",
+      description: "El retiro solicitado no está disponible en este momento.",
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const canonicalPath = `/retreats/${retreat.slug}`;
+  const imageUrl = retreat.images?.[0] || retreat.image || "/assets/placeholder.jpg";
+  const fullImageUrl = imageUrl.startsWith("http")
+    ? imageUrl
+    : `${siteUrl}${imageUrl}`;
+  const title = `${retreat.title} | Retiro bienestar y retiro yoga`;
+  const description =
+    retreat.description ||
+    `Conoce ${retreat.title}, un retiro bienestar y retiro yoga en ${retreat.location}.`;
+
+  return {
+    title,
+    description,
+    keywords: [
+      "retiros bienestar",
+      "retiros yoga",
+      `retiro ${retreat.location.toLowerCase()}`,
+      retreat.title.toLowerCase(),
+    ],
+    alternates: {
+      canonical: canonicalPath,
+    },
+    openGraph: {
+      title,
+      description,
+      url: canonicalPath,
+      type: "article",
+      images: [{ url: fullImageUrl, alt: retreat.title }],
+      locale: "es_ES",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [fullImageUrl],
+    },
+  };
+}
+
 export default async function RetreatPage({ params }: PageProps) {
   const { slug } = await params;
   const retreat = await getRetreatBySlug(slug);
@@ -134,9 +188,35 @@ export default async function RetreatPage({ params }: PageProps) {
     retreat.images?.[0] || retreat.image || "/assets/placeholder.jpg";
   const galleryImages = retreat.images || [];
   const textHighlights = normalizeHighlights(retreat.textHighlights);
+  const retreatUrl = `${siteUrl}/retreats/${retreat.slug}`;
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: retreat.title,
+    description: retreat.description,
+    image: galleryImages.length > 0 ? galleryImages : [imageUrl],
+    category: "Retiros bienestar y yoga",
+    brand: {
+      "@type": "Brand",
+      name: "YaY Retreats",
+    },
+    offers: {
+      "@type": "Offer",
+      url: retreatUrl,
+      priceCurrency: "EUR",
+      availability:
+        spotsLeft > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/SoldOut",
+    },
+  };
 
   return (
     <div className="pb-24">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
       <ScrollToTopOnMount />
       <TrackMetaOnMount
         eventName="ViewContent"

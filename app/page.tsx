@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Button from "@/components/ui/Button";
 import RetreatCard from "@/components/RetreatCard";
 import HeroTextLoop from "@/components/HeroTextLoop";
@@ -5,6 +6,23 @@ import Image from "next/image";
 import { FaInstagram, FaWhatsapp } from "react-icons/fa";
 import { prisma } from "@/lib/prisma";
 import { getRetreatSpotsLeftMap } from "@/lib/retreat-capacity";
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
+export const metadata: Metadata = {
+  title: "Retiros bienestar y retiros yoga en grupo",
+  description:
+    "Descubre retiros bienestar y retiros yoga diseñados para desconectar, descansar y recuperar energía con experiencias reales.",
+  keywords: [
+    "retiros bienestar",
+    "retiros yoga",
+    "retiros para desconectar",
+    "retiro de bienestar en grupo",
+  ],
+  alternates: {
+    canonical: "/",
+  },
+};
 
 async function getRetreats() {
   try {
@@ -40,8 +58,23 @@ export const revalidate = 60;
 
 export default async function Home() {
   const retreats = await getRetreats();
+  const localBusinessSchema = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: "YaY Retreats",
+    description:
+      "Retiros bienestar y retiros yoga con enfoque práctico para desconectar del estrés digital.",
+    url: siteUrl,
+    areaServed: "ES",
+    sameAs: ["https://www.instagram.com/yay.experiences"],
+  };
+
   return (
     <div className="flex flex-col gap-24 pb-24">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+      />
       {/* Hero Section */}
       <section className="relative h-[80vh] flex items-center justify-center px-4 bg-black text-white overflow-hidden">
         <video

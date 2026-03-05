@@ -61,7 +61,7 @@ export default function AccommodationSection({
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={image}
-                  alt={`${title} ${index + 1}`}
+                  alt={`Alojamiento de ${title} - foto ${index + 1}`}
                   className="w-full h-full object-cover object-center"
                 />
               </div>

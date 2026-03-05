@@ -153,7 +153,9 @@ export default function ImageGallery({
   if (images.length === 0) return null;
 
   const alt = (i: number) =>
-    altPrefix ? `${altPrefix} - Imagen ${i + 1}` : `Imagen ${i + 1}`;
+    altPrefix
+      ? `${altPrefix} - Foto ${i + 1} del retiro`
+      : `Foto ${i + 1} del retiro`;
 
   const canUseStackLayout = shouldTrackStackScroll;
 

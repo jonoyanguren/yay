@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
 import {
@@ -10,6 +11,21 @@ import {
   FaWhatsapp,
 } from "react-icons/fa";
 import { BiCoffee, BiMusic, BiCookie, BiTime } from "react-icons/bi";
+
+export const metadata: Metadata = {
+  title: "Concepto de retiros bienestar sin postureo",
+  description:
+    "Conoce nuestro enfoque de retiros bienestar y retiros yoga: práctico, accesible y pensado para desconectar de verdad.",
+  keywords: [
+    "retiros bienestar",
+    "concepto retiros yoga",
+    "retiros para desconectar",
+    "bienestar practico",
+  ],
+  alternates: {
+    canonical: "/concept",
+  },
+};
 
 export default function ConceptPage() {
   return (

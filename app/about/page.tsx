@@ -1,4 +1,20 @@
+import type { Metadata } from "next";
 import React from "react";
+
+export const metadata: Metadata = {
+  title: "Sobre YaY Retreats",
+  description:
+    "Descubre la filosofía de YaY Retreats: retiros bienestar y retiros yoga para descansar mejor, moverte y reconectar sin misticismo.",
+  keywords: [
+    "sobre yay retreats",
+    "retiros bienestar",
+    "retiros yoga",
+    "filosofia de bienestar",
+  ],
+  alternates: {
+    canonical: "/about",
+  },
+};
 
 export default function AboutPage() {
   return (
