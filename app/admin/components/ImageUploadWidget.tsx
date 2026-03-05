@@ -27,7 +27,7 @@ declare global {
     cloudinary?: {
       createUploadWidget: (
         options: any,
-        callback: (error: any, result: CloudinaryUploadResult) => void
+        callback: (error: any, result: CloudinaryUploadResult) => void,
       ) => CloudinaryWidget;
     };
   }
@@ -55,8 +55,7 @@ export default function ImageUploadWidget({
       void Swal.fire({
         icon: "error",
         title: "Cloudinary no configurado",
-        text:
-        "Error: Cloudinary no está configurado. Agrega NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME y NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET en tu archivo .env"
+        text: "Error: Cloudinary no está configurado. Agrega NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME y NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET en tu archivo .env",
       });
       return;
     }
@@ -115,12 +114,11 @@ export default function ImageUploadWidget({
         }
 
         if (result.event === "success") {
-          console.log("Imagen subida exitosamente:", result.info.secure_url);
           onUpload(result.info.secure_url);
           // Close widget after successful upload
           widget.close();
         }
-      }
+      },
     );
 
     widget.open();

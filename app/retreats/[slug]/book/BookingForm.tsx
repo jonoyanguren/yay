@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ImageGallery from "@/components/ImageGallery";
 import type { RetreatRoomTypeWithAvailability } from "@/lib/types";
 import type { RetreatExtraActivityRow } from "@/lib/types";
 import Button from "@/components/ui/Button";
-import { trackMeta } from "@/lib/meta-pixel";
+import { trackAnalytics } from "@/lib/analytics";
 
 function formatPrice(cents: number): string {
   return new Intl.NumberFormat("es-ES", {
@@ -27,11 +27,13 @@ type Props = {
 export default function BookingForm({
   retreatId,
   retreatSlug,
+  retreatTitle,
   reservationDepositCents,
   chargeFullAmount,
   roomTypes,
   extras,
 }: Props) {
+  const didTrackBookingFormView = useRef(false);
   const [selectedRoomTypeId, setSelectedRoomTypeId] = useState<string>("");
   const [extraQuantities, setExtraQuantities] = useState<
     Record<string, number>
@@ -57,6 +59,20 @@ export default function BookingForm({
   const totalCents = chargeFullAmount
     ? bookingTotalCents
     : Math.min(reservationDepositCents, bookingTotalCents);
+
+  useEffect(() => {
+    if (didTrackBookingFormView.current) return;
+    didTrackBookingFormView.current = true;
+
+    trackAnalytics("ViewBookingForm", {
+      content_ids: [retreatId],
+      content_type: "product",
+      content_name: retreatTitle,
+      retreat_slug: retreatSlug,
+      room_options_count: roomTypes.length,
+      extras_options_count: extras.length,
+    });
+  }, [retreatId, retreatSlug, retreatTitle, roomTypes.length, extras.length]);
 
   useEffect(() => {
     if (!selectedRoomTypeId) return;
@@ -98,12 +114,30 @@ export default function BookingForm({
         return;
       }
       if (data.url) {
-        trackMeta("AddPaymentInfo", {
+        const selectedExtras = extras.filter(
+          (extra) => (extraQuantities[extra.id] ?? 0) > 0,
+        );
+
+        trackAnalytics("AddPaymentInfo", {
           content_ids: [retreatId, selectedRoomTypeId],
           content_type: "product",
           currency: "EUR",
           value: totalCents / 100,
           num_items: 1,
+          room_type_id: selectedRoomTypeId,
+          room_type_name: selectedRoom?.name ?? "",
+          extras_ids: selectedExtras.map((extra) => extra.id),
+          extras_names: selectedExtras.map((extra) => extra.name),
+          extras_count: selectedExtras.reduce(
+            (sum, extra) => sum + (extraQuantities[extra.id] ?? 0),
+            0,
+          ),
+          extras_total_value:
+            selectedExtras.reduce(
+              (sum, extra) =>
+                sum + extra.price_cents * (extraQuantities[extra.id] ?? 0),
+              0,
+            ) / 100,
         });
 
         const popup = window.open(data.url, "_blank");
@@ -135,8 +169,8 @@ export default function BookingForm({
                 room.available <= 0
                   ? "border-gray/10 bg-gray/5 cursor-not-allowed opacity-70"
                   : selectedRoomTypeId === room.id
-                  ? "border-black bg-sand-light"
-                  : "border-gray/15 bg-white hover:border-gray/30 cursor-pointer"
+                    ? "border-black bg-sand-light"
+                    : "border-gray/15 bg-white hover:border-gray/30 cursor-pointer"
               }`}
             >
               <input
@@ -348,7 +382,9 @@ export default function BookingForm({
           {!chargeFullAmount && (
             <>
               <div className="flex justify-between items-center">
-                <span className="text-xl font-semibold">A pagar ahora (reserva)</span>
+                <span className="text-xl font-semibold">
+                  A pagar ahora (reserva)
+                </span>
                 <span className="text-3xl font-bold text-green">
                   {formatPrice(totalCents)}
                 </span>
@@ -399,7 +435,9 @@ export default function BookingForm({
           </div>
         </div>
         <div className="mt-6 rounded-lg bg-white/70 border border-gray/20 p-4 space-y-3">
-          <p className="text-sm font-medium text-black">Política de cancelación</p>
+          <p className="text-sm font-medium text-black">
+            Política de cancelación
+          </p>
           <p className="text-sm text-black/70">
             Si cancelas con menos de 1 mes de antelación, la reserva abonada no
             podrá devolverse.

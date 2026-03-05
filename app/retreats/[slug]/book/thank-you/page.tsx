@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import PurchaseOnThankYouTracker from "@/components/analytics/PurchaseOnThankYouTracker";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -46,6 +47,7 @@ export default async function ThankYouPage({
           Referencia: {session_id.slice(0, 20)}…
         </p>
       )}
+      {session_id ? <PurchaseOnThankYouTracker sessionId={session_id} /> : null}
       <Link
         href={retreat ? `/retreats/${slug}` : "/"}
         className="inline-flex items-center justify-center rounded-full font-medium bg-black text-white hover:bg-gray-dark h-11 px-8 text-sm"

@@ -2,7 +2,7 @@
 
 import Button from "@/components/ui/Button";
 import { FaInstagram, FaWhatsapp } from "react-icons/fa";
-import { trackMeta } from "@/lib/meta-pixel";
+import { trackAnalytics } from "@/lib/analytics";
 
 export default function ContactPage() {
   return (
@@ -37,7 +37,7 @@ export default function ContactPage() {
               rel="noopener noreferrer"
               className="w-full bg-linear-to-tr from-[#f09433] via-[#bc1888] to-[#cc2366] border-none text-white hover:opacity-90 hover:text-white"
               onClick={() =>
-                trackMeta("ContactInstagramClick", {
+                trackAnalytics("ContactInstagramClick", {
                   source: "contact_page",
                 })
               }
@@ -66,7 +66,7 @@ export default function ContactPage() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() =>
-                trackMeta("ContactWhatsAppCommunityClick", {
+                trackAnalytics("ContactWhatsAppCommunityClick", {
                   source: "contact_page",
                 })
               }

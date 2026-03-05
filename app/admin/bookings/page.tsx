@@ -74,26 +74,30 @@ function formatDate(dateString: string): string {
 
 function calculateTotal(booking: Booking): number {
   let total = 0;
-  
+
   // Room slots
-  booking.roomSlots.forEach(slot => {
+  booking.roomSlots.forEach((slot) => {
     total += slot.retreatRoomType.priceCents * slot.quantity;
   });
-  
+
   // Extras
-  booking.extras.forEach(extra => {
+  booking.extras.forEach((extra) => {
     total += extra.retreatExtraActivity.priceCents * extra.quantity;
   });
-  
+
   return total;
 }
 
 function getChargedCents(booking: Booking): number {
-  if (booking.stripeAmountTotalCents != null) return booking.stripeAmountTotalCents;
+  if (booking.stripeAmountTotalCents != null)
+    return booking.stripeAmountTotalCents;
   if (booking.status === "pending" || booking.status === "cancelled") return 0;
   if (!booking.stripeSessionId) return calculateTotal(booking);
   if (booking.retreat.chargeFullAmount ?? false) return calculateTotal(booking);
-  return Math.min(booking.retreat.reservationDepositCents, calculateTotal(booking));
+  return Math.min(
+    booking.retreat.reservationDepositCents,
+    calculateTotal(booking),
+  );
 }
 
 function getPendingCents(booking: Booking): number {
@@ -103,7 +107,9 @@ function getPendingCents(booking: Booking): number {
 export default function BookingsPage() {
   const router = useRouter();
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [deletingBookingId, setDeletingBookingId] = useState<string | null>(null);
+  const [deletingBookingId, setDeletingBookingId] = useState<string | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -159,7 +165,6 @@ export default function BookingsPage() {
 
       if (res.ok) {
         const data = await res.json();
-        console.log("Retreats fetched:", data);
         setRetreats(data);
       } else {
         console.error("Error fetching retreats, status:", res.status);
@@ -187,7 +192,7 @@ export default function BookingsPage() {
       if (res.ok) {
         const updatedBooking = await res.json();
         setBookings(
-          bookings.map((b) => (b.id === bookingId ? updatedBooking : b))
+          bookings.map((b) => (b.id === bookingId ? updatedBooking : b)),
         );
       } else {
         await showToast("error", "Error actualizando el estado");
@@ -260,7 +265,10 @@ export default function BookingsPage() {
     }
   };
 
-  const handleDeleteBooking = async (bookingId: string, customerEmail: string) => {
+  const handleDeleteBooking = async (
+    bookingId: string,
+    customerEmail: string,
+  ) => {
     const result = await Swal.fire({
       icon: "warning",
       title: "Borrar reserva",
@@ -311,7 +319,8 @@ export default function BookingsPage() {
   }
 
   const filteredBookings = bookings.filter((booking) => {
-    const statusMatches = filterStatus === "all" || booking.status === filterStatus;
+    const statusMatches =
+      filterStatus === "all" || booking.status === filterStatus;
     const retreatMatches =
       filterRetreatId === "all" || booking.retreat.id === filterRetreatId;
     return statusMatches && retreatMatches;
@@ -319,15 +328,15 @@ export default function BookingsPage() {
 
   const stats = {
     total: bookings.length,
-    deposit: bookings.filter(b => b.status === "deposit").length,
-    paid: bookings.filter(b => b.status === "paid").length,
-    pending: bookings.filter(b => b.status === "pending").length,
-    cancelled: bookings.filter(b => b.status === "cancelled").length,
+    deposit: bookings.filter((b) => b.status === "deposit").length,
+    paid: bookings.filter((b) => b.status === "paid").length,
+    pending: bookings.filter((b) => b.status === "pending").length,
+    cancelled: bookings.filter((b) => b.status === "cancelled").length,
     estimatedRevenue: bookings
-      .filter(b => b.status === "paid")
+      .filter((b) => b.status === "paid")
       .reduce((sum, b) => sum + calculateTotal(b), 0),
     realRevenue: bookings
-      .filter(b => b.status === "paid")
+      .filter((b) => b.status === "paid")
       .reduce((sum, b) => sum + getChargedCents(b), 0),
     reservationOnlyRevenue: bookings
       .filter(
@@ -349,7 +358,9 @@ export default function BookingsPage() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold text-gray-800">Reservas</h1>
-            <p className="text-slate-600 mt-2">Gestiona todas las reservas del sistema</p>
+            <p className="text-slate-600 mt-2">
+              Gestiona todas las reservas del sistema
+            </p>
           </div>
           <div className="flex gap-3">
             <button
@@ -399,7 +410,9 @@ export default function BookingsPage() {
           </div>
           <div className="bg-slate-50 p-6 rounded-xl shadow-sm border border-slate-200">
             <p className="text-sm text-slate-600 mb-1">Canceladas</p>
-            <p className="text-3xl font-bold text-slate-600">{stats.cancelled}</p>
+            <p className="text-3xl font-bold text-slate-600">
+              {stats.cancelled}
+            </p>
           </div>
           <div className="bg-violet-50 p-6 rounded-xl shadow-sm border border-violet-100">
             <p className="text-sm text-violet-700 mb-1">Ingresos estimados</p>
@@ -527,18 +540,29 @@ export default function BookingsPage() {
               <tbody className="divide-y divide-slate-100">
                 {filteredBookings.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-6 py-12 text-center text-slate-500">
-                      No hay reservas{filterStatus !== "all" && ` con estado "${filterStatus}"`}.
+                    <td
+                      colSpan={8}
+                      className="px-6 py-12 text-center text-slate-500"
+                    >
+                      No hay reservas
+                      {filterStatus !== "all" &&
+                        ` con estado "${filterStatus}"`}
+                      .
                     </td>
                   </tr>
                 ) : (
                   filteredBookings.map((booking) => (
-                    <tr key={booking.id} className="hover:bg-slate-50/50 transition-colors">
+                    <tr
+                      key={booking.id}
+                      className="hover:bg-slate-50/50 transition-colors"
+                    >
                       <td className="px-6 py-4">
                         <div className="font-medium text-slate-900">
                           {booking.customerName || "Sin nombre"}
                         </div>
-                        <div className="text-sm text-slate-500">{booking.customerEmail}</div>
+                        <div className="text-sm text-slate-500">
+                          {booking.customerEmail}
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <Link
@@ -560,7 +584,8 @@ export default function BookingsPage() {
                             <div className="text-xs text-slate-500 mt-1 space-y-1">
                               {booking.extras.map((extra, idx) => (
                                 <div key={idx}>
-                                  + {extra.quantity}x {extra.retreatExtraActivity.name}
+                                  + {extra.quantity}x{" "}
+                                  {extra.retreatExtraActivity.name}
                                 </div>
                               ))}
                             </div>
@@ -600,10 +625,10 @@ export default function BookingsPage() {
                             booking.status === "paid"
                               ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
                               : booking.status === "deposit"
-                              ? "bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100"
-                              : booking.status === "pending"
-                              ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
-                              : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                                ? "bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100"
+                                : booking.status === "pending"
+                                  ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
+                                  : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
                           }`}
                         >
                           <option value="deposit">Señal</option>
@@ -618,7 +643,9 @@ export default function BookingsPage() {
                       <td className="px-6 py-4">
                         <div className="flex justify-end gap-2">
                           <button
-                            onClick={() => handleSendEmail(booking.id, booking.customerEmail)}
+                            onClick={() =>
+                              handleSendEmail(booking.id, booking.customerEmail)
+                            }
                             className="px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
                             title="Enviar email de confirmación"
                           >
@@ -626,7 +653,10 @@ export default function BookingsPage() {
                           </button>
                           <button
                             onClick={() =>
-                              handleDeleteBooking(booking.id, booking.customerEmail)
+                              handleDeleteBooking(
+                                booking.id,
+                                booking.customerEmail,
+                              )
                             }
                             disabled={deletingBookingId === booking.id}
                             className="px-3 py-1.5 text-xs font-medium text-rose-700 bg-rose-50 hover:bg-rose-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors"
@@ -667,154 +697,161 @@ export default function BookingsPage() {
                   <div className="text-center py-8">
                     <p className="text-slate-600">Cargando retiros...</p>
                   </div>
-                ) : retreats.filter(r => r.published).length === 0 ? (
+                ) : retreats.filter((r) => r.published).length === 0 ? (
                   <div className="text-center py-8">
                     <p className="text-rose-600">
-                      No hay retiros publicados. Publica un retiro primero para crear reservas.
+                      No hay retiros publicados. Publica un retiro primero para
+                      crear reservas.
                     </p>
                   </div>
                 ) : (
                   <>
                     {/* Retiro */}
-                <div>
-                  <label className="block text-sm font-semibold mb-2 text-slate-700">
-                    Retiro *
-                  </label>
-                  <select
-                    required
-                    value={newBooking.retreatId}
-                    onChange={(e) => {
-                      console.log("Selected retreat ID:", e.target.value);
-                      setNewBooking({
-                        ...newBooking,
-                        retreatId: e.target.value,
-                        roomTypeId: "",
-                      });
-                    }}
-                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                  >
-                    <option value="">Seleccionar retiro...</option>
-                    {retreats.filter(r => r.published).length === 0 && (
-                      <option disabled>No hay retiros publicados disponibles</option>
+                    <div>
+                      <label className="block text-sm font-semibold mb-2 text-slate-700">
+                        Retiro *
+                      </label>
+                      <select
+                        required
+                        value={newBooking.retreatId}
+                        onChange={(e) => {
+                          setNewBooking({
+                            ...newBooking,
+                            retreatId: e.target.value,
+                            roomTypeId: "",
+                          });
+                        }}
+                        className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      >
+                        <option value="">Seleccionar retiro...</option>
+                        {retreats.filter((r) => r.published).length === 0 && (
+                          <option disabled>
+                            No hay retiros publicados disponibles
+                          </option>
+                        )}
+                        {retreats
+                          .filter((retreat) => retreat.published)
+                          .map((retreat) => (
+                            <option key={retreat.id} value={retreat.id}>
+                              {retreat.title}
+                            </option>
+                          ))}
+                      </select>
+                      <p className="text-xs text-slate-500 mt-1">
+                        {retreats.filter((r) => r.published).length} retiro(s)
+                        publicado(s)
+                      </p>
+                    </div>
+
+                    {/* Cliente */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-semibold mb-2 text-slate-700">
+                          Email *
+                        </label>
+                        <input
+                          type="email"
+                          required
+                          value={newBooking.customerEmail}
+                          onChange={(e) =>
+                            setNewBooking({
+                              ...newBooking,
+                              customerEmail: e.target.value,
+                            })
+                          }
+                          className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                          placeholder="cliente@email.com"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold mb-2 text-slate-700">
+                          Nombre
+                        </label>
+                        <input
+                          type="text"
+                          value={newBooking.customerName}
+                          onChange={(e) =>
+                            setNewBooking({
+                              ...newBooking,
+                              customerName: e.target.value,
+                            })
+                          }
+                          className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                          placeholder="Nombre del cliente"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Habitación */}
+                    {selectedRetreat && (
+                      <div>
+                        <label className="block text-sm font-semibold mb-2 text-slate-700">
+                          Habitación *
+                        </label>
+                        <select
+                          required
+                          value={newBooking.roomTypeId}
+                          onChange={(e) =>
+                            setNewBooking({
+                              ...newBooking,
+                              roomTypeId: e.target.value,
+                            })
+                          }
+                          className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        >
+                          <option value="">Seleccionar habitación...</option>
+                          {selectedRetreat.roomTypes?.map((room) => (
+                            <option key={room.id} value={room.id}>
+                              {room.name} - {formatPrice(room.priceCents)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     )}
-                    {retreats
-                      .filter(retreat => retreat.published)
-                      .map((retreat) => (
-                        <option key={retreat.id} value={retreat.id}>
-                          {retreat.title}
-                        </option>
-                      ))}
-                  </select>
-                  <p className="text-xs text-slate-500 mt-1">
-                    {retreats.filter(r => r.published).length} retiro(s) publicado(s)
-                  </p>
-                </div>
 
-                {/* Cliente */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold mb-2 text-slate-700">
-                      Email *
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={newBooking.customerEmail}
-                      onChange={(e) =>
-                        setNewBooking({
-                          ...newBooking,
-                          customerEmail: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                      placeholder="cliente@email.com"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold mb-2 text-slate-700">
-                      Nombre
-                    </label>
-                    <input
-                      type="text"
-                      value={newBooking.customerName}
-                      onChange={(e) =>
-                        setNewBooking({
-                          ...newBooking,
-                          customerName: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                      placeholder="Nombre del cliente"
-                    />
-                  </div>
-                </div>
+                    {/* Estado */}
+                    <div>
+                      <label className="block text-sm font-semibold mb-2 text-slate-700">
+                        Estado *
+                      </label>
+                      <select
+                        required
+                        value={newBooking.status}
+                        onChange={(e) =>
+                          setNewBooking({
+                            ...newBooking,
+                            status: e.target.value as
+                              | "paid"
+                              | "deposit"
+                              | "pending"
+                              | "cancelled",
+                          })
+                        }
+                        className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      >
+                        <option value="deposit">Señal</option>
+                        <option value="paid">Pagada</option>
+                        <option value="pending">Pendiente</option>
+                        <option value="cancelled">Cancelada</option>
+                      </select>
+                    </div>
 
-                {/* Habitación */}
-                {selectedRetreat && (
-                  <div>
-                    <label className="block text-sm font-semibold mb-2 text-slate-700">
-                      Habitación *
-                    </label>
-                    <select
-                      required
-                      value={newBooking.roomTypeId}
-                      onChange={(e) =>
-                        setNewBooking({
-                          ...newBooking,
-                          roomTypeId: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                    >
-                      <option value="">Seleccionar habitación...</option>
-                      {selectedRetreat.roomTypes?.map((room) => (
-                        <option key={room.id} value={room.id}>
-                          {room.name} - {formatPrice(room.priceCents)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {/* Estado */}
-                <div>
-                  <label className="block text-sm font-semibold mb-2 text-slate-700">
-                    Estado *
-                  </label>
-                  <select
-                    required
-                    value={newBooking.status}
-                    onChange={(e) =>
-                      setNewBooking({
-                        ...newBooking,
-                        status: e.target.value as "paid" | "deposit" | "pending" | "cancelled",
-                      })
-                    }
-                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                  >
-                    <option value="deposit">Señal</option>
-                    <option value="paid">Pagada</option>
-                    <option value="pending">Pendiente</option>
-                    <option value="cancelled">Cancelada</option>
-                  </select>
-                </div>
-
-                {/* Botones */}
-                <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
-                  <button
-                    type="button"
-                    onClick={() => setShowNewBookingModal(false)}
-                    className="px-6 py-2.5 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-6 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
-                  >
-                    Crear Reserva
-                  </button>
-                </div>
+                    {/* Botones */}
+                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
+                      <button
+                        type="button"
+                        onClick={() => setShowNewBookingModal(false)}
+                        className="px-6 py-2.5 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-6 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+                      >
+                        Crear Reserva
+                      </button>
+                    </div>
                   </>
                 )}
               </form>

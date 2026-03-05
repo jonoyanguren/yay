@@ -69,8 +69,7 @@ export default function ImageGallery({
       await Swal.fire({
         icon: "warning",
         title: "Eliminada solo del formulario",
-        text:
-          "No se pudo borrar en Cloudinary. Guarda para aplicar el cambio en la BD.",
+        text: "No se pudo borrar en Cloudinary. Guarda para aplicar el cambio en la BD.",
       });
     } catch (error: any) {
       console.error("Error deleting image:", error);
@@ -90,7 +89,6 @@ export default function ImageGallery({
       {images.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {images.map((imageUrl, index) => {
-            console.log("Rendering image:", imageUrl);
             return (
               <div
                 key={`${imageUrl}-${index}`}
@@ -104,12 +102,6 @@ export default function ImageGallery({
                     alt={`Imagen ${index + 1}`}
                     className="w-full h-full object-cover"
                     style={{ display: "block" }}
-                    onLoad={(e) => {
-                      console.log("Image loaded:", imageUrl);
-                    }}
-                    onError={(e) => {
-                      console.error("Image error:", imageUrl);
-                    }}
                   />
 
                   {/* Image Number Badge */}

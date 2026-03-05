@@ -42,7 +42,6 @@ async function main() {
   });
 
   await revokeAllAdminSessions(user.id);
-  console.log(`Admin user ready: ${user.email}`);
 }
 
 main()

@@ -48,11 +48,14 @@ function normalizeHighlights(value: unknown): RetreatTextHighlights {
     }
   }
 
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return empty;
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
+    return empty;
   const source = parsed as Record<string, unknown>;
 
   const asStringArray = (input: unknown) =>
-    Array.isArray(input) ? input.filter((item): item is string => typeof item === "string") : [];
+    Array.isArray(input)
+      ? input.filter((item): item is string => typeof item === "string")
+      : [];
 
   return {
     fullDescription: asStringArray(source.fullDescription),
@@ -90,7 +93,9 @@ export default async function RetreatPage({ params }: PageProps) {
     notFound();
   }
 
-  const { maxPeople, spotsLeft, isSoldOut } = await getRetreatCapacity(retreat.id);
+  const { maxPeople, spotsLeft, isSoldOut } = await getRetreatCapacity(
+    retreat.id,
+  );
 
   const arrivalOptions = (Array.isArray(retreat.arrivalOptions)
     ? retreat.arrivalOptions
@@ -129,8 +134,6 @@ export default async function RetreatPage({ params }: PageProps) {
     retreat.images?.[0] || retreat.image || "/assets/placeholder.jpg";
   const galleryImages = retreat.images || [];
   const textHighlights = normalizeHighlights(retreat.textHighlights);
-
-  console.log("Activities image:", activitiesImage);
 
   return (
     <div className="pb-24">

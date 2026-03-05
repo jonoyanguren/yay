@@ -7,7 +7,7 @@ import { retreats } from "../lib/data";
 import { RESERVATION_PAYMENT_CENTS } from "../lib/stripe-config";
 
 async function seed() {
-  console.log("Seeding retreats (full content)...");
+  console.info("Seeding retreats (full content)...");
   for (const r of retreats) {
     await prisma.retreat.upsert({
       where: { slug: r.slug },
@@ -63,7 +63,7 @@ async function seed() {
     });
   }
 
-  console.log("Seed done.");
+  console.info("Seed done.");
 }
 
 seed()
