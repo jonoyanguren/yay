@@ -10,6 +10,156 @@ import {
 } from "framer-motion";
 import Title from "./ui/Title";
 
+/** Card con efectos de scroll (scale, opacity, rotateY, z) según posición en el carrusel */
+function MobileGalleryCard({
+  img,
+  alt,
+  index,
+  total,
+  scrollXProgress,
+  onClick,
+}: {
+  img: string;
+  alt: string;
+  index: number;
+  total: number;
+  scrollXProgress: ReturnType<typeof useScroll>["scrollXProgress"];
+  onClick: () => void;
+}) {
+  const centerProgress = total > 1 ? index / (total - 1) : 0;
+  const scale = useTransform(scrollXProgress, (v) => {
+    const dist = Math.abs(v - centerProgress);
+    const falloff = Math.max(0, 1 - dist * 2.5);
+    return 0.82 + falloff * 0.18;
+  });
+  const opacity = useTransform(scrollXProgress, (v) => {
+    const dist = Math.abs(v - centerProgress);
+    return Math.max(0.5, 1 - dist * 1.2);
+  });
+  const rotateY = useTransform(scrollXProgress, (v) => {
+    if (total <= 1) return 0;
+    const offset = (v - centerProgress) * 28;
+    return Math.max(-24, Math.min(24, offset));
+  });
+  const y = useTransform(scrollXProgress, (v) => {
+    const dist = Math.abs(v - centerProgress);
+    return (1 - Math.max(0, 1 - dist * 2)) * 12;
+  });
+  const z = useTransform(scrollXProgress, (v) => {
+    const dist = Math.abs(v - centerProgress);
+    return (1 - Math.max(0, 1 - dist * 2)) * -80;
+  });
+
+  return (
+    <motion.button
+      type="button"
+      onClick={onClick}
+      style={{ scale, opacity, rotateY, y, z }}
+      className="relative aspect-square w-[72vw] max-w-[320px] min-w-[240px] rounded-2xl overflow-hidden border border-white/25 shadow-xl bg-slate-100 cursor-pointer shrink-0 snap-center focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 [transform-style:preserve-3d]"
+    >
+      <Image
+        src={img}
+        alt={alt}
+        fill
+        className="object-cover"
+        sizes="(max-width: 768px) 72vw, 320px"
+      />
+    </motion.button>
+  );
+}
+
+/** Galería horizontal móvil con efectos de scroll (parallax, scale, rotateY 3D) */
+function MobileHorizontalGallery({
+  images,
+  alt,
+  open,
+  className = "",
+}: {
+  images: string[];
+  alt: (i: number) => string;
+  open: (i: number) => void;
+  className?: string;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { scrollXProgress } = useScroll({
+    container: scrollRef,
+  });
+  const total = images.length + 1; // +1 por la card CTA final
+
+  return (
+    <div
+      ref={scrollRef}
+      className={`md:hidden overflow-x-auto overflow-y-hidden snap-x snap-mandatory scroll-smooth py-6 -mx-4 px-4 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] ${className}`}
+      style={{ perspective: "1200px" }}
+    >
+      <div className="flex items-center gap-4 pl-2" style={{ minWidth: "min-content" }}>
+        {images.map((img, index) => (
+          <MobileGalleryCard
+            key={`${img}-${index}`}
+            img={img}
+            alt={alt(index)}
+            index={index}
+            total={total}
+            scrollXProgress={scrollXProgress}
+            onClick={() => open(index)}
+          />
+        ))}
+        {/* Card CTA final como en desktop */}
+        <MobileScrollCtaCard index={images.length} total={total} scrollXProgress={scrollXProgress} />
+      </div>
+    </div>
+  );
+}
+
+/** Card "Quiero esto!" con efectos de scroll */
+function MobileScrollCtaCard({
+  index,
+  total,
+  scrollXProgress,
+}: {
+  index: number;
+  total: number;
+  scrollXProgress: ReturnType<typeof useScroll>["scrollXProgress"];
+}) {
+  const centerProgress = total > 1 ? index / (total - 1) : 0;
+  const scale = useTransform(scrollXProgress, (v) => {
+    const dist = Math.abs(v - centerProgress);
+    const falloff = Math.max(0, 1 - dist * 2.5);
+    return 0.82 + falloff * 0.18;
+  });
+  const opacity = useTransform(scrollXProgress, (v) => {
+    const dist = Math.abs(v - centerProgress);
+    return Math.max(0.5, 1 - dist * 1.2);
+  });
+  const rotateY = useTransform(scrollXProgress, (v) => {
+    if (total <= 1) return 0;
+    const offset = (v - centerProgress) * 28;
+    return Math.max(-24, Math.min(24, offset));
+  });
+  const y = useTransform(scrollXProgress, (v) => {
+    const dist = Math.abs(v - centerProgress);
+    return (1 - Math.max(0, 1 - dist * 2)) * 12;
+  });
+
+  return (
+    <motion.div
+      style={{ scale, opacity, rotateY, y }}
+      className="relative aspect-square w-[72vw] max-w-[320px] min-w-[240px] rounded-2xl border border-black/10 shadow-xl bg-black text-white shrink-0 snap-center flex items-center justify-center p-6 [transform-style:preserve-3d]"
+    >
+      <motion.div
+        className="flex flex-col items-center gap-2"
+        animate={{ y: [0, 6, 0] }}
+        transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <p className="font-sans text-2xl font-semibold tracking-tight text-center leading-tight">
+          Quiero esto!
+        </p>
+        <span className="font-sans text-2xl leading-none">↓</span>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 export type ImageGalleryVariant =
   | "full"
   | "compact"
@@ -176,25 +326,12 @@ export default function ImageGallery({
       {variant === "stack-parallax" ? (
         canUseStackLayout ? (
           <>
-            <div className={`md:hidden grid grid-cols-2 gap-3 px-6 ${className}`}>
-              {images.map((img, index) => (
-                <button
-                  key={`${img}-${index}`}
-                  type="button"
-                  onClick={() => open(index)}
-                  className="relative w-full rounded-xl overflow-hidden border border-gray/10 shadow-sm bg-slate-100 text-left cursor-pointer focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
-                  style={{ paddingBottom: "75%" }}
-                >
-                  <Image
-                    src={img}
-                    alt={alt(index)}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 50vw, 33vw"
-                  />
-                </button>
-              ))}
-            </div>
+            <MobileHorizontalGallery
+              images={images}
+              alt={alt}
+              open={open}
+              className={className}
+            />
 
             <div
               ref={stackRef}
