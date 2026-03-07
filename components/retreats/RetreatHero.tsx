@@ -60,11 +60,6 @@ export default function RetreatHero({
     [0, 0.72, 1],
     [1, 1, 0.9],
   );
-  const blur = useTransform(scrollYProgress, [0, 1], [0, 22]);
-  const mediaFilter = useTransform(
-    blur,
-    (value) => `blur(${value.toFixed(2)}px)`,
-  );
   const lightOverlayOpacity = useTransform(scrollYProgress, [0.72, 1], [0, 1]);
   const arrowOpacity = useTransform(
     scrollYProgress,
@@ -99,7 +94,6 @@ export default function RetreatHero({
                   backgroundPosition: "center",
                   scale: mediaScale,
                   opacity: mediaOpacity,
-                  filter: mediaFilter,
                 }
           }
         />

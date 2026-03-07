@@ -305,6 +305,7 @@ export default async function RetreatPage({ params }: PageProps) {
             width={1080}
             height={800}
             alt={`Collage de actividades de ${retreat.title}`}
+            className="rounded-xl md:rounded-none"
           />
         </RetreatSection>
       )}

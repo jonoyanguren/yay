@@ -176,7 +176,7 @@ export default function ImageGallery({
       {variant === "stack-parallax" ? (
         canUseStackLayout ? (
           <>
-            <div className={`md:hidden grid grid-cols-2 gap-3 ${className}`}>
+            <div className={`md:hidden grid grid-cols-2 gap-3 px-6 ${className}`}>
               {images.map((img, index) => (
                 <button
                   key={`${img}-${index}`}
@@ -201,7 +201,7 @@ export default function ImageGallery({
               className={`relative hidden md:block ${className}`}
               style={{ height: `${horizontalSectionHeight}px` }}
             >
-              <div className="sticky top-0 h-screen overflow-hidden">
+              <div className="sticky top-0 h-screen overflow-hidden px-6 md:px-12">
                 <motion.div
                   ref={trackRef}
                   style={{ x: horizontalX }}

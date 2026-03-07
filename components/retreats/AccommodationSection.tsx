@@ -51,12 +51,12 @@ export default function AccommodationSection({
         </p>
       )}
       {stripImages.length > 0 && (
-        <div className="w-full">
-          <div className="flex justify-center gap-0">
+        <div className="w-full px-10 md:px-0">
+          <div className="flex flex-col md:flex-row md:justify-center gap-2 md:gap-0">
             {stripImages.map((image, index) => (
               <div
                 key={`${image}-${index}`}
-                className="w-[20vw] min-w-[96px] max-w-[280px] aspect-square shrink-0 overflow-hidden bg-white/10"
+                className="w-full md:w-[20vw] md:min-w-[96px] md:max-w-[280px] aspect-square shrink-0 overflow-hidden rounded-xl md:rounded-none bg-white/10"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img

@@ -23,8 +23,8 @@ export default function ExperienceSection({
     imageSrc.startsWith("http://") || imageSrc.startsWith("https://");
 
   return (
-    <section className="grid gap-6 md:gap-8 md:grid-cols-2 md:items-start">
-      <div>
+    <section className="grid gap-6 md:gap-8 md:grid-cols-2 md:items-center">
+      <div className="order-2 md:order-1">
         <Title className="text-5xl mb-4 text-brand-blue-medium text-bold">
           {title}
         </Title>
@@ -36,7 +36,7 @@ export default function ExperienceSection({
         />
       </div>
 
-      <div className="relative rounded-xl overflow-hidden border border-gray/10 bg-gray/5 aspect-4/3">
+      <div className="order-1 md:order-2 relative rounded-xl overflow-hidden border border-gray/10 bg-gray/5 aspect-video md:aspect-4/3">
         <Image
           src={imageSrc}
           alt={imageAlt}

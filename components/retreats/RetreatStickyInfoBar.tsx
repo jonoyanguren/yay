@@ -52,7 +52,7 @@ export default function RetreatStickyInfoBar({
     [0, 1],
     ["0 10px 30px rgba(0,0,0,0.08)", "0 6px 18px rgba(0,0,0,0.12)"],
   );
-  const contentMaxWidth = useTransform(smoothMorph, [0, 1], ["72rem", "100vw"]);
+  const contentMaxWidth = useTransform(smoothMorph, [0, 1], ["72rem", "72rem"]);
   const contentPaddingX = useTransform(smoothMorph, [0, 1], ["0px", "14px"]);
 
   useEffect(() => {
@@ -87,15 +87,15 @@ export default function RetreatStickyInfoBar({
   return (
     <section
       ref={sectionRef}
-      className="relative z-40 -mt-1"
+      className="relative z-40 -mt-1 max-w-6xl mx-auto md:px-0"
       style={isStickyActive ? { height: `${barHeight}px` } : undefined}
     >
       <motion.div
         ref={barRef}
         className={
           isStickyActive
-            ? "fixed top-0 left-0 right-0 z-50 bg-sand-light/95 backdrop-blur border-b border-black/10"
-            : "relative mx-auto max-w-6xl bg-sand-light border border-black/10"
+            ? "fixed top-0 left-0 right-0 z-50 bg-sand-light/95 backdrop-blur border-b-0 md:border-b md:border-black/10"
+            : "relative mx-auto max-w-6xl bg-sand-light border-0 md:border md:border-black/10"
         }
         animate={
           !canMorph
@@ -122,7 +122,7 @@ export default function RetreatStickyInfoBar({
         }}
       >
         <motion.div
-          className="mx-auto"
+          className="mx-auto max-w-6xl"
           style={
             !canMorph
               ? { maxWidth: "72rem" }
