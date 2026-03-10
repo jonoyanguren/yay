@@ -80,32 +80,27 @@ function MobileHorizontalGallery({
   open: (i: number) => void;
   className?: string;
 }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const { scrollXProgress } = useScroll({
-    container: scrollRef,
-  });
-  const total = images.length + 1; // +1 por la card CTA final
-
   return (
     <div
-      ref={scrollRef}
-      className={`md:hidden overflow-x-auto overflow-y-hidden snap-x snap-mandatory scroll-smooth py-6 -mx-4 px-4 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] ${className}`}
-      style={{ perspective: "1200px" }}
+      className={`md:hidden overflow-x-auto overflow-y-hidden py-4 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] ${className}`}
     >
-      <div className="flex items-center gap-4 pl-2" style={{ minWidth: "min-content" }}>
+      <div className="flex items-start gap-4 w-max">
         {images.map((img, index) => (
-          <MobileGalleryCard
+          <button
             key={`${img}-${index}`}
-            img={img}
-            alt={alt(index)}
-            index={index}
-            total={total}
-            scrollXProgress={scrollXProgress}
+            type="button"
             onClick={() => open(index)}
-          />
+            className="relative h-[520px] w-[82vw] max-w-[340px] rounded-3xl overflow-hidden border border-white/25 shadow-xl bg-slate-100 cursor-pointer focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 shrink-0 first:ml-4 last:mr-4"
+          >
+            <img
+              src={img}
+              alt={alt(index)}
+              className="h-full w-full rounded-3xl object-cover"
+              loading={index === 0 ? "eager" : "lazy"}
+              decoding="async"
+            />
+          </button>
         ))}
-        {/* Card CTA final como en desktop */}
-        <MobileScrollCtaCard index={images.length} total={total} scrollXProgress={scrollXProgress} />
       </div>
     </div>
   );
