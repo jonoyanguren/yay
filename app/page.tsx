@@ -153,6 +153,19 @@ export default async function Home() {
               <span>Entornos de diseño minimalista</span>
             </li>
           </ul>
+          <div className="flex flex-col items-center gap-3 pt-6 px-8 md:flex-row md:items-center md:gap-3 md:px-0">
+            <Image
+              src="/assets/RYT200.png"
+              alt="Certificación RYT 200 - Registered Yoga Teacher"
+              width={120}
+              height={120}
+              className="w-28 h-28 md:w-14 md:h-14 shrink-0"
+            />
+            <p className="text-sm text-black/60 leading-snug text-center md:text-left">
+              Andrea es profesora certificada{" "}
+              <strong className="text-black/80">RYT 200</strong> por Yoga Alliance
+            </p>
+          </div>
         </div>
         <div className="bg-gray/20 aspect-square md:aspect-4/5 rounded-lg overflow-hidden relative">
           <Image

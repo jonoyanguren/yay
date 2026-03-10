@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Footer() {
   return (
@@ -10,6 +11,18 @@ export default function Footer() {
             Retiros modernos de desconexión. Sin misticismo, solo bienestar
             práctico, experiencias reales y buen diseño.
           </p>
+          <div className="flex flex-col items-center gap-2 mt-6 md:flex-row md:items-center md:gap-3">
+            <Image
+              src="/assets/RYT200.png"
+              alt="Certificación RYT 200 - Registered Yoga Teacher"
+              width={80}
+              height={80}
+              className="brightness-0 invert opacity-70 w-20 h-20 md:w-12 md:h-12 shrink-0"
+            />
+            <p className="text-xs text-gray leading-snug text-center md:text-left w-full">
+              Profesora certificada <strong className="text-white/80">RYT 200</strong> por Yoga Alliance
+            </p>
+          </div>
         </div>
         <div>
           <h4 className="font-bold mb-4 text-sm uppercase tracking-wider text-gray">
