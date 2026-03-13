@@ -3,7 +3,13 @@ import Button from "@/components/ui/Button";
 import RetreatCard from "@/components/RetreatCard";
 import HeroTextLoop from "@/components/HeroTextLoop";
 import Image from "next/image";
-import { FaInstagram, FaWhatsapp } from "react-icons/fa";
+import {
+  FaInstagram,
+  FaWhatsapp,
+  FaWineGlass,
+  FaRegSmile,
+} from "react-icons/fa";
+import { BiCoffee, BiMusic, BiCookie, BiTime } from "react-icons/bi";
 import { prisma } from "@/lib/prisma";
 import { getRetreatSpotsLeftMap } from "@/lib/retreat-capacity";
 
@@ -61,7 +67,7 @@ export default async function Home() {
   const localBusinessSchema = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
-    name: "YaY Retreats",
+    name: "YaY experiences",
     description:
       "Retiros bienestar y retiros yoga con enfoque práctico para desconectar del estrés digital.",
     url: siteUrl,
@@ -73,7 +79,9 @@ export default async function Home() {
     <div className="flex flex-col gap-24 pb-24">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(localBusinessSchema),
+        }}
       />
       {/* Hero Section */}
       <section className="relative h-[80vh] flex items-center justify-center px-4 bg-black text-white overflow-hidden">
@@ -113,10 +121,10 @@ export default async function Home() {
             <Button
               size="lg"
               variant="outline"
-              href="/concept"
+              href="/about"
               className="text-white border-white hover:bg-white hover:text-black"
             >
-              Nuestro Concepto
+              Sobre Nosotros
             </Button>
           </div>
         </div>
@@ -163,7 +171,8 @@ export default async function Home() {
             />
             <p className="text-sm text-black/60 leading-snug text-center md:text-left">
               Andrea es profesora certificada{" "}
-              <strong className="text-black/80">RYT 200</strong> por Yoga Alliance
+              <strong className="text-black/80">RYT 200</strong> por Yoga
+              Alliance
             </p>
           </div>
         </div>
@@ -198,69 +207,119 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Activities Section */}
-      <section className="bg-black text-white py-24 px-4 md:px-12">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-16 text-center">
-            Experiencias Reales
+      {/* Concept Hero */}
+      <section className="relative min-h-[500px] md:min-h-[600px] flex items-center justify-center overflow-hidden bg-black px-4 md:px-12">
+        <div className="relative z-10 container mx-auto text-center text-white max-w-4xl py-24">
+          <h2 className="text-4xl md:text-6xl font-bold mb-4 tracking-tighter">
+            Nuestro concepto
           </h2>
+          <p className="text-2xl md:text-3xl font-medium text-green mb-8">
+            Si no es YAY, no es.
+          </p>
+          <p className="text-xl md:text-2xl font-medium mb-8 text-white/90">
+            Desconectar haciendo cosas que te hacen feliz.
+          </p>
+          <p className="text-lg md:text-xl leading-relaxed mb-12 max-w-2xl mx-auto text-white/80">
+            No somos un retiro de incienso y mantras eternos. Somos retiros para
+            personas reales: algo de yoga, buena comida, una copa de vino,
+            conversaciones honestas y tiempo sin pantallas para recargar de
+            verdad.
+          </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
-            <div className="space-y-4">
-              <h3 className="text-xl font-bold border-b border-white/20 pb-2">
-                Cata de Café
-              </h3>
-              <p className="text-gray text-sm leading-relaxed">
-                Descubre matices y aromas con expertas de nivel internacional.
-                Una experiencia para despertar los sentidos.
-              </p>
-            </div>
+          <div className="flex flex-wrap justify-center gap-4 mb-10">
+            {[
+              "Yoga fácil, para relajar cuerpo y mente",
+              "Actividades que disfrutas",
+              "Buena comida y vino",
+              "Cero postureo",
+            ].map((item, idx) => (
+              <span
+                key={idx}
+                className="bg-white/20 backdrop-blur-md border border-white/30 px-6 py-2 rounded-full text-sm md:text-base font-medium hover:bg-white/30 transition-colors"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            <div className="space-y-4">
-              <h3 className="text-xl font-bold border-b border-white/20 pb-2">
-                Vinos Naturales
-              </h3>
-              <p className="text-gray text-sm leading-relaxed">
-                Degustación de vinos sin sulfitos añadidos, conectando con la
-                tierra y el proceso natural de fermentación.
-              </p>
-            </div>
+      {/* Mucho más que yoga */}
+      <section className="px-4 md:px-12 max-w-7xl mx-auto w-full">
+        <div className="mb-16 text-center max-w-3xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 tracking-tight">
+            Mucho más que yoga
+          </h2>
+          <p className="text-lg md:text-xl text-black/70">
+            Creamos grupos para desconectar juntos. El yoga es solo el
+            principio: diseñamos actividades para que conectes con otras
+            personas, te diviertas y compartas experiencias reales.
+          </p>
+        </div>
 
-            <div className="space-y-4">
-              <h3 className="text-xl font-bold border-b border-white/20 pb-2">
-                Música en Vivo
-              </h3>
-              <p className="text-gray text-sm leading-relaxed">
-                Conciertos íntimos de swing y rock acústico. Música real para
-                gente real, sin grabaciones.
-              </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[
+            {
+              icon: <BiCoffee className="w-6 h-6" />,
+              title: "Cata de café",
+              desc: "Con expertos baristas",
+            },
+            {
+              icon: <FaWineGlass className="w-6 h-6" />,
+              title: "Vinos naturales",
+              desc: "En buena compañía",
+            },
+            {
+              icon: <BiMusic className="w-6 h-6" />,
+              title: "Concierto íntimo",
+              desc: "Swing y rock en directo",
+            },
+            {
+              icon: <BiCookie className="w-6 h-6" />,
+              title: "Cocina con nosotros",
+              desc: "Cocinamos y comemos juntos",
+            },
+            {
+              icon: <BiTime className="w-6 h-6" />,
+              title: "Charlas slow",
+              desc: "Productividad para vivir tranquilo",
+            },
+            {
+              icon: <FaRegSmile className="w-6 h-6" />,
+              title: "Risas aseguradas",
+              desc: "Sin guiones ni etiquetas",
+            },
+          ].map((activity, idx) => (
+            <div
+              key={idx}
+              className="flex items-start gap-4 p-6 border border-black/5 rounded-xl hover:border-black/20 hover:bg-sand-light transition-colors group"
+            >
+              <div className="p-3 bg-sand-light rounded-full group-hover:bg-white transition-colors text-black">
+                {activity.icon}
+              </div>
+              <div>
+                <h3 className="font-bold text-lg mb-1">{activity.title}</h3>
+                <p className="text-black/60 text-sm">{activity.desc}</p>
+              </div>
             </div>
+          ))}
+        </div>
+      </section>
 
-            <div className="space-y-4">
-              <h3 className="text-xl font-bold border-b border-white/20 pb-2">
-                Cocina Colaborativa
-              </h3>
-              <p className="text-gray text-sm leading-relaxed">
-                Aprende, cocina y comparte. La cena sabe mejor cuando se prepara
-                en comunidad con ingredientes locales.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-xl font-bold border-b border-white/20 pb-2">
-                Productividad Consciente
-              </h3>
-              <p className="text-gray text-sm leading-relaxed">
-                Charlas prácticas sobre cómo gestionar el tiempo y la atención
-                en un mundo hiperconectado.
-              </p>
-            </div>
-
-            <div className="space-y-4 flex flex-col justify-center">
-              <p className="text-2xl font-serif italic text-white/80">
-                &quot;Actividades diseñadas para volver al mundo físico.&quot;
-              </p>
-            </div>
+      {/* BLOCK 4: Para personas reales */}
+      <section className="py-20 bg-green text-white px-4 md:px-12 text-center">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold mb-8 tracking-tight">
+            Para personas reales, con vidas reales
+          </h2>
+          <p className="text-lg md:text-xl text-white/90 mb-12 leading-relaxed">
+            Da igual si nunca has pisado una esterilla de yoga o si trabajas 10
+            horas al día frente a un ordenador. Diseñamos retiros para gente
+            normal que necesita parar, respirar y volver a casa con la sensación
+            de &quot;por fin he descansado de verdad&quot;.
+          </p>
+          <div className="inline-block border-2 border-white/30 px-8 py-4 rounded-full text-xl font-bold tracking-wide bg-white/10 backdrop-blur-sm rotate-1 hover:rotate-0 transition-transform">
+            Sin dogmas. Sin dramas. Sin disfraces espirituales.
           </div>
         </div>
       </section>

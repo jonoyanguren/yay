@@ -39,12 +39,6 @@ export default function Navbar() {
             Home
           </Link>
           <Link
-            href="/concept"
-            className="hover:text-gray-dark transition-colors"
-          >
-            Concepto
-          </Link>
-          <Link
             href="/about"
             className="hover:text-gray-dark transition-colors"
           >
@@ -84,13 +78,6 @@ export default function Navbar() {
             onClick={closeMenu}
           >
             Home
-          </Link>
-          <Link
-            href="/concept"
-            className="text-2xl font-medium hover:text-gray-dark transition-colors"
-            onClick={closeMenu}
-          >
-            Concepto
           </Link>
           <Link
             href="/about"

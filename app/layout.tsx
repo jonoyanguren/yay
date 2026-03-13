@@ -39,8 +39,8 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "YaY Retreats | Retiros bienestar y retiros yoga",
-    template: "%s | YaY Retreats",
+    default: "YaY experiences | Retiros bienestar y retiros yoga",
+    template: "%s | YaY experiences",
   },
   description:
     "Retiros bienestar y retiros yoga para desconectar del estrés digital. Bienestar práctico, descanso real y experiencias en grupo.",
@@ -56,17 +56,17 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "YaY Retreats | Retiros bienestar y retiros yoga",
+    title: "YaY experiences | Retiros bienestar y retiros yoga",
     description:
       "Retiros bienestar y retiros yoga para desconectar del estrés digital con un enfoque práctico y sin postureo.",
     url: "/",
-    siteName: "YaY Retreats",
+    siteName: "YaY experiences",
     locale: "es_ES",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "YaY Retreats | Retiros bienestar y retiros yoga",
+    title: "YaY experiences | Retiros bienestar y retiros yoga",
     description:
       "Retiros modernos para descansar, moverte y volver con energía. Bienestar práctico y desconexión real.",
   },

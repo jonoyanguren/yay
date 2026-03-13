@@ -198,7 +198,7 @@ export default async function RetreatPage({ params }: PageProps) {
     category: "Retiros bienestar y yoga",
     brand: {
       "@type": "Brand",
-      name: "YaY Retreats",
+      name: "YaY experiences",
     },
     offers: {
       "@type": "Offer",
