@@ -86,6 +86,7 @@ export type BookingInsert = {
   stripeSessionId: string | null;
   customerEmail: string;
   customerName: string | null;
+  customerPhone?: string | null;
   status: "pending" | "deposit" | "paid" | "cancelled";
 };
 

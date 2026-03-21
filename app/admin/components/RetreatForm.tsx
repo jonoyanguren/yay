@@ -1191,7 +1191,7 @@ export default function RetreatForm({
               name="videoUrl"
               value={formData.videoUrl}
               onChange={handleChange}
-              placeholder="https://...mp4"
+              placeholder="YouTube, Vimeo o URL directa (.mp4, etc.)"
               className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
             />
           </div>

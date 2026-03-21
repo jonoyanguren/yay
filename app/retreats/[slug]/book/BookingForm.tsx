@@ -6,6 +6,16 @@ import type { RetreatRoomTypeWithAvailability } from "@/lib/types";
 import type { RetreatExtraActivityRow } from "@/lib/types";
 import Button from "@/components/ui/Button";
 import { trackAnalytics } from "@/lib/analytics";
+import {
+  BOOKING_EMAIL_INVALID_MESSAGE,
+  isValidBookingEmail,
+  normalizeCustomerEmail,
+} from "@/lib/booking-email";
+import {
+  BOOKING_PHONE_INVALID_MESSAGE,
+  isValidBookingPhone,
+  normalizeCustomerPhone,
+} from "@/lib/booking-phone";
 
 function formatPrice(cents: number): string {
   return new Intl.NumberFormat("es-ES", {
@@ -39,9 +49,12 @@ export default function BookingForm({
     Record<string, number>
   >(() => Object.fromEntries(extras.map((e) => [e.id, 0])));
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailBlurError, setEmailBlurError] = useState<string | null>(null);
+  const [phoneBlurError, setPhoneBlurError] = useState<string | null>(null);
   const [acceptedCancellationPolicy, setAcceptedCancellationPolicy] =
     useState(false);
 
@@ -87,6 +100,18 @@ export default function BookingForm({
       setError("Elige una habitación e indica tu email.");
       return;
     }
+    const emailNorm = normalizeCustomerEmail(email);
+    if (!isValidBookingEmail(emailNorm)) {
+      setError(BOOKING_EMAIL_INVALID_MESSAGE);
+      setEmailBlurError(BOOKING_EMAIL_INVALID_MESSAGE);
+      return;
+    }
+    const phoneNorm = normalizeCustomerPhone(phone);
+    if (!isValidBookingPhone(phoneNorm)) {
+      setError(BOOKING_PHONE_INVALID_MESSAGE);
+      setPhoneBlurError(BOOKING_PHONE_INVALID_MESSAGE);
+      return;
+    }
     if (!selectedRoom || selectedRoom.available <= 0) {
       setError("La habitación seleccionada ya no tiene plazas disponibles.");
       return;
@@ -104,8 +129,9 @@ export default function BookingForm({
           extras: extras
             .filter((e) => (extraQuantities[e.id] ?? 0) > 0)
             .map((e) => ({ id: e.id, quantity: extraQuantities[e.id] })),
-          customerEmail: email.trim(),
+          customerEmail: emailNorm,
           customerName: name.trim() || null,
+          customerPhone: phoneNorm,
         }),
       });
       const data = await res.json();
@@ -416,12 +442,92 @@ export default function BookingForm({
             <label className="block text-sm font-medium mb-2">Email *</label>
             <input
               type="email"
+              name="email"
+              autoComplete="email"
+              inputMode="email"
               required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onFocus={() => setEmailBlurError(null)}
+              onChange={(e) => {
+                const v = e.target.value;
+                setEmail(v);
+                const t = normalizeCustomerEmail(v);
+                if (t.length === 0 || isValidBookingEmail(t)) {
+                  setEmailBlurError(null);
+                }
+              }}
+              onBlur={() => {
+                const t = normalizeCustomerEmail(email);
+                if (t.length === 0) {
+                  setEmailBlurError(null);
+                  return;
+                }
+                setEmailBlurError(
+                  isValidBookingEmail(t) ? null : BOOKING_EMAIL_INVALID_MESSAGE,
+                );
+              }}
               placeholder="tu@email.com"
-              className="w-full rounded-lg border border-gray/20 px-4 py-3.5 text-sm"
+              aria-invalid={emailBlurError ? true : undefined}
+              className={`w-full rounded-lg border px-4 py-3.5 text-sm ${
+                emailBlurError
+                  ? "border-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-red-500"
+                  : "border-gray/20"
+              }`}
             />
+            {emailBlurError ? (
+              <p className="mt-1.5 text-sm text-red-600" role="alert">
+                {emailBlurError}
+              </p>
+            ) : null}
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Teléfono (WhatsApp) *
+            </label>
+            <input
+              type="tel"
+              name="phone"
+              autoComplete="tel"
+              inputMode="tel"
+              required
+              value={phone}
+              onFocus={() => setPhoneBlurError(null)}
+              onChange={(e) => {
+                const v = e.target.value;
+                setPhone(v);
+                const t = normalizeCustomerPhone(v);
+                if (t.length === 0 || isValidBookingPhone(t)) {
+                  setPhoneBlurError(null);
+                }
+              }}
+              onBlur={() => {
+                const t = normalizeCustomerPhone(phone);
+                if (t.length === 0) {
+                  setPhoneBlurError(null);
+                  return;
+                }
+                setPhoneBlurError(
+                  isValidBookingPhone(t) ? null : BOOKING_PHONE_INVALID_MESSAGE,
+                );
+              }}
+              placeholder="+34 600 000 000"
+              aria-invalid={phoneBlurError ? true : undefined}
+              className={`w-full rounded-lg border px-4 py-3.5 text-sm ${
+                phoneBlurError
+                  ? "border-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-red-500"
+                  : "border-gray/20"
+              }`}
+            />
+            {phoneBlurError ? (
+              <p className="mt-1.5 text-sm text-red-600" role="alert">
+                {phoneBlurError}
+              </p>
+            ) : null}
+            <p className="mt-2 text-sm text-black/65 leading-relaxed">
+              La mayor parte de la coordinación del retiro la hacemos por
+              WhatsApp. Necesitamos tu número para enviarte detalles prácticos,
+              el grupo y cualquier incidencia antes y durante la experiencia.
+            </p>
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Nombre</label>
@@ -475,7 +581,9 @@ export default function BookingForm({
             loading ||
             totalCents <= 0 ||
             !acceptedCancellationPolicy ||
-            !hasValidSelectedRoom
+            !hasValidSelectedRoom ||
+            Boolean(emailBlurError) ||
+            Boolean(phoneBlurError)
           }
         >
           {loading

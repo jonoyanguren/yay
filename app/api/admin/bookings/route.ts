@@ -2,6 +2,7 @@ import { requireAdminAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { sendBookingConfirmationEmail } from "@/lib/email";
+import { normalizeCustomerPhone } from "@/lib/booking-phone";
 
 /**
  * GET /api/admin/bookings
@@ -71,6 +72,7 @@ export async function POST(request: Request) {
       retreatId,
       customerEmail,
       customerName,
+      customerPhone,
       roomTypeId,
       roomQuantity,
       extras,
@@ -100,6 +102,10 @@ export async function POST(request: Request) {
         retreatId,
         customerEmail: customerEmail.trim(),
         customerName: customerName?.trim() || null,
+        customerPhone:
+          typeof customerPhone === "string" && customerPhone.trim()
+            ? normalizeCustomerPhone(customerPhone)
+            : null,
         status: status || "paid",
         stripeSessionId: null,
       },

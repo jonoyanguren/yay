@@ -17,6 +17,7 @@ interface Booking {
   id: string;
   customerEmail: string;
   customerName: string | null;
+  customerPhone: string | null;
   status: string;
   createdAt: string;
   stripeSessionId: string | null;
@@ -111,6 +112,7 @@ export default function BookingsPage() {
     retreatId: "",
     customerEmail: "",
     customerName: "",
+    customerPhone: "",
     roomTypeId: "",
     roomQuantity: 1,
     extras: [] as { id: string; quantity: number }[],
@@ -212,6 +214,7 @@ export default function BookingsPage() {
           retreatId: "",
           customerEmail: "",
           customerName: "",
+          customerPhone: "",
           roomTypeId: "",
           roomQuantity: 1,
           extras: [],
@@ -385,29 +388,29 @@ export default function BookingsPage() {
     return statusMatches && retreatMatches && balanceEmailMatches;
   });
 
+  const nonCancelled = bookings.filter((b) => b.status !== "cancelled");
+
   const stats = {
     total: bookings.length,
     deposit: bookings.filter((b) => b.status === "deposit").length,
     paid: bookings.filter((b) => b.status === "paid").length,
     pending: bookings.filter((b) => b.status === "pending").length,
     cancelled: bookings.filter((b) => b.status === "cancelled").length,
-    estimatedRevenue: bookings
-      .filter((b) => b.status === "paid")
-      .reduce((sum, b) => sum + calculateBookingTotalCents(b), 0),
-    realRevenue: bookings
-      .filter((b) => b.status === "paid")
-      .reduce((sum, b) => sum + getChargedCents(b), 0),
-    reservationOnlyRevenue: bookings
-      .filter(
-        (b) =>
-          b.status === "paid" &&
-          getChargedCents(b) > 0 &&
-          getChargedCents(b) < calculateBookingTotalCents(b),
-      )
-      .reduce((sum, b) => sum + getChargedCents(b), 0),
-    pendingInvoiceAmount: bookings
-      .filter((b) => b.status === "paid")
-      .reduce((sum, b) => sum + getPendingCents(b), 0),
+    /** Total contratado (reservas no canceladas). */
+    estimatedRevenue: nonCancelled.reduce(
+      (sum, b) => sum + calculateBookingTotalCents(b),
+      0,
+    ),
+    /** Ya cobrado vía Stripe (señales, pagos completos, etc.). */
+    stripeCollected: nonCancelled.reduce(
+      (sum, b) => sum + getChargedCents(b),
+      0,
+    ),
+    /** Falta por cobrar respecto al total contratado. */
+    pendingRevenue: nonCancelled.reduce(
+      (sum, b) => sum + getPendingCents(b),
+      0,
+    ),
     balanceEmailNotSentCount: bookings.filter(
       (b) => canCreateBalanceStripeInvoice(b) && !b.balanceInvoiceSentAt,
     ).length,
@@ -458,55 +461,26 @@ export default function BookingsPage() {
           </div>
         )}
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-8 gap-4 mb-8">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-            <p className="text-sm text-slate-600 mb-1">Total Reservas</p>
-            <p className="text-3xl font-bold text-slate-900">{stats.total}</p>
-          </div>
-          <div className="bg-cyan-50 p-6 rounded-xl shadow-sm border border-cyan-100">
-            <p className="text-sm text-cyan-700 mb-1">Señal</p>
-            <p className="text-3xl font-bold text-cyan-700">{stats.deposit}</p>
-          </div>
-          <div className="bg-emerald-50 p-6 rounded-xl shadow-sm border border-emerald-100">
-            <p className="text-sm text-emerald-700 mb-1">Pagadas</p>
-            <p className="text-3xl font-bold text-emerald-700">{stats.paid}</p>
-          </div>
-          <div className="bg-amber-50 p-6 rounded-xl shadow-sm border border-amber-100">
-            <p className="text-sm text-amber-700 mb-1">Pendientes</p>
-            <p className="text-3xl font-bold text-amber-700">{stats.pending}</p>
-          </div>
-          <div className="bg-slate-50 p-6 rounded-xl shadow-sm border border-slate-200">
-            <p className="text-sm text-slate-600 mb-1">Canceladas</p>
-            <p className="text-3xl font-bold text-slate-600">
-              {stats.cancelled}
-            </p>
-          </div>
+        {/* Stats (no canceladas: estimado = cobrado Stripe + pendiente) */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 max-w-5xl">
           <div className="bg-violet-50 p-6 rounded-xl shadow-sm border border-violet-100">
             <p className="text-sm text-violet-700 mb-1">Ingresos estimados</p>
-            <p className="text-2xl font-bold text-violet-700">
+            <p className="text-2xl font-bold text-violet-800 tabular-nums">
               {formatPrice(stats.estimatedRevenue)}
             </p>
           </div>
           <div className="bg-blue-50 p-6 rounded-xl shadow-sm border border-blue-100">
-            <p className="text-sm text-blue-700 mb-1">Cobrado real (Stripe)</p>
-            <p className="text-2xl font-bold text-blue-700">
-              {formatPrice(stats.realRevenue)}
+            <p className="text-sm text-blue-700 mb-1">
+              Ingresos cobrados en Stripe
+            </p>
+            <p className="text-2xl font-bold text-blue-800 tabular-nums">
+              {formatPrice(stats.stripeCollected)}
             </p>
           </div>
-          <div className="bg-orange-50 p-6 rounded-xl shadow-sm border border-orange-100">
-            <p className="text-sm text-orange-700 mb-1">Solo señal cobrada</p>
-            <p className="text-2xl font-bold text-orange-700">
-              {formatPrice(stats.reservationOnlyRevenue)}
-            </p>
-            <p className="text-xs text-orange-700/80 mt-1">
-              Pendiente de facturar: {formatPrice(stats.pendingInvoiceAmount)}
-            </p>
-            <p className="text-xs text-orange-700/80 mt-1">
-              Email saldo sin enviar:{" "}
-              <span className="font-semibold">
-                {stats.balanceEmailNotSentCount}
-              </span>
+          <div className="bg-amber-50 p-6 rounded-xl shadow-sm border border-amber-100">
+            <p className="text-sm text-amber-800 mb-1">Ingresos pendientes</p>
+            <p className="text-2xl font-bold text-amber-900 tabular-nums">
+              {formatPrice(stats.pendingRevenue)}
             </p>
           </div>
         </div>
@@ -658,6 +632,14 @@ export default function BookingsPage() {
                         >
                           {booking.customerEmail}
                         </div>
+                        {booking.customerPhone ? (
+                          <div
+                            className="text-xs text-slate-600 truncate mt-0.5 tabular-nums"
+                            title={booking.customerPhone}
+                          >
+                            {booking.customerPhone}
+                          </div>
+                        ) : null}
                       </td>
                       <td className="px-2 py-2.5 align-top min-w-0">
                         <Link
@@ -915,7 +897,7 @@ export default function BookingsPage() {
                     </div>
 
                     {/* Cliente */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-semibold mb-2 text-slate-700">
                           Email *
@@ -935,6 +917,24 @@ export default function BookingsPage() {
                         />
                       </div>
                       <div>
+                        <label className="block text-sm font-semibold mb-2 text-slate-700">
+                          Teléfono (WhatsApp)
+                        </label>
+                        <input
+                          type="tel"
+                          autoComplete="tel"
+                          value={newBooking.customerPhone}
+                          onChange={(e) =>
+                            setNewBooking({
+                              ...newBooking,
+                              customerPhone: e.target.value,
+                            })
+                          }
+                          className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                          placeholder="+34 …"
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
                         <label className="block text-sm font-semibold mb-2 text-slate-700">
                           Nombre
                         </label>

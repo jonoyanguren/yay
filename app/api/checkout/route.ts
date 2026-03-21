@@ -4,6 +4,16 @@ import { prisma } from "@/lib/prisma";
 import { RESERVATION_PAYMENT_CENTS } from "@/lib/stripe-config";
 import { sendMetaLeadEvent } from "@/lib/meta-conversions";
 import { getRoomTypeAvailability } from "@/lib/retreat-capacity";
+import {
+  BOOKING_EMAIL_INVALID_MESSAGE,
+  isValidBookingEmail,
+  normalizeCustomerEmail,
+} from "@/lib/booking-email";
+import {
+  BOOKING_PHONE_INVALID_MESSAGE,
+  isValidBookingPhone,
+  normalizeCustomerPhone,
+} from "@/lib/booking-phone";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -15,6 +25,7 @@ type CheckoutBody = {
   extras: { id: string; quantity: number }[];
   customerEmail: string;
   customerName: string | null;
+  customerPhone: string;
 };
 
 export async function POST(request: NextRequest) {
@@ -40,6 +51,7 @@ export async function POST(request: NextRequest) {
     extras,
     customerEmail,
     customerName,
+    customerPhone,
   } = body;
   const retreat = await prisma.retreat.findFirst({
     where: { id: retreatId, published: true },
@@ -62,12 +74,29 @@ export async function POST(request: NextRequest) {
     !roomTypeId ||
     roomQuantity == null ||
     roomQuantity < 1 ||
-    !customerEmail?.trim()
+    !customerEmail?.trim() ||
+    !customerPhone?.trim()
   ) {
     return NextResponse.json(
-      { error: "Faltan datos requeridos (retiro, habitación, email)" },
+      {
+        error:
+          "Faltan datos requeridos (retiro, habitación, email y teléfono)",
+      },
       { status: 400 }
     );
+  }
+
+  const phoneNormalized = normalizeCustomerPhone(customerPhone);
+  const emailNormalized = normalizeCustomerEmail(customerEmail);
+  if (!isValidBookingEmail(emailNormalized)) {
+    return NextResponse.json(
+      { error: BOOKING_EMAIL_INVALID_MESSAGE },
+      { status: 400 },
+    );
+  }
+
+  if (!isValidBookingPhone(phoneNormalized)) {
+    return NextResponse.json({ error: BOOKING_PHONE_INVALID_MESSAGE }, { status: 400 });
   }
 
   const roomType = await prisma.retreatRoomType.findFirst({
@@ -130,8 +159,9 @@ export async function POST(request: NextRequest) {
     data: {
       retreatId,
       stripeSessionId: null,
-      customerEmail: customerEmail.trim(),
+      customerEmail: emailNormalized,
       customerName: customerName?.trim() || null,
+      customerPhone: phoneNormalized,
       status: "pending",
     },
   });
@@ -167,7 +197,7 @@ export async function POST(request: NextRequest) {
     mode: "payment",
     line_items: lineItems,
     customer_creation: "always",
-    customer_email: customerEmail.trim(),
+    customer_email: emailNormalized,
     metadata: {
       bookingId,
       paymentType: retreatChargeFullAmount ? "full_payment" : "reservation_fee",
@@ -175,6 +205,7 @@ export async function POST(request: NextRequest) {
       reservationAmountCents: String(reservationChargeCents),
       reservationDepositCents: String(retreatReservationDepositCents),
       estimatedTotalCents: String(estimatedTotalCents),
+      customerPhone: phoneNormalized.slice(0, 500),
     },
     success_url: `${baseUrl}/retreats/${slug}/book/thank-you?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}/retreats/${slug}/book`,
@@ -193,7 +224,7 @@ export async function POST(request: NextRequest) {
     bookingId,
     retreatId,
     reservationAmountCents: reservationChargeCents,
-    customerEmail: customerEmail.trim(),
+    customerEmail: emailNormalized,
     customerName: customerName?.trim() || null,
     clientIpAddress,
     clientUserAgent,

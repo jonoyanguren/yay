@@ -132,6 +132,7 @@ model Booking {
   stripePaymentType        String?   @map("stripe_payment_type")
   customerEmail            String    @map("customer_email")
   customerName             String?   @map("customer_name")
+  customerPhone            String?   @map("customer_phone")
   status                   String    @default("pending")
   /** When we last emailed the customer the Stripe balance-invoice pay link (Resend). */
   balanceInvoiceSentAt     DateTime? @map("balance_invoice_sent_at")

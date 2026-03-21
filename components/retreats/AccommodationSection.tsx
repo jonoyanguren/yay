@@ -1,4 +1,5 @@
 import Title from "@/components/ui/Title";
+import { resolveVideoEmbed } from "@/lib/videoEmbed";
 
 interface AccommodationSectionProps {
   title: string;
@@ -17,6 +18,8 @@ export default function AccommodationSection({
   hotelUrl = "",
   videoUrl = "",
 }: AccommodationSectionProps) {
+  const { kind, embedSrc } = resolveVideoEmbed(videoUrl);
+
   const stripImages =
     images.length === 0
       ? []
@@ -69,14 +72,27 @@ export default function AccommodationSection({
           </div>
         </div>
       )}
-      {videoUrl && (
-        <div className="pt-2">
-          <video
-            src={videoUrl}
-            controls
-            preload="metadata"
-            className="w-full max-w-4xl mx-auto rounded-md"
-          />
+      {videoUrl.trim() && (
+        <div className="pt-2 w-full max-w-4xl mx-auto">
+          <div className="relative w-full aspect-video overflow-hidden rounded-md bg-black">
+            {kind !== "file" && embedSrc ? (
+              <iframe
+                src={embedSrc}
+                title={`Vídeo de alojamiento — ${title}`}
+                className="absolute inset-0 h-full w-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            ) : (
+              <video
+                src={videoUrl.trim()}
+                controls
+                playsInline
+                preload="metadata"
+                className="absolute inset-0 h-full w-full object-contain"
+              />
+            )}
+          </div>
         </div>
       )}
     </section>
