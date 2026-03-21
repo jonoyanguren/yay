@@ -432,6 +432,12 @@ export default function BookingsPage() {
               + Nueva Reserva Manual
             </button>
             <Link
+              href="/admin/email-templates"
+              className="bg-slate-200 text-slate-800 px-5 py-2.5 rounded-lg hover:bg-slate-300 transition-colors font-medium text-sm"
+            >
+              ✉️ Plantillas email
+            </Link>
+            <Link
               href="/admin"
               className="bg-slate-100 text-slate-700 px-5 py-2.5 rounded-lg hover:bg-slate-200 transition-colors font-medium text-sm"
             >

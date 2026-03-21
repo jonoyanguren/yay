@@ -7,6 +7,10 @@ import {
   sendWaitlistJoinedEmail,
 } from "@/lib/email";
 import { getRetreatSpotsLeftMap } from "@/lib/retreat-capacity";
+import {
+  DEFAULT_RESEND_MAILBOX,
+  getResendFrom,
+} from "@/lib/resend-from";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -109,13 +113,13 @@ export async function POST(
   }
 
   const notifyTo =
-    process.env.WAITLIST_NOTIFY_EMAIL ||
-    process.env.RESEND_FROM_EMAIL ||
-    "onboarding@resend.dev";
+    process.env.WAITLIST_NOTIFY_EMAIL?.trim() ||
+    process.env.RESEND_FROM_EMAIL?.trim() ||
+    DEFAULT_RESEND_MAILBOX;
 
   try {
     await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
+      from: getResendFrom(),
       to: [notifyTo],
       subject: `Nueva solicitud de lista de espera (${retreat.title})`,
       html: `

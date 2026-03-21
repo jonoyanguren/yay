@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import type { WaitlistAlternativeRetreat } from "@/lib/email-templates";
+import { getResendFrom } from "@/lib/resend-from";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -71,7 +72,7 @@ export async function sendBookingConfirmationEmail({
 
   try {
     const data = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
+      from: getResendFrom(),
       to: [to],
       subject: `✓ Reserva confirmada: ${retreatTitle}`,
       html,
@@ -113,7 +114,7 @@ export async function sendWaitlistJoinedEmail({
 
   try {
     const data = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
+      from: getResendFrom(),
       to: [to],
       subject: `Lista de espera: ${retreatTitle}`,
       html,
@@ -169,7 +170,7 @@ export async function sendBalanceInvoiceEmail({
 
   try {
     const data = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
+      from: getResendFrom(),
       to: [to],
       subject: `Pago pendiente — ${retreatTitle}`,
       html,
@@ -204,7 +205,7 @@ export async function sendRetreatFullyPaidEmail({
 
   try {
     const data = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
+      from: getResendFrom(),
       to: [to],
       subject: `¡Listo! Pago completado: ${retreatTitle}`,
       html,

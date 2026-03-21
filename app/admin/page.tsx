@@ -154,6 +154,12 @@ export default function AdminPage() {
               📨 Waitlist
             </Link>
             <Link
+              href="/admin/email-templates"
+              className="bg-slate-700 text-white px-5 py-2.5 rounded-lg hover:bg-slate-800 transition-colors font-medium text-sm"
+            >
+              ✉️ Emails
+            </Link>
+            <Link
               href="/admin/retreats/new"
               className="bg-emerald-600 text-white px-5 py-2.5 rounded-lg hover:bg-emerald-700 transition-colors font-medium text-sm"
             >
