@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
-import { sendBookingConfirmationEmail } from "@/lib/email";
+import { calculateBookingTotalCents } from "@/lib/booking-total-cents";
+import {
+  sendBookingConfirmationEmail,
+  sendRetreatFullyPaidEmail,
+} from "@/lib/email";
 import { sendMetaPurchaseEvent } from "@/lib/meta-conversions";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -11,26 +15,27 @@ function getCustomerId(session: Stripe.Checkout.Session): string | null {
   return typeof session.customer === "string" ? session.customer : null;
 }
 
-function calculateBookingTotalCents(booking: {
-  roomSlots: Array<{
-    quantity: number;
-    retreatRoomType: { priceCents: number };
-  }>;
-  extras: Array<{
-    quantity: number;
-    retreatExtraActivity: { priceCents: number };
-  }>;
-}): number {
-  const roomTotal = booking.roomSlots.reduce(
-    (sum, slot) => sum + slot.retreatRoomType.priceCents * slot.quantity,
-    0,
-  );
-  const extrasTotal = booking.extras.reduce(
-    (sum, extra) =>
-      sum + extra.retreatExtraActivity.priceCents * extra.quantity,
-    0,
-  );
-  return roomTotal + extrasTotal;
+async function resolveInvoicePayerEmail(
+  invoice: Stripe.Invoice,
+  fallbackEmail: string,
+): Promise<string> {
+  const fromInvoice = invoice.customer_email?.trim();
+  if (fromInvoice) return fromInvoice.toLowerCase();
+
+  const customerId =
+    typeof invoice.customer === "string" ? invoice.customer : null;
+  if (customerId) {
+    try {
+      const customer = await stripe.customers.retrieve(customerId);
+      if (!customer.deleted && customer.email?.trim()) {
+        return customer.email.trim().toLowerCase();
+      }
+    } catch (e) {
+      console.error("resolveInvoicePayerEmail: customer retrieve failed", e);
+    }
+  }
+
+  return fallbackEmail.trim().toLowerCase();
 }
 
 export async function POST(request: NextRequest) {
@@ -56,6 +61,11 @@ export async function POST(request: NextRequest) {
     console.error("Stripe webhook signature verification failed:", message);
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
+
+  console.info("[stripe webhook] received", {
+    type: event.type,
+    id: event.id,
+  });
 
   if (
     event.type === "checkout.session.completed" ||
@@ -152,6 +162,161 @@ export async function POST(request: NextRequest) {
       }
     } catch (error) {
       console.error("Error updating booking to paid:", bookingId, error);
+    }
+  }
+
+  /**
+   * Dashboard: webhook debe incluir `invoice.paid`.
+   * Facturas de saldo: metadata `bookingId` = id de la reserva.
+   */
+  if (event.type === "invoice.paid") {
+    const invoice = event.data.object as Stripe.Invoice;
+
+    console.info("[stripe webhook] invoice.paid payload", {
+      invoiceId: invoice.id,
+      status: invoice.status,
+      amountPaid: invoice.amount_paid,
+      metadata: invoice.metadata ?? {},
+    });
+
+    if (invoice.status !== "paid") {
+      console.info(
+        "[stripe webhook] invoice.paid skip: invoice.status !== paid",
+        {
+          invoiceId: invoice.id,
+          status: invoice.status,
+        },
+      );
+      return NextResponse.json({ received: true });
+    }
+
+    const invBookingId = invoice.metadata?.bookingId?.trim();
+    if (!invBookingId) {
+      console.info(
+        "[stripe webhook] invoice.paid skip: no metadata.bookingId",
+        {
+          invoiceId: invoice.id,
+          metadataKeys: invoice.metadata ? Object.keys(invoice.metadata) : [],
+        },
+      );
+      return NextResponse.json({ received: true });
+    }
+
+    const invoicePaidCents = invoice.amount_paid ?? 0;
+    if (invoicePaidCents <= 0) {
+      console.info("[stripe webhook] invoice.paid skip: amount_paid <= 0", {
+        invoiceId: invoice.id,
+        amountPaid: invoicePaidCents,
+      });
+      return NextResponse.json({ received: true });
+    }
+
+    try {
+      const booking = await prisma.booking.findUnique({
+        where: { id: invBookingId },
+        include: {
+          retreat: { select: { title: true, slug: true } },
+          roomSlots: {
+            include: {
+              retreatRoomType: { select: { name: true, priceCents: true } },
+            },
+          },
+          extras: {
+            include: {
+              retreatExtraActivity: {
+                select: { name: true, priceCents: true },
+              },
+            },
+          },
+        },
+      });
+
+      if (!booking) {
+        console.error("[stripe webhook] invoice.paid skip: booking not found", {
+          bookingId: invBookingId,
+          invoiceId: invoice.id,
+        });
+        return NextResponse.json({ received: true });
+      }
+
+      const totalRequiredCents = calculateBookingTotalCents(booking);
+      const depositCents = booking.stripeAmountTotalCents ?? 0;
+      const totalPaidCents = depositCents + invoicePaidCents;
+      const toleranceCents = 1;
+
+      console.info("[stripe webhook] invoice.paid totals check", {
+        bookingId: invBookingId,
+        bookingStatus: booking.status,
+        totalRequiredCents,
+        depositCents,
+        invoicePaidCents,
+        totalPaidCents,
+        passesTotalCheck: totalPaidCents + toleranceCents >= totalRequiredCents,
+      });
+
+      if (totalPaidCents + toleranceCents < totalRequiredCents) {
+        console.warn(
+          "[stripe webhook] invoice.paid skip: sum below retreat total",
+          {
+            bookingId: invBookingId,
+            totalRequiredCents,
+            depositCents,
+            invoicePaidCents,
+            totalPaidCents,
+          },
+        );
+        return NextResponse.json({ received: true });
+      }
+
+      if (booking.status === "paid") {
+        console.info(
+          "[stripe webhook] invoice.paid skip: booking already paid (no duplicate email)",
+          {
+            bookingId: invBookingId,
+          },
+        );
+        return NextResponse.json({ received: true });
+      }
+
+      await prisma.booking.update({
+        where: { id: invBookingId },
+        data: {
+          status: "paid",
+          stripeAmountTotalCents: totalPaidCents,
+        },
+      });
+
+      const payerEmail = await resolveInvoicePayerEmail(
+        invoice,
+        booking.customerEmail,
+      );
+
+      console.info(
+        "[stripe webhook] invoice.paid sending RetreatFullyPaid email",
+        {
+          bookingId: invBookingId,
+          to: payerEmail,
+          totalPaidCents,
+        },
+      );
+
+      const emailResult = await sendRetreatFullyPaidEmail({
+        to: payerEmail,
+        customerName: booking.customerName || "Viajero",
+        retreatTitle: booking.retreat.title,
+        retreatSlug: booking.retreat.slug,
+      });
+
+      console.info("[stripe webhook] invoice.paid email result", {
+        bookingId: invBookingId,
+        success: emailResult.success,
+        error: emailResult.success ? undefined : emailResult.error,
+      });
+    } catch (error) {
+      console.error("[stripe webhook] invoice.paid handler error", {
+        bookingId: invBookingId,
+        error,
+      });
     }
   }
 

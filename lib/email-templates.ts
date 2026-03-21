@@ -352,7 +352,6 @@ interface RetreatFullyPaidEmailProps {
   retreatTitle: string;
   retreatSlug: string;
   baseUrl: string;
-  totalPaidCents: number;
 }
 
 export function RetreatFullyPaidEmail({
@@ -360,15 +359,10 @@ export function RetreatFullyPaidEmail({
   retreatTitle,
   retreatSlug,
   baseUrl,
-  totalPaidCents,
 }: RetreatFullyPaidEmailProps) {
   const safeName = escapeHtml(customerName || "Viajero");
   const safeTitle = escapeHtml(retreatTitle);
   const retreatUrl = `${baseUrl.replace(/\/$/, "")}/retreats/${retreatSlug}`;
-  const formattedTotal = new Intl.NumberFormat("es-ES", {
-    style: "currency",
-    currency: "EUR",
-  }).format(totalPaidCents / 100);
 
   return `
 <!DOCTYPE html>
@@ -402,19 +396,6 @@ export function RetreatFullyPaidEmail({
               <p style="${s.paragraphLast}">
                 Hemos recibido el pago de tu factura: <strong>ya has completado el importe total</strong> de <strong>${safeTitle}</strong>. ¡Mil gracias por confiar en nosotros!
               </p>
-
-              <table width="100%" cellpadding="0" cellspacing="0" style="${s.sectionBox}">
-                <tr>
-                  <td style="${s.sectionBoxInner}">
-                    <h2 style="${s.sectionHeading}">
-                      Resumen
-                    </h2>
-                    <p style="margin: 0; font-size: 15px; color: #374151; line-height: 1.6;">
-                      Importe total abonado (señal + pago final): <strong style="color: #059669;">${escapeHtml(formattedTotal)}</strong>
-                    </p>
-                  </td>
-                </tr>
-              </table>
 
               <table width="100%" cellpadding="0" cellspacing="0" style="${s.infoBoxBlue}">
                 <tr>

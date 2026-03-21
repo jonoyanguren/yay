@@ -131,7 +131,6 @@ interface SendRetreatFullyPaidParams {
   customerName: string;
   retreatTitle: string;
   retreatSlug: string;
-  totalPaidCents: number;
 }
 
 export async function sendRetreatFullyPaidEmail({
@@ -139,7 +138,6 @@ export async function sendRetreatFullyPaidEmail({
   customerName,
   retreatTitle,
   retreatSlug,
-  totalPaidCents,
 }: SendRetreatFullyPaidParams) {
   if (!process.env.RESEND_API_KEY) {
     console.error("RESEND_API_KEY not configured");
@@ -153,7 +151,6 @@ export async function sendRetreatFullyPaidEmail({
     retreatTitle,
     retreatSlug,
     baseUrl: getEmailBaseUrl(),
-    totalPaidCents,
   });
 
   try {
