@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { prisma } from "@/lib/prisma";
+import {
+  absoluteUrlForEmail,
+  getEmailBaseUrl,
+  sendWaitlistJoinedEmail,
+} from "@/lib/email";
+import { getRetreatSpotsLeftMap } from "@/lib/retreat-capacity";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -49,8 +55,9 @@ export async function POST(
       },
     });
     created = true;
-  } catch (error: any) {
-    if (error?.code !== "P2002") {
+  } catch (error: unknown) {
+    const code = error && typeof error === "object" && "code" in error ? (error as { code: string }).code : null;
+    if (code !== "P2002") {
       console.error("Error creating waitlist entry:", error);
       return NextResponse.json(
         { error: "No se pudo guardar tu solicitud" },
@@ -68,6 +75,37 @@ export async function POST(
       { ok: true, notified: false },
       { status: 201 },
     );
+  }
+
+  const baseUrl = getEmailBaseUrl();
+
+  const otherRetreats = await prisma.retreat.findMany({
+    where: { published: true, id: { not: retreat.id } },
+    select: { id: true, title: true, slug: true, image: true, images: true },
+    orderBy: [{ date: "asc" }, { createdAt: "asc" }],
+  });
+
+  const spotsMap = await getRetreatSpotsLeftMap(otherRetreats.map((r) => r.id));
+  const alternativeRetreats = otherRetreats
+    .filter((r) => (spotsMap.get(r.id) ?? 0) > 0)
+    .map((r) => ({
+      title: r.title,
+      slug: r.slug,
+      imageUrl: absoluteUrlForEmail(
+        r.images?.[0] || r.image || "/assets/placeholder.jpg",
+        baseUrl,
+      ),
+    }));
+
+  const userEmailResult = await sendWaitlistJoinedEmail({
+    to: email,
+    retreatTitle: retreat.title,
+    retreatSlug: retreat.slug,
+    alternativeRetreats,
+  });
+
+  if (!userEmailResult.success) {
+    console.error("Error sending waitlist confirmation to user:", userEmailResult.error);
   }
 
   const notifyTo =

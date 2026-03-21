@@ -25,6 +25,7 @@ export async function GET(
             title: true,
             slug: true,
             reservationDepositCents: true,
+            chargeFullAmount: true,
           },
         },
         roomSlots: {
@@ -104,6 +105,7 @@ export async function PATCH(
             title: true,
             slug: true,
             reservationDepositCents: true,
+            chargeFullAmount: true,
           },
         },
         roomSlots: {

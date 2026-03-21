@@ -21,6 +21,7 @@ export async function GET(request: Request) {
             title: true,
             slug: true,
             reservationDepositCents: true,
+            chargeFullAmount: true,
           },
         },
         roomSlots: {
@@ -135,6 +136,7 @@ export async function POST(request: Request) {
           title: true,
           slug: true,
           reservationDepositCents: true,
+          chargeFullAmount: true,
         },
       },
       roomSlots: {

@@ -104,6 +104,13 @@ function getPendingCents(booking: Booking): number {
   return Math.max(0, calculateTotal(booking) - getChargedCents(booking));
 }
 
+function isSoloSeñalBooking(booking: Booking): boolean {
+  if (booking.status !== "deposit") return false;
+  if (booking.retreat.chargeFullAmount ?? false) return false;
+  if (booking.retreat.reservationDepositCents <= 0) return false;
+  return getPendingCents(booking) > 0;
+}
+
 export default function BookingsPage() {
   const router = useRouter();
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -599,7 +606,7 @@ export default function BookingsPage() {
                         <div className="text-xs text-slate-500 mt-1">
                           Cobrado: {formatPrice(getChargedCents(booking))}
                         </div>
-                        {booking.stripePaymentType === "reservation_fee" && (
+                        {isSoloSeñalBooking(booking) && (
                           <div className="text-xs text-orange-700 mt-1">
                             Solo señal
                           </div>

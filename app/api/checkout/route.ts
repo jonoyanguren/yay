@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
     customer_email: customerEmail.trim(),
     metadata: {
       bookingId,
-      paymentType: "reservation_fee",
+      paymentType: retreatChargeFullAmount ? "full_payment" : "reservation_fee",
       chargeMode: retreatChargeFullAmount ? "full" : "deposit",
       reservationAmountCents: String(reservationChargeCents),
       reservationDepositCents: String(retreatReservationDepositCents),
