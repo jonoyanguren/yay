@@ -455,3 +455,109 @@ export function RetreatFullyPaidEmail({
 </html>
   `.trim();
 }
+
+interface BalanceInvoiceEmailProps {
+  customerName: string;
+  retreatTitle: string;
+  amountPendingCents: number;
+  /** Stripe hosted invoice URL (pay link). */
+  payInvoiceUrl: string;
+  baseUrl: string;
+}
+
+export function BalanceInvoiceEmail({
+  customerName,
+  retreatTitle,
+  amountPendingCents,
+  payInvoiceUrl,
+  baseUrl,
+}: BalanceInvoiceEmailProps) {
+  const formatPrice = (cents: number) =>
+    new Intl.NumberFormat("es-ES", {
+      style: "currency",
+      currency: "EUR",
+    }).format(cents / 100);
+
+  const safeName = escapeHtml(customerName || "Viajero");
+  const safeTitle = escapeHtml(retreatTitle);
+  const amountLabel = escapeHtml(formatPrice(amountPendingCents));
+  const safePayUrl = escapeHtml(payInvoiceUrl);
+  const siteUrl = baseUrl.replace(/\/$/, "");
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pago pendiente</title>
+</head>
+<body style="${s.body}">
+  <table width="100%" cellpadding="0" cellspacing="0" style="${s.outerWrap}">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="${s.card}">
+          <tr>
+            <td style="${s.headerGreen}">
+              <h1 style="${s.headerTitle}">
+                Pendiente de pago
+              </h1>
+              <p style="${s.headerSubtitle}">
+                ${safeTitle}
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="${s.contentCell}">
+              <p style="${s.paragraph}">
+                Hola <strong>${safeName}</strong>,
+              </p>
+              <p style="${s.paragraphLast}">
+                Aquí tienes el enlace para completar el <strong>pago restante</strong> de tu reserva: <strong>${amountLabel}</strong>.
+              </p>
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="${s.infoBoxBlue}">
+                <tr>
+                  <td style="${s.infoBoxBlueInner}">
+                    <p style="${s.infoBoxBlueText}">
+                      El cobro lo gestiona <strong>Stripe</strong> de forma segura. Si no ves el botón, copia y pega el enlace del botón en tu navegador.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="${s.ctaWrap}">
+                <tr>
+                  <td align="center">
+                    <a href="${safePayUrl}" style="${s.ctaButton}">
+                      Pagar ahora
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="${s.mutedParagraph}">
+                ¿Dudas? Responde a este correo y te ayudamos.
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="${s.footer}">
+              <p style="${s.footerLine}">
+                ${siteUrl.replace(/^https?:\/\//, "")}
+              </p>
+              <p style="${s.footerMeta}">
+                Factura de saldo · ${safeTitle}
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim();
+}

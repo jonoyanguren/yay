@@ -133,6 +133,55 @@ interface SendRetreatFullyPaidParams {
   retreatSlug: string;
 }
 
+interface SendBalanceInvoiceEmailParams {
+  to: string;
+  customerName: string;
+  retreatTitle: string;
+  amountPendingCents: number;
+  payInvoiceUrl: string;
+}
+
+export async function sendBalanceInvoiceEmail({
+  to,
+  customerName,
+  retreatTitle,
+  amountPendingCents,
+  payInvoiceUrl,
+}: SendBalanceInvoiceEmailParams) {
+  if (!process.env.RESEND_API_KEY) {
+    console.error("RESEND_API_KEY not configured");
+    return { success: false, error: "Email service not configured" };
+  }
+
+  if (!payInvoiceUrl?.trim()) {
+    return { success: false, error: "Missing invoice pay URL" };
+  }
+
+  const { BalanceInvoiceEmail } = await import("./email-templates");
+
+  const html = BalanceInvoiceEmail({
+    customerName,
+    retreatTitle,
+    amountPendingCents,
+    payInvoiceUrl: payInvoiceUrl.trim(),
+    baseUrl: getEmailBaseUrl(),
+  });
+
+  try {
+    const data = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
+      to: [to],
+      subject: `Pago pendiente — ${retreatTitle}`,
+      html,
+    });
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error sending balance invoice email:", error);
+    return { success: false, error };
+  }
+}
+
 export async function sendRetreatFullyPaidEmail({
   to,
   customerName,

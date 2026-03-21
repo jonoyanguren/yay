@@ -124,16 +124,20 @@ model RetreatExtraActivity {
 }
 
 model Booking {
-  id                     String   @id @default(uuid())
-  retreatId              String   @map("retreat_id")
-  stripeSessionId        String?  @unique @map("stripe_session_id")
-  stripeCustomerId       String?  @map("stripe_customer_id")
-  stripeAmountTotalCents Int?     @map("stripe_amount_total_cents")
-  stripePaymentType      String?  @map("stripe_payment_type")
-  customerEmail          String   @map("customer_email")
-  customerName           String?  @map("customer_name")
-  status                 String   @default("pending")
-  createdAt              DateTime @default(now()) @map("created_at")
+  id                       String    @id @default(uuid())
+  retreatId                String    @map("retreat_id")
+  stripeSessionId          String?   @unique @map("stripe_session_id")
+  stripeCustomerId         String?   @map("stripe_customer_id")
+  stripeAmountTotalCents   Int?      @map("stripe_amount_total_cents")
+  stripePaymentType        String?   @map("stripe_payment_type")
+  customerEmail            String    @map("customer_email")
+  customerName             String?   @map("customer_name")
+  status                   String    @default("pending")
+  /** When we last emailed the customer the Stripe balance-invoice pay link (Resend). */
+  balanceInvoiceSentAt     DateTime? @map("balance_invoice_sent_at")
+  /** Stripe invoice id (in_…) for that balance invoice at time of send. */
+  balanceInvoiceStripeId   String?   @map("balance_invoice_stripe_id")
+  createdAt                DateTime  @default(now()) @map("created_at")
 
   retreat   Retreat           @relation(fields: [retreatId], references: [id])
   roomSlots BookingRoomSlot[]

@@ -1,4 +1,6 @@
 import { requireAdminAuth } from "@/lib/auth";
+import { getChargedCents, getPendingCents } from "@/lib/booking-balance";
+import { calculateBookingTotalCents } from "@/lib/booking-total-cents";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { sendBookingConfirmationEmail } from "@/lib/email";
@@ -26,6 +28,7 @@ export async function POST(
             title: true,
             slug: true,
             reservationDepositCents: true,
+            chargeFullAmount: true,
           },
         },
         roomSlots: {
@@ -58,23 +61,9 @@ export async function POST(
       );
     }
 
-    // Calculate total
-    let totalAmount = 0;
-    booking.roomSlots.forEach((slot) => {
-      totalAmount += slot.retreatRoomType.priceCents * slot.quantity;
-    });
-    booking.extras.forEach((extra) => {
-      totalAmount += extra.retreatExtraActivity.priceCents * extra.quantity;
-    });
-
-    const chargedAmount =
-      booking.stripeAmountTotalCents ??
-      (booking.status === "paid"
-        ? totalAmount
-        : booking.status === "deposit"
-          ? Math.min(booking.retreat.reservationDepositCents, totalAmount)
-          : 0);
-    const pendingAmount = Math.max(0, totalAmount - chargedAmount);
+    const totalAmount = calculateBookingTotalCents(booking);
+    const chargedAmount = getChargedCents(booking);
+    const pendingAmount = getPendingCents(booking);
 
     // Send confirmation email
     const result = await sendBookingConfirmationEmail({

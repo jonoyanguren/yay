@@ -4,6 +4,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Swal from "sweetalert2";
+import { FaEnvelope, FaFileInvoice, FaTrash } from "react-icons/fa";
+import { calculateBookingTotalCents } from "@/lib/booking-total-cents";
+import {
+  canCreateBalanceStripeInvoice,
+  getChargedCents,
+  getPendingCents,
+  isSoloSeñalBooking,
+} from "@/lib/booking-balance";
 
 interface Booking {
   id: string;
@@ -15,6 +23,8 @@ interface Booking {
   stripeCustomerId: string | null;
   stripeAmountTotalCents: number | null;
   stripePaymentType: string | null;
+  balanceInvoiceSentAt: string | null;
+  balanceInvoiceStripeId: string | null;
   retreat: {
     id: string;
     title: string;
@@ -62,53 +72,22 @@ function formatPrice(cents: number): string {
   }).format(cents / 100);
 }
 
-function formatDate(dateString: string): string {
+function formatShortDate(dateString: string): string {
   return new Date(dateString).toLocaleString("es-ES", {
     year: "numeric",
     month: "short",
     day: "numeric",
+  });
+}
+
+function formatCompactDateTime(dateString: string): string {
+  return new Date(dateString).toLocaleString("es-ES", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-
-function calculateTotal(booking: Booking): number {
-  let total = 0;
-
-  // Room slots
-  booking.roomSlots.forEach((slot) => {
-    total += slot.retreatRoomType.priceCents * slot.quantity;
-  });
-
-  // Extras
-  booking.extras.forEach((extra) => {
-    total += extra.retreatExtraActivity.priceCents * extra.quantity;
-  });
-
-  return total;
-}
-
-function getChargedCents(booking: Booking): number {
-  if (booking.stripeAmountTotalCents != null)
-    return booking.stripeAmountTotalCents;
-  if (booking.status === "pending" || booking.status === "cancelled") return 0;
-  if (!booking.stripeSessionId) return calculateTotal(booking);
-  if (booking.retreat.chargeFullAmount ?? false) return calculateTotal(booking);
-  return Math.min(
-    booking.retreat.reservationDepositCents,
-    calculateTotal(booking),
-  );
-}
-
-function getPendingCents(booking: Booking): number {
-  return Math.max(0, calculateTotal(booking) - getChargedCents(booking));
-}
-
-function isSoloSeñalBooking(booking: Booking): boolean {
-  if (booking.status !== "deposit") return false;
-  if (booking.retreat.chargeFullAmount ?? false) return false;
-  if (booking.retreat.reservationDepositCents <= 0) return false;
-  return getPendingCents(booking) > 0;
 }
 
 export default function BookingsPage() {
@@ -117,10 +96,15 @@ export default function BookingsPage() {
   const [deletingBookingId, setDeletingBookingId] = useState<string | null>(
     null,
   );
+  const [balanceInvoiceBookingId, setBalanceInvoiceBookingId] = useState<
+    string | null
+  >(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterRetreatId, setFilterRetreatId] = useState<string>("all");
+  const [filterMissingBalanceInvoiceEmail, setFilterMissingBalanceInvoiceEmail] =
+    useState(false);
   const [showNewBookingModal, setShowNewBookingModal] = useState(false);
   const [retreats, setRetreats] = useState<Retreat[]>([]);
   const [newBooking, setNewBooking] = useState({
@@ -243,6 +227,70 @@ export default function BookingsPage() {
     }
   };
 
+  const handleBalanceInvoice = async (booking: Booking) => {
+    const pending = getPendingCents(booking);
+    const result = await Swal.fire({
+      icon: "question",
+      title: "Factura de saldo",
+      html: `Se creará o reutilizará una factura en Stripe por <strong>${formatPrice(pending)}</strong>. Te enviaremos un correo a <strong>${booking.customerEmail}</strong> con el enlace de pago (no usamos el email de Stripe).`,
+      showCancelButton: true,
+      confirmButtonText: "Crear y enviar",
+      cancelButtonText: "Cancelar",
+    });
+    if (!result.isConfirmed) return;
+
+    setBalanceInvoiceBookingId(booking.id);
+    try {
+      const res = await fetch(
+        `/api/admin/bookings/${booking.id}/stripe-balance-invoice`,
+        { method: "POST" },
+      );
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        if (
+          data.emailSent &&
+          data.balanceInvoiceSentAt &&
+          typeof data.balanceInvoiceSentAt === "string"
+        ) {
+          setBookings((prev) =>
+            prev.map((b) =>
+              b.id === booking.id
+                ? {
+                    ...b,
+                    balanceInvoiceSentAt: data.balanceInvoiceSentAt,
+                    balanceInvoiceStripeId:
+                      typeof data.balanceInvoiceStripeId === "string"
+                        ? data.balanceInvoiceStripeId
+                        : b.balanceInvoiceStripeId,
+                  }
+                : b,
+            ),
+          );
+        }
+        if (data.emailSent === false) {
+          await showToast(
+            "warning",
+            data.emailError ||
+              "Factura en Stripe OK, pero no se envió el email (revisa Resend)",
+          );
+        } else {
+          await showToast(
+            "success",
+            data.reused
+              ? "Enlace de pago enviado por email"
+              : "Factura creada y email enviado",
+          );
+        }
+      } else {
+        await showToast("error", data.error || "Error con la factura");
+      }
+    } catch {
+      await showToast("error", "Error con la factura");
+    } finally {
+      setBalanceInvoiceBookingId(null);
+    }
+  };
+
   const handleSendEmail = async (bookingId: string, customerEmail: string) => {
     const result = await Swal.fire({
       icon: "question",
@@ -330,7 +378,11 @@ export default function BookingsPage() {
       filterStatus === "all" || booking.status === filterStatus;
     const retreatMatches =
       filterRetreatId === "all" || booking.retreat.id === filterRetreatId;
-    return statusMatches && retreatMatches;
+    const balanceEmailMatches =
+      !filterMissingBalanceInvoiceEmail ||
+      (canCreateBalanceStripeInvoice(booking) &&
+        !booking.balanceInvoiceSentAt);
+    return statusMatches && retreatMatches && balanceEmailMatches;
   });
 
   const stats = {
@@ -341,7 +393,7 @@ export default function BookingsPage() {
     cancelled: bookings.filter((b) => b.status === "cancelled").length,
     estimatedRevenue: bookings
       .filter((b) => b.status === "paid")
-      .reduce((sum, b) => sum + calculateTotal(b), 0),
+      .reduce((sum, b) => sum + calculateBookingTotalCents(b), 0),
     realRevenue: bookings
       .filter((b) => b.status === "paid")
       .reduce((sum, b) => sum + getChargedCents(b), 0),
@@ -350,12 +402,15 @@ export default function BookingsPage() {
         (b) =>
           b.status === "paid" &&
           getChargedCents(b) > 0 &&
-          getChargedCents(b) < calculateTotal(b),
+          getChargedCents(b) < calculateBookingTotalCents(b),
       )
       .reduce((sum, b) => sum + getChargedCents(b), 0),
     pendingInvoiceAmount: bookings
       .filter((b) => b.status === "paid")
       .reduce((sum, b) => sum + getPendingCents(b), 0),
+    balanceEmailNotSentCount: bookings.filter(
+      (b) => canCreateBalanceStripeInvoice(b) && !b.balanceInvoiceSentAt,
+    ).length,
   };
 
   return (
@@ -441,6 +496,12 @@ export default function BookingsPage() {
             <p className="text-xs text-orange-700/80 mt-1">
               Pendiente de facturar: {formatPrice(stats.pendingInvoiceAmount)}
             </p>
+            <p className="text-xs text-orange-700/80 mt-1">
+              Email saldo sin enviar:{" "}
+              <span className="font-semibold">
+                {stats.balanceEmailNotSentCount}
+              </span>
+            </p>
           </div>
         </div>
 
@@ -498,6 +559,19 @@ export default function BookingsPage() {
               Canceladas ({stats.cancelled})
             </button>
           )}
+          <button
+            type="button"
+            onClick={() =>
+              setFilterMissingBalanceInvoiceEmail((v) => !v)
+            }
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              filterMissingBalanceInvoiceEmail
+                ? "bg-orange-600 text-white"
+                : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+            }`}
+          >
+            Email saldo pendiente ({stats.balanceEmailNotSentCount})
+          </button>
           <select
             value={filterRetreatId}
             onChange={(event) => setFilterRetreatId(event.target.value)}
@@ -514,32 +588,32 @@ export default function BookingsPage() {
 
         {/* Bookings Table */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="overflow-hidden">
+            <table className="w-full table-fixed text-sm">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  <th className="w-[14%] px-2 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
                     Cliente
                   </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  <th className="w-[12%] px-2 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
                     Retiro
                   </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  <th className="w-[16%] px-2 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
                     Habitación
                   </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  <th className="w-[18%] px-2 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
                     Importe
                   </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                    Pendiente
+                  <th className="w-[11%] px-2 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
+                    Fact. mail
                   </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  <th className="w-[10%] px-2 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
                     Estado
                   </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  <th className="w-[9%] px-2 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
                     Fecha
                   </th>
-                  <th className="px-6 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  <th className="w-[10%] px-2 py-2.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wide">
                     Acciones
                   </th>
                 </tr>
@@ -554,6 +628,8 @@ export default function BookingsPage() {
                       No hay reservas
                       {filterStatus !== "all" &&
                         ` con estado "${filterStatus}"`}
+                      {filterMissingBalanceInvoiceEmail &&
+                        " con saldo pendiente y email de factura sin enviar"}
                       .
                     </td>
                   </tr>
@@ -563,34 +639,45 @@ export default function BookingsPage() {
                       key={booking.id}
                       className="hover:bg-slate-50/50 transition-colors"
                     >
-                      <td className="px-6 py-4">
-                        <div className="font-medium text-slate-900">
+                      <td className="px-2 py-2.5 align-top min-w-0">
+                        <div
+                          className="font-medium text-slate-900 truncate"
+                          title={booking.customerName || "Sin nombre"}
+                        >
                           {booking.customerName || "Sin nombre"}
                         </div>
-                        <div className="text-sm text-slate-500">
+                        <div
+                          className="text-xs text-slate-500 truncate"
+                          title={booking.customerEmail}
+                        >
                           {booking.customerEmail}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-2 py-2.5 align-top min-w-0">
                         <Link
                           href={`/retreats/${booking.retreat.slug}`}
                           target="_blank"
-                          className="font-medium text-slate-900 hover:text-emerald-600 transition-colors"
+                          className="font-medium text-slate-900 hover:text-emerald-600 transition-colors line-clamp-2 break-words"
+                          title={booking.retreat.title}
                         >
                           {booking.retreat.title}
                         </Link>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-slate-700">
+                      <td className="px-2 py-2.5 align-top min-w-0">
+                        <div className="text-xs text-slate-700 leading-snug line-clamp-4">
                           {booking.roomSlots.map((slot, idx) => (
-                            <div key={idx}>
+                            <div key={idx} className="truncate" title={`${slot.quantity}x ${slot.retreatRoomType.name}`}>
                               {slot.quantity}x {slot.retreatRoomType.name}
                             </div>
                           ))}
                           {booking.extras.length > 0 && (
-                            <div className="text-xs text-slate-500 mt-1 space-y-1">
+                            <div className="text-slate-500 mt-0.5 space-y-0.5">
                               {booking.extras.map((extra, idx) => (
-                                <div key={idx}>
+                                <div
+                                  key={idx}
+                                  className="truncate"
+                                  title={`+ ${extra.quantity}x ${extra.retreatExtraActivity.name}`}
+                                >
                                   + {extra.quantity}x{" "}
                                   {extra.retreatExtraActivity.name}
                                 </div>
@@ -599,36 +686,84 @@ export default function BookingsPage() {
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-slate-900">
-                          Estimado: {formatPrice(calculateTotal(booking))}
-                        </div>
-                        <div className="text-xs text-slate-500 mt-1">
-                          Cobrado: {formatPrice(getChargedCents(booking))}
-                        </div>
-                        {isSoloSeñalBooking(booking) && (
-                          <div className="text-xs text-orange-700 mt-1">
-                            Solo señal
+                      <td className="px-2 py-2.5 align-top min-w-0">
+                        {booking.status === "paid" &&
+                        getPendingCents(booking) === 0 ? (
+                          <div className="text-xs leading-snug">
+                            <div className="font-semibold text-emerald-700">
+                              {formatPrice(
+                                calculateBookingTotalCents(booking),
+                              )}
+                            </div>
+                            {booking.stripeCustomerId ? (
+                              <div
+                                className="text-[10px] text-slate-500 mt-1 truncate font-mono"
+                                title={booking.stripeCustomerId}
+                              >
+                                {booking.stripeCustomerId}
+                              </div>
+                            ) : null}
                           </div>
-                        )}
-                        {booking.stripeCustomerId && (
-                          <div className="text-xs text-slate-400 mt-1">
-                            Cliente Stripe: {booking.stripeCustomerId}
-                          </div>
+                        ) : (
+                          <>
+                            <div className="font-semibold text-slate-900 text-xs leading-snug">
+                              Tot.{" "}
+                              {formatPrice(
+                                calculateBookingTotalCents(booking),
+                              )}
+                            </div>
+                            <div className="text-[11px] text-slate-500 mt-0.5">
+                              Cob. {formatPrice(getChargedCents(booking))}
+                            </div>
+                            <div className="text-[11px] text-slate-700 mt-0.5 font-medium">
+                              Pend. {formatPrice(getPendingCents(booking))}
+                            </div>
+                            {isSoloSeñalBooking(booking) && (
+                              <div className="text-[10px] text-orange-700 mt-0.5">
+                                Solo señal
+                              </div>
+                            )}
+                            {booking.stripeCustomerId && (
+                              <div
+                                className="text-[10px] text-slate-400 mt-0.5 truncate font-mono"
+                                title={booking.stripeCustomerId}
+                              >
+                                {booking.stripeCustomerId}
+                              </div>
+                            )}
+                          </>
                         )}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-slate-900">
-                          {formatPrice(getPendingCents(booking))}
-                        </div>
+                      <td className="px-2 py-2.5 align-top min-w-0">
+                        {booking.balanceInvoiceSentAt ? (
+                          <div
+                            className="text-xs text-emerald-800"
+                            title={
+                              booking.balanceInvoiceStripeId
+                                ? `Factura Stripe: ${booking.balanceInvoiceStripeId}`
+                                : undefined
+                            }
+                          >
+                            <span className="font-semibold">OK</span>
+                            <div className="text-[10px] text-slate-500 leading-tight mt-0.5">
+                              {formatShortDate(booking.balanceInvoiceSentAt)}
+                            </div>
+                          </div>
+                        ) : canCreateBalanceStripeInvoice(booking) ? (
+                          <span className="text-xs font-semibold text-amber-700">
+                            No
+                          </span>
+                        ) : (
+                          <span className="text-xs text-slate-400">—</span>
+                        )}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-2 py-2.5 align-top min-w-0">
                         <select
                           value={booking.status}
                           onChange={(e) =>
                             handleStatusChange(booking.id, e.target.value)
                           }
-                          className={`px-3 py-1.5 text-xs font-medium rounded-lg border-2 transition-colors cursor-pointer ${
+                          className={`w-full max-w-full py-1 pl-1.5 pr-6 text-[11px] font-medium rounded-md border transition-colors cursor-pointer truncate ${
                             booking.status === "paid"
                               ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
                               : booking.status === "deposit"
@@ -644,21 +779,38 @@ export default function BookingsPage() {
                           <option value="cancelled">Cancelada</option>
                         </select>
                       </td>
-                      <td className="px-6 py-4 text-sm text-slate-600">
-                        {formatDate(booking.createdAt)}
+                      <td className="px-2 py-2.5 align-top text-[11px] text-slate-600 leading-tight whitespace-normal">
+                        {formatCompactDateTime(booking.createdAt)}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex justify-end gap-2">
+                      <td className="px-2 py-2.5 align-middle">
+                        <div className="flex flex-row flex-nowrap items-center justify-end gap-1">
+                          {canCreateBalanceStripeInvoice(booking) && (
+                            <button
+                              type="button"
+                              onClick={() => handleBalanceInvoice(booking)}
+                              disabled={
+                                balanceInvoiceBookingId === booking.id
+                              }
+                              className="inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-emerald-200/80 bg-emerald-50 text-emerald-800 transition-colors hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+                              title="Factura de saldo (Stripe + email)"
+                            >
+                              <FaFileInvoice className="size-3.5" aria-hidden />
+                              <span className="sr-only">Factura saldo</span>
+                            </button>
+                          )}
                           <button
+                            type="button"
                             onClick={() =>
                               handleSendEmail(booking.id, booking.customerEmail)
                             }
-                            className="px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
+                            className="inline-flex size-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-700 transition-colors hover:bg-blue-100"
                             title="Enviar email de confirmación"
                           >
-                            📧 Enviar Email
+                            <FaEnvelope className="size-3.5" aria-hidden />
+                            <span className="sr-only">Enviar mail</span>
                           </button>
                           <button
+                            type="button"
                             onClick={() =>
                               handleDeleteBooking(
                                 booking.id,
@@ -666,12 +818,18 @@ export default function BookingsPage() {
                               )
                             }
                             disabled={deletingBookingId === booking.id}
-                            className="px-3 py-1.5 text-xs font-medium text-rose-700 bg-rose-50 hover:bg-rose-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors"
+                            className="inline-flex size-8 shrink-0 items-center justify-center rounded-md bg-rose-50 text-rose-700 transition-colors hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50"
                             title="Borrar reserva"
                           >
-                            {deletingBookingId === booking.id
-                              ? "Borrando..."
-                              : "🗑️ Borrar"}
+                            {deletingBookingId === booking.id ? (
+                              <span
+                                className="size-3.5 animate-pulse rounded-sm bg-rose-300"
+                                aria-hidden
+                              />
+                            ) : (
+                              <FaTrash className="size-3.5" aria-hidden />
+                            )}
+                            <span className="sr-only">Borrar</span>
                           </button>
                         </div>
                       </td>
