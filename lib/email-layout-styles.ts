@@ -10,6 +10,9 @@ export const emailLayoutStyles = {
     "background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);",
   headerGreen:
     "background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 30px; text-align: center;",
+  /** Slightly brighter gradient for celebration / full-payment emails */
+  headerCelebration:
+    "background: linear-gradient(135deg, #34d399 0%, #10b981 45%, #059669 100%); padding: 40px 30px; text-align: center;",
   headerTitle: "margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;",
   headerSubtitle: "margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px;",
   contentCell: "padding: 40px 30px;",

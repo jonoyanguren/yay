@@ -346,3 +346,131 @@ export function WaitlistJoinedEmail({
 </html>
   `.trim();
 }
+
+interface RetreatFullyPaidEmailProps {
+  customerName: string;
+  retreatTitle: string;
+  retreatSlug: string;
+  baseUrl: string;
+  totalPaidCents: number;
+}
+
+export function RetreatFullyPaidEmail({
+  customerName,
+  retreatTitle,
+  retreatSlug,
+  baseUrl,
+  totalPaidCents,
+}: RetreatFullyPaidEmailProps) {
+  const safeName = escapeHtml(customerName || "Viajero");
+  const safeTitle = escapeHtml(retreatTitle);
+  const retreatUrl = `${baseUrl.replace(/\/$/, "")}/retreats/${retreatSlug}`;
+  const formattedTotal = new Intl.NumberFormat("es-ES", {
+    style: "currency",
+    currency: "EUR",
+  }).format(totalPaidCents / 100);
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pago completado</title>
+</head>
+<body style="${s.body}">
+  <table width="100%" cellpadding="0" cellspacing="0" style="${s.outerWrap}">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="${s.card}">
+          <tr>
+            <td style="${s.headerCelebration}">
+              <h1 style="${s.headerTitle}">
+                ¡Pago completado! 🎉
+              </h1>
+              <p style="${s.headerSubtitle}">
+                Tu retiro está al corriente
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="${s.contentCell}">
+              <p style="${s.paragraph}">
+                Hola <strong>${safeName}</strong>,
+              </p>
+              <p style="${s.paragraphLast}">
+                Hemos recibido el pago de tu factura: <strong>ya has completado el importe total</strong> de <strong>${safeTitle}</strong>. ¡Mil gracias por confiar en nosotros!
+              </p>
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="${s.sectionBox}">
+                <tr>
+                  <td style="${s.sectionBoxInner}">
+                    <h2 style="${s.sectionHeading}">
+                      Resumen
+                    </h2>
+                    <p style="margin: 0; font-size: 15px; color: #374151; line-height: 1.6;">
+                      Importe total abonado (señal + pago final): <strong style="color: #059669;">${escapeHtml(formattedTotal)}</strong>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="${s.infoBoxBlue}">
+                <tr>
+                  <td style="${s.infoBoxBlueInner}">
+                    <p style="${s.infoBoxBlueText}">
+                      <strong>Próximos pasos</strong><br><br>
+                      En los <strong>días previos al retiro</strong> te iremos enviando por email la información práctica: horarios, punto de encuentro, qué llevar y últimos detalles.<br><br>
+                      Revisa también la carpeta de spam o promociones por si nuestros mensajes se cuelan ahí.<br><br>
+                      Si surge cualquier imprevisto de última hora, responde a este correo y lo vemos juntos.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="${s.noticeBoxAmber}">
+                <tr>
+                  <td style="${s.noticeBoxAmberInner}">
+                    <p style="margin: 0; font-size: 14px; color: #92400e; line-height: 1.5;">
+                      <strong>Última hora</strong><br>
+                      Cualquier aviso urgente del equipo (cambios puntuales, coordinación, etc.) te lo haremos llegar por el mismo canal, así que mantén un ojo a tu bandeja cerca de las fechas del retiro.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="${s.mutedParagraph}">
+                Si tienes preguntas, escríbenos contestando a este mensaje.
+              </p>
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="${s.ctaWrap}">
+                <tr>
+                  <td align="center">
+                    <a href="${escapeHtml(retreatUrl)}" style="${s.ctaButton}">
+                      Ver el retiro
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="${s.footer}">
+              <p style="${s.footerLine}">
+                Nos vemos muy pronto ✨
+              </p>
+              <p style="${s.footerMeta}">
+                Pago final recibido · ${safeTitle}
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim();
+}

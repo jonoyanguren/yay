@@ -125,3 +125,48 @@ export async function sendWaitlistJoinedEmail({
     return { success: false, error };
   }
 }
+
+interface SendRetreatFullyPaidParams {
+  to: string;
+  customerName: string;
+  retreatTitle: string;
+  retreatSlug: string;
+  totalPaidCents: number;
+}
+
+export async function sendRetreatFullyPaidEmail({
+  to,
+  customerName,
+  retreatTitle,
+  retreatSlug,
+  totalPaidCents,
+}: SendRetreatFullyPaidParams) {
+  if (!process.env.RESEND_API_KEY) {
+    console.error("RESEND_API_KEY not configured");
+    return { success: false, error: "Email service not configured" };
+  }
+
+  const { RetreatFullyPaidEmail } = await import("./email-templates");
+
+  const html = RetreatFullyPaidEmail({
+    customerName,
+    retreatTitle,
+    retreatSlug,
+    baseUrl: getEmailBaseUrl(),
+    totalPaidCents,
+  });
+
+  try {
+    const data = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
+      to: [to],
+      subject: `¡Listo! Pago completado: ${retreatTitle}`,
+      html,
+    });
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error sending fully paid email:", error);
+    return { success: false, error };
+  }
+}

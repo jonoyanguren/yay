@@ -12,7 +12,10 @@ function getCustomerId(session: Stripe.Checkout.Session): string | null {
 }
 
 function calculateBookingTotalCents(booking: {
-  roomSlots: Array<{ quantity: number; retreatRoomType: { priceCents: number } }>;
+  roomSlots: Array<{
+    quantity: number;
+    retreatRoomType: { priceCents: number };
+  }>;
   extras: Array<{
     quantity: number;
     retreatExtraActivity: { priceCents: number };
@@ -23,7 +26,8 @@ function calculateBookingTotalCents(booking: {
     0,
   );
   const extrasTotal = booking.extras.reduce(
-    (sum, extra) => sum + extra.retreatExtraActivity.priceCents * extra.quantity,
+    (sum, extra) =>
+      sum + extra.retreatExtraActivity.priceCents * extra.quantity,
     0,
   );
   return roomTotal + extrasTotal;
@@ -34,7 +38,7 @@ export async function POST(request: NextRequest) {
     console.error("STRIPE_WEBHOOK_SECRET not set");
     return NextResponse.json(
       { error: "Webhook secret not configured" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
@@ -67,10 +71,10 @@ export async function POST(request: NextRequest) {
       console.error("checkout.session.completed missing metadata.bookingId");
       return NextResponse.json(
         { error: "Missing booking id in metadata" },
-        { status: 400 }
+        { status: 400 },
       );
     }
-    
+
     try {
       const booking = await prisma.booking.findUnique({
         where: { id: bookingId },
@@ -136,7 +140,7 @@ export async function POST(request: NextRequest) {
           retreatSlug: booking.retreat.slug,
           roomType: booking.roomSlots[0]?.retreatRoomType.name || "Habitación",
           roomQuantity: booking.roomSlots[0]?.quantity || 1,
-          extras: booking.extras.map(e => ({
+          extras: booking.extras.map((e) => ({
             name: e.retreatExtraActivity.name,
             quantity: e.quantity,
           })),
