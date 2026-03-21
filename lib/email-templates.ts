@@ -1,3 +1,4 @@
+import { cancellationPolicyEmailInnerHtml } from "@/lib/cancellation-policy";
 import { emailLayoutStyles as s } from "@/lib/email-layout-styles";
 
 function escapeHtml(text: string): string {
@@ -152,18 +153,7 @@ export function BookingConfirmationEmail({
               <table width="100%" cellpadding="0" cellspacing="0" style="${s.noticeBoxAmber}">
                 <tr>
                   <td style="${s.noticeBoxAmberInner}">
-                    <p style="margin: 0 0 8px 0; font-size: 14px; color: #92400e; line-height: 1.5;">
-                      <strong>📌 Política de cancelación</strong>
-                    </p>
-                    <p style="margin: 0 0 8px 0; font-size: 13px; color: #92400e; line-height: 1.5;">
-                      Si cancelas con menos de 1 mes de antelación, el importe de la reserva no se devuelve.
-                    </p>
-                    <p style="margin: 0 0 8px 0; font-size: 13px; color: #92400e; line-height: 1.5;">
-                      Si cancelas con 3 meses o más de antelación, devolvemos una parte del importe abonado en la reserva.
-                    </p>
-                    <p style="margin: 0; font-size: 13px; color: #92400e; line-height: 1.5;">
-                      Estas condiciones nos ayudan a organizar la logística con tiempo y cuidar la experiencia del grupo.
-                    </p>
+                    ${cancellationPolicyEmailInnerHtml()}
                   </td>
                 </tr>
               </table>

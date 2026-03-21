@@ -137,6 +137,37 @@ export default function PrivacidadPage() {
             </li>
             <li>Cumplir obligaciones legales aplicables</li>
           </ul>
+          <p className="pt-1">
+            <strong className="text-black">Ejemplos de correos que puedes recibir</strong>{" "}
+            (según tu relación con nosotros):
+          </p>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>
+              Confirmación de reserva con el detalle de tu pedido (habitación,
+              extras, importes pagados y pendientes).
+            </li>
+            <li>
+              Mensaje con enlace para completar el pago pendiente (factura de saldo
+              gestionada con Stripe).
+            </li>
+            <li>
+              Aviso de que has completado el pago total del retiro y recordatorio de
+              próximos pasos.
+            </li>
+            <li>
+              Información práctica en los días previos al retiro (horarios, punto de
+              encuentro, qué llevar, últimos detalles).
+            </li>
+            <li>
+              Avisos puntuales relacionados con la coordinación o asistencia al
+              retiro.
+            </li>
+            <li>
+              Lista de espera: confirmación de tu inscripción y, si aplica, avisos de
+              plaza disponible o nuevas convocatorias.
+            </li>
+            <li>Respuesta a consultas enviadas por contacto o respondiendo a un email nuestro.</li>
+          </ul>
         </section>
 
         <section className="space-y-3">

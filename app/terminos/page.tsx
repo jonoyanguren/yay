@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CANCELLATION_POLICY } from "@/lib/cancellation-policy";
 
 export const metadata: Metadata = {
   title: "Términos y condiciones de contratación",
@@ -122,30 +123,45 @@ export default function TerminosPage() {
           </p>
         </section>
 
-        <section className="space-y-3">
+        <section className="space-y-4">
           <h2 className="text-xl font-bold text-black tracking-tight">
             4. Política de cancelación
           </h2>
-          <p>Si necesitas cancelar tu reserva, estas son las condiciones:</p>
-          <ul className="list-disc pl-5 space-y-2">
-            <li>
-              Si cancelas con menos de un mes de antelación respecto a la fecha
-              del retiro, el importe abonado como reserva no se devuelve.
-            </li>
-            <li>
-              Si cancelas con tres meses o más de antelación, se devuelve solo una
-              parte del importe abonado en la reserva.
-            </li>
-            <li>
-              Estas condiciones permiten organizar el retiro con tiempo y cuidar
-              la experiencia del grupo.
-            </li>
-            <li>
-              Para cancelaciones entre uno y tres meses de antelación, este tramo no
-              está detallado en la política pública. En ese caso, deberás contactar
-              directamente con el equipo para valorar tu situación.
-            </li>
-          </ul>
+          <p>
+            Si necesitas cancelar tu reserva, aplicará la siguiente escala según la
+            antelación con la que comuniques la cancelación. {CANCELLATION_POLICY.intro}
+          </p>
+          <div className="overflow-x-auto rounded-lg border border-black/10">
+            <table className="w-full min-w-[320px] text-left text-sm border-collapse">
+              <thead>
+                <tr className="bg-black/4 border-b border-black/10">
+                  <th className="px-3 py-3 font-bold text-black align-top">
+                    Antelación (días naturales hasta el inicio del retiro)
+                  </th>
+                  <th className="px-3 py-3 font-bold text-black align-top w-[min(40%,200px)]">
+                    Devolución
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {CANCELLATION_POLICY.rows.map((row) => (
+                  <tr
+                    key={row.antelacion}
+                    className="border-b border-black/10 last:border-b-0"
+                  >
+                    <td className="px-3 py-3 align-top">{row.antelacion}</td>
+                    <td className="px-3 py-3 align-top">{row.devolucion}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p>{CANCELLATION_POLICY.baseAmountNote}</p>
+          <p>{CANCELLATION_POLICY.processingNote}</p>
+          <p>
+            Estas condiciones permiten organizar el retiro con tiempo y cuidar la
+            experiencia del grupo.
+          </p>
           <p>
             En caso de que YaY Experiences cancele el retiro, se devolverá el
             importe íntegro abonado por el participante.

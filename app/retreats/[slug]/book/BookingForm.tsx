@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import ImageGallery from "@/components/ImageGallery";
 import type { RetreatRoomTypeWithAvailability } from "@/lib/types";
 import type { RetreatExtraActivityRow } from "@/lib/types";
@@ -16,6 +17,7 @@ import {
   isValidBookingPhone,
   normalizeCustomerPhone,
 } from "@/lib/booking-phone";
+import { cancellationPolicyFormParagraphs } from "@/lib/cancellation-policy";
 
 function formatPrice(cents: number): string {
   return new Intl.NumberFormat("es-ES", {
@@ -544,17 +546,21 @@ export default function BookingForm({
           <p className="text-sm font-medium text-black">
             Política de cancelación
           </p>
+          {cancellationPolicyFormParagraphs().map((line) => (
+            <p key={line} className="text-sm text-black/70">
+              {line}
+            </p>
+          ))}
           <p className="text-sm text-black/70">
-            Si cancelas con menos de 1 mes de antelación, la reserva abonada no
-            podrá devolverse.
-          </p>
-          <p className="text-sm text-black/70">
-            Si cancelas con 3 meses o más de antelación, devolvemos parte de la
-            reserva para ayudarte con el cambio de planes.
-          </p>
-          <p className="text-sm text-black/70">
-            Estas condiciones nos permiten organizar el retiro con tiempo y
-            cuidar cada detalle de la experiencia del grupo.
+            Los plazos son días naturales hasta el día de inicio del retiro.{" "}
+            <Link
+              href="/terminos"
+              className="text-black underline underline-offset-2 hover:text-black/80"
+            >
+              Términos y condiciones
+            </Link>{" "}
+            (texto legal completo, supuestos especiales y tramitación de
+            reembolsos).
           </p>
           <label className="flex items-start gap-3 pt-1 cursor-pointer">
             <input
