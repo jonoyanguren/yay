@@ -15,17 +15,32 @@ export default function ArrivalOptionsSection({
   options,
 }: ArrivalOptionsSectionProps) {
   if (options.length === 0) return null;
+  const remainder = options.length % 3;
+  const lastRowStartIndex =
+    remainder === 0 ? options.length : options.length - remainder;
 
   return (
     <section className="space-y-4">
       <Title className="text-5xl text-white">Llegadas y transfers</Title>
       <p className="text-xl text-white leading-relaxed mb-12">{intro}</p>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
         {options.map((item, index) => (
           <div
             key={item.title}
-            className={`p-4 border-2 rounded-lg shadow-sm ${
+            className={`p-4 border-2 rounded-lg shadow-sm md:col-span-2 ${
               index === 0 ? "" : "border-white/15 bg-white"
+            } ${
+              remainder === 1 && index === lastRowStartIndex
+                ? "md:col-start-3"
+                : ""
+            } ${
+              remainder === 2 && index === lastRowStartIndex
+                ? "md:col-start-2"
+                : ""
+            } ${
+              remainder === 2 && index === lastRowStartIndex + 1
+                ? "md:col-start-4"
+                : ""
             }`}
             style={
               index === 0
