@@ -68,6 +68,7 @@ model Retreat {
   reservationDepositCents  Int      @default(60000) @map("reservation_deposit_cents")
   chargeFullAmount         Boolean  @default(false) @map("charge_full_amount")
   published                Boolean  @default(false)
+  forceSoldOut             Boolean  @default(false) @map("force_sold_out")
   arrivalIntro             String?  @map("arrival_intro")
   arrivalOptions           Json?    @map("arrival_options")
   hotelName                String?  @map("hotel_name")

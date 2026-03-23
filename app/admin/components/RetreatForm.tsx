@@ -124,6 +124,7 @@ export default function RetreatForm({
     reservationDepositCents: retreat?.reservationDepositCents ?? 60000,
     chargeFullAmount: retreat?.chargeFullAmount || false,
     published: retreat?.published || false,
+    forceSoldOut: retreat?.forceSoldOut || false,
     arrivalIntro: retreat?.arrivalIntro || "",
     hotelName: retreat?.hotelName || "",
     hotelUrl: retreat?.hotelUrl || "",
@@ -1054,21 +1055,39 @@ export default function RetreatForm({
         </div>
 
         <div className="mt-5 pt-4 border-t border-slate-100">
-          <label className="flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              name="published"
-              checked={formData.published}
-              onChange={handleChange}
-              className="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500"
-            />
-            <span className="ml-2 text-sm font-medium text-slate-700">
-              Publicado
-            </span>
-            <span className="ml-2 text-xs text-slate-500">
-              (visible en la web)
-            </span>
-          </label>
+          <div className="space-y-3">
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                name="published"
+                checked={formData.published}
+                onChange={handleChange}
+                className="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500"
+              />
+              <span className="ml-2 text-sm font-medium text-slate-700">
+                Publicado
+              </span>
+              <span className="ml-2 text-xs text-slate-500">
+                (visible en la web)
+              </span>
+            </label>
+
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                name="forceSoldOut"
+                checked={formData.forceSoldOut}
+                onChange={handleChange}
+                className="w-4 h-4 text-rose-600 border-slate-300 rounded focus:ring-rose-500"
+              />
+              <span className="ml-2 text-sm font-medium text-slate-700">
+                Marcar como completo
+              </span>
+              <span className="ml-2 text-xs text-slate-500">
+                (forzar waitlist y bloquear reservas)
+              </span>
+            </label>
+          </div>
         </div>
 
         <div className="mt-5">

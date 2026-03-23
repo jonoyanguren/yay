@@ -115,7 +115,7 @@ export default async function RetreatPage({ params }: PageProps) {
       url: retreatUrl,
       priceCurrency: "EUR",
       availability:
-        spotsLeft > 0
+        !isSoldOut
           ? "https://schema.org/InStock"
           : "https://schema.org/SoldOut",
     },

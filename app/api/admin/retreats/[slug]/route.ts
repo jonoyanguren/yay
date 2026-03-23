@@ -81,6 +81,9 @@ export async function PATCH(
         chargeFullAmount: Boolean(data.chargeFullAmount),
       }),
       ...(data.published !== undefined && { published: data.published }),
+      ...(data.forceSoldOut !== undefined && {
+        forceSoldOut: Boolean(data.forceSoldOut),
+      }),
       ...(data.arrivalIntro !== undefined && {
         arrivalIntro: data.arrivalIntro,
       }),

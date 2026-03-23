@@ -21,6 +21,7 @@ export type Retreat = {
   price: string;
   reservationDepositCents: number;
   chargeFullAmount: boolean;
+  forceSoldOut?: boolean;
   arrivalIntro?: string | null;
   arrivalOptions?: { title: string; detail: string }[] | null;
   hotelName?: string | null;

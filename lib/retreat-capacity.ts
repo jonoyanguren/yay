@@ -75,10 +75,16 @@ export async function getRetreatCapacity(retreatId: string): Promise<{
   spotsLeft: number;
   isSoldOut: boolean;
 }> {
+  const retreat = await prisma.retreat.findUnique({
+    where: { id: retreatId },
+    select: { forceSoldOut: true },
+  });
   const roomTypes = await getRoomTypesWithAvailability(retreatId);
   const maxPeople = roomTypes.reduce((sum, room) => sum + room.max_people, 0);
-  const spotsLeft = roomTypes.reduce((sum, room) => sum + room.available, 0);
-  const isSoldOut = roomTypes.length > 0 && spotsLeft <= 0;
+  const computedSpotsLeft = roomTypes.reduce((sum, room) => sum + room.available, 0);
+  const isSoldOutByCapacity = roomTypes.length > 0 && computedSpotsLeft <= 0;
+  const isSoldOut = Boolean(retreat?.forceSoldOut) || isSoldOutByCapacity;
+  const spotsLeft = isSoldOut ? 0 : computedSpotsLeft;
 
   return { maxPeople, spotsLeft, isSoldOut };
 }
@@ -95,15 +101,28 @@ export async function getRetreatSpotsLeftMap(
     select: { id: true, retreatId: true, maxPeople: true },
   });
   const soldByRoom = await getSoldByRoomTypeIds(roomTypes.map((room) => room.id));
+  const forceSoldOutRetreats = await prisma.retreat.findMany({
+    where: { id: { in: retreatIds }, forceSoldOut: true },
+    select: { id: true },
+  });
+  const forcedSet = new Set(forceSoldOutRetreats.map((retreat) => retreat.id));
   const spotsLeftByRetreat = new Map<string, number>();
 
   for (const room of roomTypes) {
+    if (forcedSet.has(room.retreatId)) {
+      spotsLeftByRetreat.set(room.retreatId, 0);
+      continue;
+    }
     const sold = soldByRoom.get(room.id) ?? 0;
     const available = Math.max(0, room.maxPeople - sold);
     spotsLeftByRetreat.set(
       room.retreatId,
       (spotsLeftByRetreat.get(room.retreatId) ?? 0) + available,
     );
+  }
+
+  for (const retreatId of forcedSet) {
+    spotsLeftByRetreat.set(retreatId, 0);
   }
 
   return spotsLeftByRetreat;

@@ -39,7 +39,7 @@ export default function RetreatCard({ retreat }: RetreatCardProps) {
         />
         {!isPublished && <div className="absolute inset-0 bg-black/25" />}
         {!isPublished && (
-          <span className="absolute top-3 left-3 px-3 py-1.5 rounded-full text-sm font-bold bg-black/80 text-white shadow-md">
+          <span className="absolute top-3 right-3 px-3 py-1.5 rounded-full text-sm font-bold bg-black/80 text-white shadow-md">
             Coming soon
           </span>
         )}

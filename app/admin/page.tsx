@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FaEye, FaPencilAlt, FaTrash } from "react-icons/fa";
+import { FaEye, FaPencilAlt, FaTrash, FaEllipsisV } from "react-icons/fa";
 import Swal from "sweetalert2";
 
 interface Retreat {
@@ -13,6 +13,7 @@ interface Retreat {
   location: string;
   date: string;
   published: boolean;
+  forceSoldOut: boolean;
   createdAt: string;
 }
 
@@ -25,13 +26,17 @@ export default function AdminPage() {
     type: "success" | "error";
     message: string;
   } | null>(null);
+  const [openMenuSlug, setOpenMenuSlug] = useState<string | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(
+    null,
+  );
 
   const showToast = (type: "success" | "error", message: string) => {
     setToast({ type, message });
     setTimeout(() => setToast(null), 3500);
   };
 
-  const fetchRetreats = async () => {
+  const fetchRetreats = useCallback(async () => {
     try {
       const res = await fetch("/api/admin/retreats");
 
@@ -48,10 +53,29 @@ export default function AdminPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [router]);
 
   useEffect(() => {
     fetchRetreats();
+  }, [fetchRetreats]);
+
+  useEffect(() => {
+    const handleOutsideClick = () => setOpenMenuSlug(null);
+    window.addEventListener("click", handleOutsideClick);
+    return () => window.removeEventListener("click", handleOutsideClick);
+  }, []);
+
+  useEffect(() => {
+    const closeMenu = () => {
+      setOpenMenuSlug(null);
+      setMenuPosition(null);
+    };
+    window.addEventListener("scroll", closeMenu, true);
+    window.addEventListener("resize", closeMenu);
+    return () => {
+      window.removeEventListener("scroll", closeMenu, true);
+      window.removeEventListener("resize", closeMenu);
+    };
   }, []);
 
   const handleDelete = async (slug: string, title: string) => {
@@ -108,10 +132,35 @@ export default function AdminPage() {
     }
   };
 
+  const handleToggleForceSoldOut = async (slug: string, nextValue: boolean) => {
+    try {
+      const res = await fetch(`/api/admin/retreats/${slug}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ forceSoldOut: nextValue }),
+      });
+
+      if (res.ok) {
+        setRetreats((prev) =>
+          prev.map((r) =>
+            r.slug === slug ? { ...r, forceSoldOut: nextValue } : r,
+          ),
+        );
+      } else {
+        showToast("error", "No se pudo cambiar el estado de completo.");
+      }
+    } catch {
+      showToast("error", "No se pudo cambiar el estado de completo.");
+    }
+  };
+
   const handleLogout = async () => {
     await fetch("/api/admin/auth/logout", { method: "POST" });
     router.push("/admin/login");
   };
+  const activeRetreat = retreats.find((retreat) => retreat.slug === openMenuSlug) ?? null;
 
   if (isLoading) {
     return (
@@ -122,7 +171,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-8">
+    <div className="min-h-screen bg-slate-50 p-4 md:p-6">
       {toast && (
         <div className="fixed top-6 right-6 z-50">
           <div
@@ -138,36 +187,38 @@ export default function AdminPage() {
       )}
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800">Retreat Dashboard</h1>
-          <div className="flex gap-3">
+        <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+            Retreat Dashboard
+          </h1>
+          <div className="flex flex-wrap gap-2">
             <Link
               href="/admin/bookings"
-              className="bg-violet-600 text-white px-5 py-2.5 rounded-lg hover:bg-violet-700 transition-colors font-medium text-sm"
+              className="bg-violet-600 text-white px-3 py-2 rounded-lg hover:bg-violet-700 transition-colors font-medium text-xs md:text-sm"
             >
               📋 Ver Reservas
             </Link>
             <Link
               href="/admin/waitlist"
-              className="bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+              className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium text-xs md:text-sm"
             >
               📨 Waitlist
             </Link>
             <Link
               href="/admin/email-templates"
-              className="bg-slate-700 text-white px-5 py-2.5 rounded-lg hover:bg-slate-800 transition-colors font-medium text-sm"
+              className="bg-slate-700 text-white px-3 py-2 rounded-lg hover:bg-slate-800 transition-colors font-medium text-xs md:text-sm"
             >
               ✉️ Emails
             </Link>
             <Link
               href="/admin/retreats/new"
-              className="bg-emerald-600 text-white px-5 py-2.5 rounded-lg hover:bg-emerald-700 transition-colors font-medium text-sm"
+              className="bg-emerald-600 text-white px-3 py-2 rounded-lg hover:bg-emerald-700 transition-colors font-medium text-xs md:text-sm"
             >
               + New Retreat
             </Link>
             <button
               onClick={handleLogout}
-              className="bg-slate-100 text-slate-700 px-5 py-2.5 rounded-lg hover:bg-slate-200 transition-colors font-medium text-sm"
+              className="bg-slate-100 text-slate-700 px-3 py-2 rounded-lg hover:bg-slate-200 transition-colors font-medium text-xs md:text-sm"
             >
               Logout
             </button>
@@ -175,122 +226,99 @@ export default function AdminPage() {
         </div>
 
         {error && (
-          <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3.5 rounded-lg mb-6 font-medium text-sm">
+          <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-2.5 rounded-lg mb-3 font-medium text-sm">
             {error}
           </div>
         )}
 
         {/* Retreats Table */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto overflow-y-visible">
           <table className="w-full">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                   Title
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                   Location
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                   Date
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Actions
+                <th className="px-4 py-2.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Acciones
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {retreats.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
+                  <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
                     No retreats yet. Create your first one!
                   </td>
                 </tr>
               ) : (
                 retreats.map((retreat) => (
                   <tr key={retreat.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3">
                       <div className="font-semibold text-slate-900">{retreat.title}</div>
                       <div className="text-sm text-slate-500 mt-0.5">{retreat.slug}</div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">
+                    <td className="px-4 py-3 text-sm text-slate-600">
                       {retreat.location}
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">
+                    <td className="px-4 py-3 text-sm text-slate-600">
                       {retreat.date}
                     </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${
-                          retreat.published
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-slate-100 text-slate-600"
-                        }`}
-                      >
-                        {retreat.published ? "Published" : "Draft"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-end items-center gap-3">
-                        {retreat.published ? (
-                          <Link
-                            href={`/retreats/${retreat.slug}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-                            title="View"
-                          >
-                            <FaEye className="w-4 h-4" />
-                          </Link>
-                        ) : (
-                          <Link
-                            href={`/admin/retreats/${retreat.slug}/preview`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 text-violet-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors"
-                            title="Preview"
-                          >
-                            <FaEye className="w-4 h-4" />
-                          </Link>
-                        )}
-                        <Link
-                          href={`/admin/retreats/${retreat.slug}/edit`}
-                          className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-                          title="Edit"
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap gap-2">
+                        <span
+                          className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${
+                            retreat.published
+                              ? "bg-emerald-100 text-emerald-700"
+                              : "bg-slate-100 text-slate-600"
+                          }`}
                         >
-                          <FaPencilAlt className="w-4 h-4" />
-                        </Link>
-                        <button
-                          type="button"
-                          onClick={() => handleTogglePublish(retreat.slug)}
-                          className="shrink-0"
-                          title={retreat.published ? "Unpublish" : "Publish"}
-                        >
-                          <span
-                            role="switch"
-                            aria-checked={retreat.published}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:ring-offset-2 ${
-                              retreat.published ? "bg-emerald-400" : "bg-slate-200"
-                            }`}
-                          >
-                            <span
-                              className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${
-                                retreat.published ? "translate-x-6" : "translate-x-1"
-                              }`}
-                            />
+                          {retreat.published ? "Published" : "Draft"}
+                        </span>
+                        {retreat.forceSoldOut && (
+                          <span className="inline-flex px-2.5 py-1 text-xs font-medium rounded-full bg-rose-100 text-rose-700">
+                            Completo
                           </span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(retreat.slug, retreat.title)}
-                          className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50/70 rounded-lg transition-colors"
-                          title="Delete"
-                        >
-                          <FaTrash className="w-4 h-4" />
-                        </button>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex justify-end">
+                        <div>
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              const rect = (
+                                event.currentTarget as HTMLButtonElement
+                              ).getBoundingClientRect();
+                              const nextIsOpen = openMenuSlug !== retreat.slug;
+                              setOpenMenuSlug(nextIsOpen ? retreat.slug : null);
+                              setMenuPosition(
+                                nextIsOpen
+                                  ? {
+                                      top: rect.bottom + 8,
+                                      left: rect.right - 288,
+                                    }
+                                  : null,
+                              );
+                            }}
+                            className="inline-flex items-center justify-center h-9 w-9 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                            title="Acciones"
+                            aria-label="Abrir acciones del retiro"
+                          >
+                            <FaEllipsisV className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     </td>
                   </tr>
@@ -300,6 +328,95 @@ export default function AdminPage() {
           </table>
         </div>
       </div>
+      {activeRetreat && menuPosition && (
+        <div
+          className="fixed w-72 bg-white border border-slate-200 rounded-xl shadow-lg z-40 p-2 space-y-1"
+          style={{
+            top: `${menuPosition.top}px`,
+            left: `${Math.max(16, menuPosition.left)}px`,
+          }}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <Link
+            href={
+              activeRetreat.published
+                ? `/retreats/${activeRetreat.slug}`
+                : `/admin/retreats/${activeRetreat.slug}/preview`
+            }
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 text-sm text-slate-700"
+          >
+            <FaEye className="w-4 h-4 text-slate-500" />
+            <span>{activeRetreat.published ? "Ver publicado" : "Ver preview"}</span>
+          </Link>
+
+          <Link
+            href={`/admin/retreats/${activeRetreat.slug}/edit`}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 text-sm text-slate-700"
+          >
+            <FaPencilAlt className="w-4 h-4 text-slate-500" />
+            <span>Editar retiro</span>
+          </Link>
+
+          <div className="border-t border-slate-100 my-1" />
+
+          <button
+            type="button"
+            onClick={() => handleTogglePublish(activeRetreat.slug)}
+            className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 text-sm text-slate-700"
+          >
+            <span className="font-medium">Publicado</span>
+            <span
+              role="switch"
+              aria-checked={activeRetreat.published}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                activeRetreat.published ? "bg-emerald-400" : "bg-slate-200"
+              }`}
+            >
+              <span
+                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${
+                  activeRetreat.published ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              handleToggleForceSoldOut(activeRetreat.slug, !activeRetreat.forceSoldOut)
+            }
+            className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 text-sm text-slate-700"
+          >
+            <span className="font-medium">Marcar completo</span>
+            <span
+              role="switch"
+              aria-checked={activeRetreat.forceSoldOut}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                activeRetreat.forceSoldOut ? "bg-rose-400" : "bg-slate-200"
+              }`}
+            >
+              <span
+                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${
+                  activeRetreat.forceSoldOut ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </span>
+          </button>
+
+          <div className="border-t border-slate-100 my-1" />
+
+          <button
+            type="button"
+            onClick={() => handleDelete(activeRetreat.slug, activeRetreat.title)}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-rose-50 text-sm text-rose-600"
+          >
+            <FaTrash className="w-4 h-4" />
+            <span>Eliminar retiro</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

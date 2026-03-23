@@ -66,7 +66,9 @@ export default async function BookingPage({ params }: PageProps) {
     getExtraActivities(retreat.id),
   ]);
   const totalAvailable = roomTypes.reduce((sum, room) => sum + room.available, 0);
-  const isSoldOut = roomTypes.length > 0 && totalAvailable <= 0;
+  const isSoldOutByCapacity = roomTypes.length > 0 && totalAvailable <= 0;
+  const forceSoldOut = Boolean((retreat as { forceSoldOut?: boolean }).forceSoldOut);
+  const isSoldOut = forceSoldOut || isSoldOutByCapacity;
 
   if (isSoldOut) {
     return (
