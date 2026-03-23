@@ -43,6 +43,8 @@ interface ExtraActivity {
   priceEuros?: number; // For display only
 }
 
+const DEFAULT_RETREAT_BG_COLOR = "#d77a61";
+
 type RoomTypeRaw = {
   id?: string;
   name: string;
@@ -128,7 +130,7 @@ export default function RetreatForm({
     videoUrl: retreat?.videoUrl || "",
     accommodationTitle: retreat?.accommodationTitle || "",
     accommodationDescription: retreat?.accommodationDescription || "",
-    bgColor: retreat?.bgColor || "#d77a61",
+    bgColor: retreat?.bgColor || DEFAULT_RETREAT_BG_COLOR,
   });
   const [fullDescriptionHighlights, setFullDescriptionHighlights] = useState<
     string[]
@@ -178,7 +180,10 @@ export default function RetreatForm({
   });
   const [newDayByDay, setNewDayByDay] = useState({ day: "", items: "" });
   const [editingDayIndex, setEditingDayIndex] = useState<number | null>(null);
-  const [editingDayByDay, setEditingDayByDay] = useState({ day: "", items: "" });
+  const [editingDayByDay, setEditingDayByDay] = useState({
+    day: "",
+    items: "",
+  });
   const [draggedDayIndex, setDraggedDayIndex] = useState<number | null>(null);
   const [newInclude, setNewInclude] = useState("");
   const [newNotInclude, setNewNotInclude] = useState("");
@@ -203,9 +208,9 @@ export default function RetreatForm({
     priceCents: "",
     maxPeople: "",
   });
-  const [editingRoomTypeIndex, setEditingRoomTypeIndex] = useState<number | null>(
-    null,
-  );
+  const [editingRoomTypeIndex, setEditingRoomTypeIndex] = useState<
+    number | null
+  >(null);
   const [editingRoomType, setEditingRoomType] = useState({
     name: "",
     description: "",
@@ -284,7 +289,9 @@ export default function RetreatForm({
       setRoomTypes(normalizeRoomTypes(updatedRetreat.roomTypes));
     }
     if (payload.extraActivities) {
-      setExtraActivities(normalizeExtraActivities(updatedRetreat.extraActivities));
+      setExtraActivities(
+        normalizeExtraActivities(updatedRetreat.extraActivities),
+      );
     }
   };
 
@@ -639,7 +646,9 @@ export default function RetreatForm({
       if (isEdit) {
         persistCollections({ extraActivities: nextExtraActivities }).catch(
           (err: unknown) =>
-            setError(err instanceof Error ? err.message : "Error guardando extras"),
+            setError(
+              err instanceof Error ? err.message : "Error guardando extras",
+            ),
         );
       }
     }
@@ -663,7 +672,9 @@ export default function RetreatForm({
     if (isEdit) {
       persistCollections({ extraActivities: nextExtraActivities }).catch(
         (err: unknown) =>
-          setError(err instanceof Error ? err.message : "Error guardando extras"),
+          setError(
+            err instanceof Error ? err.message : "Error guardando extras",
+          ),
       );
     }
   };
@@ -738,7 +749,9 @@ export default function RetreatForm({
     if (isEdit) {
       persistCollections({ extraActivities: nextExtraActivities }).catch(
         (err: unknown) =>
-          setError(err instanceof Error ? err.message : "Error guardando extras"),
+          setError(
+            err instanceof Error ? err.message : "Error guardando extras",
+          ),
       );
     }
     cancelEditExtraActivity();
@@ -852,7 +865,7 @@ export default function RetreatForm({
         type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     }));
   };
-  const colorPreview = formData.bgColor?.trim() || "#ffffff";
+  const colorPreview = formData.bgColor?.trim() || DEFAULT_RETREAT_BG_COLOR;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -954,23 +967,33 @@ export default function RetreatForm({
               Color fondo (waves y secciones)
             </label>
             <div className="flex items-center gap-2">
-              <span
-                className="h-10 w-10 shrink-0 rounded-md border border-slate-300"
-                style={{ backgroundColor: colorPreview }}
-                aria-hidden="true"
+              <input
+                type="color"
+                value={colorPreview}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    bgColor: e.target.value,
+                  }))
+                }
+                className="h-10 w-10 shrink-0 rounded-md border border-slate-300 bg-transparent p-0 cursor-pointer"
+                aria-label="Seleccionar color de fondo del retiro"
               />
               <input
                 type="text"
                 name="bgColor"
-                value={formData.bgColor}
+                value={formData.bgColor || DEFAULT_RETREAT_BG_COLOR}
                 onChange={handleChange}
+                onBlur={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    bgColor: prev.bgColor?.trim() || DEFAULT_RETREAT_BG_COLOR,
+                  }))
+                }
                 placeholder="#d77a61"
                 className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
               />
             </div>
-            <p className="text-xs text-slate-500 mt-1.5">
-              Formato HEX. Ej: #d77a61
-            </p>
           </div>
 
           <div>
@@ -1019,10 +1042,13 @@ export default function RetreatForm({
               Plazas totales (auto)
             </label>
             <div className="w-full px-4 py-2.5 border border-slate-200 bg-slate-50 rounded-lg text-slate-700 font-medium">
-              {totalRoomTypeSpots > 0 ? totalRoomTypeSpots : "Define habitaciones"}
+              {totalRoomTypeSpots > 0
+                ? totalRoomTypeSpots
+                : "Define habitaciones"}
             </div>
             <p className="text-xs text-slate-500 mt-1.5">
-              Se calcula sumando el campo &quot;Plazas máximas&quot; de cada tipo de habitación.
+              Se calcula sumando el campo &quot;Plazas máximas&quot; de cada
+              tipo de habitación.
             </p>
           </div>
         </div>
@@ -1232,7 +1258,9 @@ export default function RetreatForm({
             <ImageGallery
               images={accommodationImages}
               onRemove={(index) =>
-                setAccommodationImages((prev) => prev.filter((_, i) => i !== index))
+                setAccommodationImages((prev) =>
+                  prev.filter((_, i) => i !== index),
+                )
               }
               onAdd={(url) => setAccommodationImages((prev) => [...prev, url])}
               onReorder={setAccommodationImages}
@@ -1244,9 +1272,7 @@ export default function RetreatForm({
 
       {/* Activities */}
       <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-100">
-        <h2 className="text-xl font-bold mb-5 text-slate-800">
-          Actividades
-        </h2>
+        <h2 className="text-xl font-bold mb-5 text-slate-800">Actividades</h2>
         <div className="mb-5">
           <label className="block text-sm font-semibold mb-2 text-slate-700">
             Imagen collage de actividades
@@ -1597,7 +1623,9 @@ export default function RetreatForm({
                     <input
                       type="text"
                       value={editingNotIncludeValue}
-                      onChange={(e) => setEditingNotIncludeValue(e.target.value)}
+                      onChange={(e) =>
+                        setEditingNotIncludeValue(e.target.value)
+                      }
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
@@ -1845,7 +1873,9 @@ export default function RetreatForm({
                 ) : (
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <p className="font-semibold text-slate-800">{room.name}</p>
+                      <p className="font-semibold text-slate-800">
+                        {room.name}
+                      </p>
                       {room.description && (
                         <p className="text-sm text-slate-600 mt-1">
                           {room.description}
@@ -1872,7 +1902,10 @@ export default function RetreatForm({
                       <div className="flex gap-4 mt-2 text-sm text-slate-600">
                         <span className="font-medium">
                           💰{" "}
-                          {(room.priceEuros ?? room.priceCents / 100).toFixed(2)}€
+                          {(room.priceEuros ?? room.priceCents / 100).toFixed(
+                            2,
+                          )}
+                          €
                         </span>
                         <span>👥 Plazas: {room.maxPeople}</span>
                       </div>
