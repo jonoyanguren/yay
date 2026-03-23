@@ -8,14 +8,20 @@ interface ImageGalleryProps {
   images: string[];
   onRemove: (index: number) => void;
   onAdd: (url: string) => void;
+  onAddMany?: (urls: string[]) => void;
   folder?: string;
+  allowMultipleUpload?: boolean;
+  maxUploadFiles?: number;
 }
 
 export default function ImageGallery({
   images,
   onRemove,
   onAdd,
+  onAddMany,
   folder = "yay",
+  allowMultipleUpload = true,
+  maxUploadFiles = 20,
 }: ImageGalleryProps) {
   const [deletingIndex, setDeletingIndex] = useState<number | null>(null);
   const canAddMore = true;
@@ -145,7 +151,15 @@ export default function ImageGallery({
       {/* Upload Button */}
       <div className="flex items-center justify-between bg-slate-50 px-4 py-3 rounded-lg border border-slate-200">
         <div className="text-sm text-slate-600">{images.length} imágenes</div>
-        {canAddMore && <ImageUploadWidget onUpload={onAdd} folder={folder} />}
+        {canAddMore && (
+          <ImageUploadWidget
+            onUpload={onAdd}
+            onUploadMany={onAddMany}
+            folder={folder}
+            multiple={allowMultipleUpload}
+            maxFiles={maxUploadFiles}
+          />
+        )}
       </div>
 
       {/* Debug info */}

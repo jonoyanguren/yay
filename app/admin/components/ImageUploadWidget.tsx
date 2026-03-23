@@ -19,7 +19,10 @@ interface CloudinaryUploadResult {
 
 interface ImageUploadWidgetProps {
   onUpload: (url: string) => void;
+  onUploadMany?: (urls: string[]) => void;
   folder?: string;
+  multiple?: boolean;
+  maxFiles?: number;
 }
 
 declare global {
@@ -35,7 +38,10 @@ declare global {
 
 export default function ImageUploadWidget({
   onUpload,
+  onUploadMany,
   folder = "yay",
+  multiple = true,
+  maxFiles = 20,
 }: ImageUploadWidgetProps) {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
@@ -76,8 +82,8 @@ export default function ImageUploadWidget({
         uploadPreset,
         folder,
         sources: ["local", "url", "camera"],
-        multiple: false,
-        maxFiles: 1,
+        multiple,
+        maxFiles,
         clientAllowedFormats: ["png", "jpg", "jpeg", "webp", "gif"],
         maxImageFileSize: 10000000, // 10MB
         maxImageWidth: 2000,
@@ -115,8 +121,18 @@ export default function ImageUploadWidget({
 
         if (result.event === "success") {
           onUpload(result.info.secure_url);
-          // Close widget after successful upload
-          widget.close();
+          return;
+        }
+
+        if (result.event === "queues-end" && onUploadMany) {
+          const uploaded = Array.isArray(result.info?.files)
+            ? result.info.files
+                .map((file) => file?.uploadInfo?.secure_url)
+                .filter((url): url is string => typeof url === "string")
+            : [];
+          if (uploaded.length > 0) {
+            onUploadMany(uploaded);
+          }
         }
       },
     );
@@ -130,7 +146,7 @@ export default function ImageUploadWidget({
       onClick={openWidget}
       className="px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium text-sm whitespace-nowrap"
     >
-      📷 Subir Imagen
+      {multiple ? "📷 Subir Imágenes" : "📷 Subir Imagen"}
     </button>
   );
 }

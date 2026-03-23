@@ -1036,7 +1036,7 @@ export default function RetreatForm({
             onRemove={(index) =>
               setRetreatImages(retreatImages.filter((_, i) => i !== index))
             }
-            onAdd={(url) => setRetreatImages([...retreatImages, url])}
+            onAdd={(url) => setRetreatImages((prev) => [...prev, url])}
             folder="yay/retreats"
           />
         </div>
@@ -1235,9 +1235,7 @@ export default function RetreatForm({
                   accommodationImages.filter((_, i) => i !== index),
                 )
               }
-              onAdd={(url) =>
-                setAccommodationImages([...accommodationImages, url])
-              }
+              onAdd={(url) => setAccommodationImages((prev) => [...prev, url])}
               folder="yay/accommodation"
             />
           </div>
@@ -1258,6 +1256,8 @@ export default function RetreatForm({
             onRemove={() => setActivitiesImage("")}
             onAdd={(url) => setActivitiesImage(url)}
             folder="yay/activities"
+            allowMultipleUpload={false}
+            maxUploadFiles={1}
           />
           <p className="text-xs text-slate-500 mt-1.5">
             Esta imagen se mostrará como collage visual de actividades.
@@ -1722,10 +1722,10 @@ export default function RetreatForm({
                 })
               }
               onAdd={(url) =>
-                setNewRoomType({
-                  ...newRoomType,
-                  images: [...newRoomType.images, url],
-                })
+                setNewRoomType((prev) => ({
+                  ...prev,
+                  images: [...prev.images, url],
+                }))
               }
               folder="yay/rooms"
             />
@@ -1811,10 +1811,10 @@ export default function RetreatForm({
                         })
                       }
                       onAdd={(url) =>
-                        setEditingRoomType({
-                          ...editingRoomType,
-                          images: [...editingRoomType.images, url],
-                        })
+                        setEditingRoomType((prev) => ({
+                          ...prev,
+                          images: [...prev.images, url],
+                        }))
                       }
                       folder="yay/rooms"
                     />
@@ -1991,10 +1991,10 @@ export default function RetreatForm({
                 })
               }
               onAdd={(url) =>
-                setNewExtraActivity({
-                  ...newExtraActivity,
-                  images: [...newExtraActivity.images, url],
-                })
+                setNewExtraActivity((prev) => ({
+                  ...prev,
+                  images: [...prev.images, url],
+                }))
               }
               folder="yay/extras"
             />
@@ -2108,10 +2108,10 @@ export default function RetreatForm({
                         })
                       }
                       onAdd={(url) =>
-                        setEditingExtraActivity({
-                          ...editingExtraActivity,
-                          images: [...editingExtraActivity.images, url],
-                        })
+                        setEditingExtraActivity((prev) => ({
+                          ...prev,
+                          images: [...prev.images, url],
+                        }))
                       }
                       folder="yay/extras"
                     />
