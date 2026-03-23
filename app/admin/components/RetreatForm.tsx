@@ -1027,20 +1027,6 @@ export default function RetreatForm({
           </div>
         </div>
 
-        <div className="mt-5">
-          <label className="block text-sm font-semibold mb-3 text-slate-700">
-            Imágenes del Retiro
-          </label>
-          <ImageGallery
-            images={retreatImages}
-            onRemove={(index) =>
-              setRetreatImages(retreatImages.filter((_, i) => i !== index))
-            }
-            onAdd={(url) => setRetreatImages((prev) => [...prev, url])}
-            folder="yay/retreats"
-          />
-        </div>
-
         <div className="mt-5 pt-4 border-t border-slate-100">
           <label className="flex items-center cursor-pointer">
             <input
@@ -1057,6 +1043,21 @@ export default function RetreatForm({
               (visible en la web)
             </span>
           </label>
+        </div>
+
+        <div className="mt-5">
+          <label className="block text-sm font-semibold mb-3 text-slate-700">
+            Imágenes del Retiro
+          </label>
+          <ImageGallery
+            images={retreatImages}
+            onRemove={(index) =>
+              setRetreatImages((prev) => prev.filter((_, i) => i !== index))
+            }
+            onAdd={(url) => setRetreatImages((prev) => [...prev, url])}
+            onReorder={setRetreatImages}
+            folder="yay/retreats"
+          />
         </div>
       </div>
 
@@ -1231,11 +1232,10 @@ export default function RetreatForm({
             <ImageGallery
               images={accommodationImages}
               onRemove={(index) =>
-                setAccommodationImages(
-                  accommodationImages.filter((_, i) => i !== index),
-                )
+                setAccommodationImages((prev) => prev.filter((_, i) => i !== index))
               }
               onAdd={(url) => setAccommodationImages((prev) => [...prev, url])}
+              onReorder={setAccommodationImages}
               folder="yay/accommodation"
             />
           </div>
@@ -1716,16 +1716,19 @@ export default function RetreatForm({
             <ImageGallery
               images={newRoomType.images}
               onRemove={(index) =>
-                setNewRoomType({
-                  ...newRoomType,
-                  images: newRoomType.images.filter((_, i) => i !== index),
-                })
+                setNewRoomType((prev) => ({
+                  ...prev,
+                  images: prev.images.filter((_, i) => i !== index),
+                }))
               }
               onAdd={(url) =>
                 setNewRoomType((prev) => ({
                   ...prev,
                   images: [...prev.images, url],
                 }))
+              }
+              onReorder={(nextImages) =>
+                setNewRoomType((prev) => ({ ...prev, images: nextImages }))
               }
               folder="yay/rooms"
             />
@@ -1803,17 +1806,21 @@ export default function RetreatForm({
                     <ImageGallery
                       images={editingRoomType.images}
                       onRemove={(imgIndex) =>
-                        setEditingRoomType({
-                          ...editingRoomType,
-                          images: editingRoomType.images.filter(
-                            (_, i) => i !== imgIndex,
-                          ),
-                        })
+                        setEditingRoomType((prev) => ({
+                          ...prev,
+                          images: prev.images.filter((_, i) => i !== imgIndex),
+                        }))
                       }
                       onAdd={(url) =>
                         setEditingRoomType((prev) => ({
                           ...prev,
                           images: [...prev.images, url],
+                        }))
+                      }
+                      onReorder={(nextImages) =>
+                        setEditingRoomType((prev) => ({
+                          ...prev,
+                          images: nextImages,
                         }))
                       }
                       folder="yay/rooms"
@@ -1985,16 +1992,19 @@ export default function RetreatForm({
             <ImageGallery
               images={newExtraActivity.images}
               onRemove={(index) =>
-                setNewExtraActivity({
-                  ...newExtraActivity,
-                  images: newExtraActivity.images.filter((_, i) => i !== index),
-                })
+                setNewExtraActivity((prev) => ({
+                  ...prev,
+                  images: prev.images.filter((_, i) => i !== index),
+                }))
               }
               onAdd={(url) =>
                 setNewExtraActivity((prev) => ({
                   ...prev,
                   images: [...prev.images, url],
                 }))
+              }
+              onReorder={(nextImages) =>
+                setNewExtraActivity((prev) => ({ ...prev, images: nextImages }))
               }
               folder="yay/extras"
             />
@@ -2100,17 +2110,21 @@ export default function RetreatForm({
                     <ImageGallery
                       images={editingExtraActivity.images}
                       onRemove={(imgIndex) =>
-                        setEditingExtraActivity({
-                          ...editingExtraActivity,
-                          images: editingExtraActivity.images.filter(
-                            (_, i) => i !== imgIndex,
-                          ),
-                        })
+                        setEditingExtraActivity((prev) => ({
+                          ...prev,
+                          images: prev.images.filter((_, i) => i !== imgIndex),
+                        }))
                       }
                       onAdd={(url) =>
                         setEditingExtraActivity((prev) => ({
                           ...prev,
                           images: [...prev.images, url],
+                        }))
+                      }
+                      onReorder={(nextImages) =>
+                        setEditingExtraActivity((prev) => ({
+                          ...prev,
+                          images: nextImages,
                         }))
                       }
                       folder="yay/extras"

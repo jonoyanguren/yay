@@ -8,6 +8,7 @@ interface ImageGalleryProps {
   images: string[];
   onRemove: (index: number) => void;
   onAdd: (url: string) => void;
+  onReorder?: (nextImages: string[]) => void;
   onAddMany?: (urls: string[]) => void;
   folder?: string;
   allowMultipleUpload?: boolean;
@@ -18,13 +19,44 @@ export default function ImageGallery({
   images,
   onRemove,
   onAdd,
+  onReorder,
   onAddMany,
   folder = "yay",
   allowMultipleUpload = true,
   maxUploadFiles = 20,
 }: ImageGalleryProps) {
   const [deletingIndex, setDeletingIndex] = useState<number | null>(null);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const canAddMore = true;
+  const canReorder = typeof onReorder === "function";
+
+  const handleDrop = (
+    event: React.DragEvent<HTMLDivElement>,
+    targetIndex: number,
+  ) => {
+    event.preventDefault();
+    const transferred = event.dataTransfer.getData("text/plain");
+    const sourceIndex = transferred ? Number(transferred) : draggedIndex;
+
+    if (
+      !canReorder ||
+      sourceIndex === null ||
+      Number.isNaN(sourceIndex) ||
+      sourceIndex === targetIndex
+    ) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    const nextImages = [...images];
+    const [moved] = nextImages.splice(sourceIndex, 1);
+    nextImages.splice(targetIndex, 0, moved);
+    onReorder(nextImages);
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
 
   const handleDelete = async (index: number, imageUrl: string) => {
     if (deletingIndex !== null) return; // Prevent multiple simultaneous deletions
@@ -98,8 +130,27 @@ export default function ImageGallery({
             return (
               <div
                 key={`${imageUrl}-${index}`}
-                className="relative w-full bg-slate-100 group"
+                className={`relative w-full bg-slate-100 group ${
+                  canReorder ? "cursor-move" : ""
+                } ${draggedIndex === index ? "opacity-60" : ""} ${
+                  dragOverIndex === index ? "ring-2 ring-emerald-500" : ""
+                }`}
                 style={{ paddingBottom: "100%" }}
+                draggable={canReorder}
+                onDragStart={(e) => {
+                  e.dataTransfer.effectAllowed = "move";
+                  e.dataTransfer.setData("text/plain", String(index));
+                  setDraggedIndex(index);
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  if (dragOverIndex !== index) setDragOverIndex(index);
+                }}
+                onDrop={(e) => handleDrop(e, index)}
+                onDragEnd={() => {
+                  setDraggedIndex(null);
+                  setDragOverIndex(null);
+                }}
               >
                 <div className="absolute inset-0 rounded-lg overflow-hidden border-2 border-slate-200">
                   {/* Image */}
@@ -150,7 +201,12 @@ export default function ImageGallery({
 
       {/* Upload Button */}
       <div className="flex items-center justify-between bg-slate-50 px-4 py-3 rounded-lg border border-slate-200">
-        <div className="text-sm text-slate-600">{images.length} imágenes</div>
+        <div className="text-sm text-slate-600">
+          {images.length} imágenes
+          {canReorder && images.length > 1
+            ? " · Puedes reordenar con Drag and Drop"
+            : ""}
+        </div>
         {canAddMore && (
           <ImageUploadWidget
             onUpload={onAdd}
