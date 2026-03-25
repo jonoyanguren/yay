@@ -1,25 +1,27 @@
 import RetreatSoldOutEmailForm from "@/components/retreats/RetreatSoldOutEmailForm";
+import SoldOutStamp from "@/components/ui/SoldOutStamp";
 
 interface WaitlistFormProps {
   retreatSlug: string;
 }
 
-export default function WaitlistForm({
-  retreatSlug,
-}: WaitlistFormProps) {
+export default function WaitlistForm({ retreatSlug }: WaitlistFormProps) {
   return (
     <section className="relative z-40 -mt-1">
-      <div className="mx-auto max-w-6xl bg-white border border-black/10 p-5 md:p-8 rounded-xl">
-        <div className="max-w-2xl mx-auto text-center">
-          <p className="inline-flex items-center rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700 mb-4">
-            No quedan plazas
+      <div className="relative mx-auto max-w-6xl rounded-xl border border-black/10 bg-white p-5 shadow-[0_10px_30px_rgba(0,0,0,0.08)] md:p-8">
+        <div className="pointer-events-none absolute -top-4 right-2 md:-top-5 md:-right-3">
+          <SoldOutStamp size="lg" className="bg-white" />
+        </div>
+        <div className="mx-auto max-w-2xl text-center">
+          <h3 className="mb-3 text-2xl font-bold tracking-tight text-black">
+            Apuntate a la lista de espera
+          </h3>
+          <p className="mb-4 text-base leading-relaxed text-black/75 md:text-lg">
+            Dejanos tu correo y vemos si podemos hacerte un hueco para que
+            puedas venirte con nosotros.
           </p>
-          <p className="text-base md:text-lg text-black/75 leading-relaxed mb-4">
-            Ahora mismo ya no quedan plazas, pero dejanos tu correo y vemos si
-            podemos hacer algun apaño para que puedas venirte con nosotros.
-          </p>
-          <p className="text-sm text-black/60 mb-4">
-            Si se libera un hueco o abrimos una opcion extra, seras de las
+          <p className="mb-5 text-base text-black/75 md:text-lg">
+            Si se libera una plaza o abrimos un retiro extra, seras de las
             primeras personas en enterarte.
           </p>
           <RetreatSoldOutEmailForm retreatSlug={retreatSlug} large />

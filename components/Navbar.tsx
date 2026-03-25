@@ -52,13 +52,6 @@ export default function Navbar() {
           </Link>
         </div>
 
-        <Link
-          href="/contact"
-          className="hidden md:block px-5 py-2 bg-black text-white text-sm rounded-full hover:bg-gray-dark transition-colors"
-        >
-          Reservar
-        </Link>
-
         {/* Mobile Menu Button */}
         <button
           className="md:hidden p-2 z-50 relative"
@@ -92,13 +85,6 @@ export default function Navbar() {
             onClick={closeMenu}
           >
             Contacto
-          </Link>
-          <Link
-            href="/contact"
-            className="px-8 py-3 bg-black text-white text-lg rounded-full hover:bg-gray-dark transition-colors mt-4"
-            onClick={closeMenu}
-          >
-            Reservar
           </Link>
         </div>
       )}

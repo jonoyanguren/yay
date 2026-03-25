@@ -39,6 +39,7 @@ async function getRetreats() {
         id: true,
         slug: true,
         title: true,
+        date: true,
         location: true,
         description: true,
         image: true,

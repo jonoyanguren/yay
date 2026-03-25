@@ -197,7 +197,7 @@ export default function BookingForm({
                 room.available <= 0
                   ? "border-gray/10 bg-gray/5 cursor-not-allowed opacity-70"
                   : selectedRoomTypeId === room.id
-                    ? "border-black bg-sand-light"
+                    ? "border-black bg-white"
                     : "border-gray/15 bg-white hover:border-gray/30 cursor-pointer"
               }`}
             >
@@ -212,31 +212,39 @@ export default function BookingForm({
               />
 
               <div className="flex flex-col flex-1">
-                <div className="flex justify-between items-center gap-4">
+                <div className="flex items-start justify-between gap-4">
                   <span className="font-semibold text-lg">{room.name}</span>
-                  {room.images && room.images.length > 0 && (
-                    <ImageGallery
-                      images={room.images}
-                      altPrefix={room.name}
-                      variant="button"
-                      buttonLabel="Ver fotos"
-                      className="shrink-0"
-                    />
-                  )}
+                  <span className="text-xl font-semibold text-green text-right shrink-0">
+                    {formatPrice(room.price_cents)}
+                  </span>
                 </div>
                 {room.description && (
-                  <span className="text-sm text-black/70 mt-1 block">
+                  <span className="mt-1 block max-w-[calc(100%-7rem)] text-sm text-black/70">
                     {room.description}
                   </span>
                 )}
-                <span className="text-xl mt-2 font-semibold text-green">
-                  {formatPrice(room.price_cents)}
-                </span>
-                <span className="text-sm mt-1 text-black/60">
-                  {room.available <= 0
-                    ? "Completa"
-                    : `${room.available} ${room.available === 1 ? "plaza" : "plazas"} disponibles`}
-                </span>
+                {room.images && room.images.length > 0 && (
+                  <ImageGallery
+                    images={room.images}
+                    altPrefix={room.name}
+                    variant="button"
+                    buttonLabel="Ver fotos"
+                    className="mt-4 w-fit"
+                  />
+                )}
+                {room.available > 0 && (
+                  <span className="mt-4 w-fit rounded-full bg-emerald-50 px-2.5 py-1 text-sm font-bold text-emerald-700">
+                    {room.available}{" "}
+                    {room.available === 1
+                      ? "plaza disponible"
+                      : "plazas disponibles"}
+                  </span>
+                )}
+                {room.available <= 0 && (
+                  <span className="mt-4 w-fit self-end rounded-full bg-rose-50 px-2.5 py-1 text-sm font-bold text-rose-700">
+                    0 plazas disponibles
+                  </span>
+                )}
               </div>
             </label>
           ))}
@@ -255,12 +263,12 @@ export default function BookingForm({
                   key={extra.id}
                   className={`flex items-start gap-5 p-6 rounded-xl border-2 transition-colors ${
                     qty > 0
-                      ? "border-black bg-sand-light"
+                      ? "border-black bg-white"
                       : "border-gray/15 bg-white hover:border-gray/30"
                   }`}
                 >
                   {isSingle ? (
-                    <label className="flex items-center gap-5 flex-1 cursor-pointer">
+                    <label className="flex items-start gap-5 flex-1 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={qty > 0}
@@ -270,32 +278,30 @@ export default function BookingForm({
                             [extra.id]: e.target.checked ? 1 : 0,
                           }))
                         }
-                        className="h-5 w-5 shrink-0 rounded border-2 border-gray/30 accent-black cursor-pointer"
+                        className="mt-1 h-5 w-5 shrink-0 rounded border-2 border-gray/30 accent-black cursor-pointer"
                       />
                       <div className="flex-1">
-                        <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-start justify-between gap-4">
                           <span className="font-medium text-lg">
                             {extra.name}
                           </span>
-                          <span className="flex items-center gap-3 shrink-0">
-                            {extra.images && extra.images.length > 0 && (
-                              <ImageGallery
-                                images={extra.images}
-                                altPrefix={extra.name}
-                                variant="button"
-                                buttonLabel="Ver fotos"
-                                className="shrink-0"
-                              />
-                            )}
-                            <span className="text-green font-semibold text-lg">
-                              +{formatPrice(extra.price_cents)}
-                            </span>
+                          <span className="text-green font-semibold text-lg text-right shrink-0">
+                            +{formatPrice(extra.price_cents)}
                           </span>
                         </div>
                         {extra.description && (
-                          <span className="text-sm text-black/70 block mt-1">
+                          <span className="mt-1 block max-w-[calc(100%-7rem)] text-sm text-black/70">
                             {extra.description}
                           </span>
+                        )}
+                        {extra.images && extra.images.length > 0 && (
+                          <ImageGallery
+                            images={extra.images}
+                            altPrefix={extra.name}
+                            variant="button"
+                            buttonLabel="Ver fotos"
+                            className="mt-3 w-fit"
+                          />
                         )}
                         {extra.link && (
                           <a
@@ -355,29 +361,27 @@ export default function BookingForm({
                         </button>
                       </div>
                       <div className="flex-1">
-                        <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-start justify-between gap-4">
                           <span className="font-medium text-lg">
                             {extra.name}
                           </span>
-                          <span className="flex items-center gap-3 shrink-0">
-                            {extra.images && extra.images.length > 0 && (
-                              <ImageGallery
-                                images={extra.images}
-                                altPrefix={extra.name}
-                                variant="button"
-                                buttonLabel="Ver fotos"
-                                className="shrink-0"
-                              />
-                            )}
-                            <span className="text-green font-semibold text-lg">
-                              +{formatPrice(extra.price_cents)}
-                            </span>
+                          <span className="text-green font-semibold text-lg text-right shrink-0">
+                            +{formatPrice(extra.price_cents)}
                           </span>
                         </div>
                         {extra.description && (
-                          <span className="text-sm text-black/70 block mt-1">
+                          <span className="mt-1 block max-w-[calc(100%-7rem)] text-sm text-black/70">
                             {extra.description}
                           </span>
+                        )}
+                        {extra.images && extra.images.length > 0 && (
+                          <ImageGallery
+                            images={extra.images}
+                            altPrefix={extra.name}
+                            variant="button"
+                            buttonLabel="Ver fotos"
+                            className="mt-3 w-fit"
+                          />
                         )}
                         {extra.link && (
                           <a
@@ -399,7 +403,7 @@ export default function BookingForm({
         </section>
       )}
 
-      <section className="p-8 rounded-xl bg-sand-light border-2 border-gray/20">
+      <section className="p-8 rounded-xl bg-white border-2 border-gray/15">
         <div className="space-y-3 mb-8">
           <div className="flex justify-between items-center">
             <span className="text-xl font-semibold">Total de la reserva</span>
@@ -426,7 +430,7 @@ export default function BookingForm({
             </>
           )}
         </div>
-        <div className="mb-6 rounded-lg bg-white/70 border border-gray/20 p-4 space-y-2">
+        <div className="mb-6 rounded-lg bg-white border border-gray/15 p-4 space-y-2">
           <p className="text-sm text-black/70">
             {chargeFullAmount
               ? "Este retiro se cobra al completo en un único pago."
@@ -472,7 +476,7 @@ export default function BookingForm({
               aria-invalid={emailBlurError ? true : undefined}
               className={`w-full rounded-lg border px-4 py-3.5 text-sm ${
                 emailBlurError
-                  ? "border-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-red-500"
+                  ? "border-red-500 focus-visible:outline-2 focus-visible:outline-red-500"
                   : "border-gray/20"
               }`}
             />
@@ -516,7 +520,7 @@ export default function BookingForm({
               aria-invalid={phoneBlurError ? true : undefined}
               className={`w-full rounded-lg border px-4 py-3.5 text-sm ${
                 phoneBlurError
-                  ? "border-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-red-500"
+                  ? "border-red-500 focus-visible:outline-2 focus-visible:outline-red-500"
                   : "border-gray/20"
               }`}
             />
@@ -542,7 +546,7 @@ export default function BookingForm({
             />
           </div>
         </div>
-        <div className="mt-6 rounded-lg bg-white/70 border border-gray/20 p-4 space-y-3">
+        <div className="mt-6 rounded-lg bg-white border border-gray/15 p-4 space-y-3">
           <p className="text-sm font-medium text-black">
             Política de cancelación
           </p>
