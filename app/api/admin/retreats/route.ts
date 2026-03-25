@@ -70,6 +70,7 @@ export async function POST(request: Request) {
             : 60000,
         chargeFullAmount: Boolean(data.chargeFullAmount),
         published: data.published || false,
+        hideFromWeb: Boolean(data.hideFromWeb),
         forceSoldOut: Boolean(data.forceSoldOut),
         arrivalIntro: data.arrivalIntro || null,
         arrivalOptions: data.arrivalOptions || null,

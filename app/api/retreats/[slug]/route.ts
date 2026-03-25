@@ -16,6 +16,7 @@ export async function GET(
       where: { 
         slug,
         published: true,
+        hideFromWeb: false,
       },
     });
 

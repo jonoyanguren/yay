@@ -42,7 +42,7 @@ export async function POST(
   }
 
   const retreat = await prisma.retreat.findUnique({
-    where: { slug, published: true },
+    where: { slug, published: true, hideFromWeb: false },
     select: { id: true, title: true, slug: true },
   });
 
@@ -84,7 +84,11 @@ export async function POST(
   const baseUrl = getEmailBaseUrl();
 
   const otherRetreats = await prisma.retreat.findMany({
-    where: { published: true, id: { not: retreat.id } },
+    where: {
+      published: true,
+      hideFromWeb: false,
+      id: { not: retreat.id },
+    },
     select: { id: true, title: true, slug: true, image: true, images: true },
     orderBy: [{ date: "asc" }, { createdAt: "asc" }],
   });

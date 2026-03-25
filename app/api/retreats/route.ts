@@ -8,7 +8,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
   try {
     const retreats = await prisma.retreat.findMany({
-      where: { published: true },
+      where: { published: true, hideFromWeb: false },
       orderBy: { createdAt: "asc" },
       select: {
         id: true,

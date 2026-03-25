@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     customerPhone,
   } = body;
   const retreat = await prisma.retreat.findFirst({
-    where: { id: retreatId, published: true },
+    where: { id: retreatId, published: true, hideFromWeb: false },
   });
   if (!retreat) {
     return NextResponse.json({ error: "Retiro no encontrado" }, { status: 404 });

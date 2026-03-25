@@ -22,6 +22,7 @@ export type Retreat = {
   reservationDepositCents: number;
   chargeFullAmount: boolean;
   forceSoldOut?: boolean;
+  hideFromWeb?: boolean;
   arrivalIntro?: string | null;
   arrivalOptions?: { title: string; detail: string }[] | null;
   hotelName?: string | null;
@@ -49,6 +50,7 @@ export type Retreat = {
 export type RetreatSeedData = Omit<
   Retreat,
   | "published"
+  | "hideFromWeb"
   | "roomTypes"
   | "extraActivities"
   | "bookings"

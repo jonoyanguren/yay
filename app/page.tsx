@@ -34,6 +34,7 @@ async function getRetreats() {
   try {
     const retreats = await prisma.retreat.findMany({
       orderBy: [{ published: "desc" }, { createdAt: "asc" }],
+      where: { hideFromWeb: false },
       select: {
         id: true,
         slug: true,

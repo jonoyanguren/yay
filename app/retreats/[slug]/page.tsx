@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 
 export async function generateStaticParams() {
   const retreats = await prisma.retreat.findMany({
-    where: { published: true },
+    where: { published: true, hideFromWeb: false },
     select: { slug: true },
   });
 
@@ -28,6 +28,7 @@ async function getRetreatBySlug(slug: string) {
     where: {
       slug,
       published: true,
+      hideFromWeb: false,
     },
   });
 }

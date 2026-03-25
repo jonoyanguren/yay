@@ -13,6 +13,7 @@ interface Retreat {
   location: string;
   date: string;
   published: boolean;
+  hideFromWeb?: boolean;
   forceSoldOut: boolean;
   createdAt: string;
 }
@@ -156,6 +157,30 @@ export default function AdminPage() {
     }
   };
 
+  const handleToggleHideFromWeb = async (slug: string, nextValue: boolean) => {
+    try {
+      const res = await fetch(`/api/admin/retreats/${slug}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ hideFromWeb: nextValue }),
+      });
+
+      if (res.ok) {
+        setRetreats((prev) =>
+          prev.map((r) =>
+            r.slug === slug ? { ...r, hideFromWeb: nextValue } : r,
+          ),
+        );
+      } else {
+        showToast("error", "No se pudo cambiar el estado de visibilidad.");
+      }
+    } catch {
+      showToast("error", "No se pudo cambiar el estado de visibilidad.");
+    }
+  };
+
   const handleLogout = async () => {
     await fetch("/api/admin/auth/logout", { method: "POST" });
     router.push("/admin/login");
@@ -284,6 +309,11 @@ export default function AdminPage() {
                         >
                           {retreat.published ? "Published" : "Draft"}
                         </span>
+                        {retreat.hideFromWeb && (
+                          <span className="inline-flex px-2.5 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-700">
+                            Oculto en web
+                          </span>
+                        )}
                         {retreat.forceSoldOut && (
                           <span className="inline-flex px-2.5 py-1 text-xs font-medium rounded-full bg-rose-100 text-rose-700">
                             Completo
@@ -339,7 +369,7 @@ export default function AdminPage() {
         >
           <Link
             href={
-              activeRetreat.published
+              activeRetreat.published && !activeRetreat.hideFromWeb
                 ? `/retreats/${activeRetreat.slug}`
                 : `/admin/retreats/${activeRetreat.slug}/preview`
             }
@@ -348,7 +378,11 @@ export default function AdminPage() {
             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 text-sm text-slate-700"
           >
             <FaEye className="w-4 h-4 text-slate-500" />
-            <span>{activeRetreat.published ? "Ver publicado" : "Ver preview"}</span>
+            <span>
+              {activeRetreat.published && !activeRetreat.hideFromWeb
+                ? "Ver publicado"
+                : "Ver preview"}
+            </span>
           </Link>
 
           <Link
@@ -377,6 +411,29 @@ export default function AdminPage() {
               <span
                 className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${
                   activeRetreat.published ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              handleToggleHideFromWeb(activeRetreat.slug, !activeRetreat.hideFromWeb)
+            }
+            className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 text-sm text-slate-700"
+          >
+            <span className="font-medium">Ocultar en la web</span>
+            <span
+              role="switch"
+              aria-checked={Boolean(activeRetreat.hideFromWeb)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                activeRetreat.hideFromWeb ? "bg-amber-400" : "bg-slate-200"
+              }`}
+            >
+              <span
+                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${
+                  activeRetreat.hideFromWeb ? "translate-x-6" : "translate-x-1"
                 }`}
               />
             </span>

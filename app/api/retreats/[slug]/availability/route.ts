@@ -15,7 +15,7 @@ export async function GET(
     
     // First get the retreat ID from slug
     const retreat = await prisma.retreat.findFirst({
-      where: { slug, published: true },
+      where: { slug, published: true, hideFromWeb: false },
       select: { id: true },
     });
 

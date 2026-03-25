@@ -124,6 +124,7 @@ export default function RetreatForm({
     reservationDepositCents: retreat?.reservationDepositCents ?? 60000,
     chargeFullAmount: retreat?.chargeFullAmount || false,
     published: retreat?.published || false,
+    hideFromWeb: retreat?.hideFromWeb || false,
     forceSoldOut: retreat?.forceSoldOut || false,
     arrivalIntro: retreat?.arrivalIntro || "",
     hotelName: retreat?.hotelName || "",
@@ -1068,7 +1069,23 @@ export default function RetreatForm({
                 Publicado
               </span>
               <span className="ml-2 text-xs text-slate-500">
-                (visible en la web)
+                (visible en la web si no está oculto)
+              </span>
+            </label>
+
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                name="hideFromWeb"
+                checked={formData.hideFromWeb}
+                onChange={handleChange}
+                className="w-4 h-4 text-amber-600 border-slate-300 rounded focus:ring-amber-500"
+              />
+              <span className="ml-2 text-sm font-medium text-slate-700">
+                Ocultar en la web
+              </span>
+              <span className="ml-2 text-xs text-slate-500">
+                (no se muestra ni permite reservas)
               </span>
             </label>
 

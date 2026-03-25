@@ -26,7 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   const retreats = await prisma.retreat.findMany({
-    where: { published: true },
+    where: { published: true, hideFromWeb: false },
     select: { slug: true, createdAt: true },
   });
 

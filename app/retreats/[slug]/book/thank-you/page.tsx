@@ -13,6 +13,7 @@ async function getRetreatBySlug(slug: string) {
       where: { 
         slug,
         published: true,
+        hideFromWeb: false,
       },
       select: {
         id: true,
