@@ -46,10 +46,10 @@ export function BookingConfirmationEmail({
   const safeName = escapeHtml(customerName || "Viajero");
   const safeTitle = escapeHtml(retreatTitle);
   const headerImage = escapeHtml(
-    `${baseUrl.replace(/\/$/, "")}/assets/emails/Header.svg`,
+    `${baseUrl.replace(/\/$/, "")}/assets/emails/Header.png`,
   );
   const heroBackground = escapeHtml(
-    `${baseUrl.replace(/\/$/, "")}/assets/emails/HeroBookingConfirm.svg`,
+    `${baseUrl.replace(/\/$/, "")}/assets/emails/HeroBookingConfirm.png`,
   );
 
   return `
@@ -235,10 +235,10 @@ export function WaitlistJoinedEmail({
   const safeTitle = escapeHtml(retreatTitle);
   const retreatUrl = `${baseUrl.replace(/\/$/, "")}/retreats/${retreatSlug}`;
   const headerImage = escapeHtml(
-    `${baseUrl.replace(/\/$/, "")}/assets/emails/Header.svg`,
+    `${baseUrl.replace(/\/$/, "")}/assets/emails/Header.png`,
   );
   const heroImage = escapeHtml(
-    `${baseUrl.replace(/\/$/, "")}/assets/emails/HeroBookingConfirm.svg`,
+    `${baseUrl.replace(/\/$/, "")}/assets/emails/HeroBookingConfirm.png`,
   );
 
   const alternativesSection =
@@ -380,10 +380,10 @@ export function RetreatFullyPaidEmail({
   const safeTitle = escapeHtml(retreatTitle);
   const retreatUrl = `${baseUrl.replace(/\/$/, "")}/retreats/${retreatSlug}`;
   const headerImage = escapeHtml(
-    `${baseUrl.replace(/\/$/, "")}/assets/emails/Header.svg`,
+    `${baseUrl.replace(/\/$/, "")}/assets/emails/Header.png`,
   );
   const heroImage = escapeHtml(
-    `${baseUrl.replace(/\/$/, "")}/assets/emails/HeroPayConfirm.svg`,
+    `${baseUrl.replace(/\/$/, "")}/assets/emails/HeroPayConfirm.png`,
   );
 
   return `
@@ -513,10 +513,10 @@ export function BalanceInvoiceEmail({
   const safePayUrl = escapeHtml(payInvoiceUrl);
   const siteUrl = baseUrl.replace(/\/$/, "");
   const headerImage = escapeHtml(
-    `${baseUrl.replace(/\/$/, "")}/assets/emails/Header.svg`,
+    `${baseUrl.replace(/\/$/, "")}/assets/emails/Header.png`,
   );
   const heroImage = escapeHtml(
-    `${baseUrl.replace(/\/$/, "")}/assets/emails/HeroPayConfirm.svg`,
+    `${baseUrl.replace(/\/$/, "")}/assets/emails/HeroPayConfirm.png`,
   );
 
   return `

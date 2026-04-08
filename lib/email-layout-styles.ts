@@ -4,10 +4,10 @@
  */
 export const emailLayoutStyles = {
   body:
-    "margin: 0; padding: 0; background-color: #fffcf3; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;",
-  outerWrap: "background-color: #fffcf3; padding: 40px 20px;",
+    "margin: 0; padding: 0; background-color: #ffffff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;",
+  outerWrap: "background-color: #ffffff; padding: 40px 20px;",
   card:
-    "background-color: #fffcf3; border-radius: 18px; overflow: hidden; border: 1px solid #f3e6d4; box-shadow: 0 8px 24px rgba(48,30,14,0.08);",
+    "background-color: #fffcf3; border-radius: 18px; overflow: hidden; border: 1px solid #f3e6d4;",
   headerGreen:
     "background-color: #301e0e; height: 467px; padding: 40px 30px; text-align: center;",
   /** Slightly brighter gradient for celebration / full-payment emails */
