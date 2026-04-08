@@ -8,11 +8,19 @@ import type { WaitlistAlternativeRetreat } from "@/lib/email-templates";
 import type { EmailTemplateId } from "@/lib/email-templates-meta";
 
 function baseUrl(): string {
-  return (
+  const configured =
+    process.env.EMAIL_ASSETS_BASE_URL ||
     process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    "http://localhost:3000"
-  ).replace(/\/$/, "");
+    process.env.NEXT_PUBLIC_BASE_URL;
+  const vercelHost =
+    process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+  const rawBaseUrl =
+    configured || (vercelHost ? `https://${vercelHost}` : "https://yayexperiences.com");
+  const normalizedBaseUrl = /^https?:\/\//i.test(rawBaseUrl)
+    ? rawBaseUrl
+    : `https://${rawBaseUrl}`;
+
+  return normalizedBaseUrl.replace(/\/$/, "");
 }
 
 const SAMPLE_ALTERNATIVES: WaitlistAlternativeRetreat[] = [
