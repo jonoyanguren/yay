@@ -45,6 +45,12 @@ export function BookingConfirmationEmail({
 
   const safeName = escapeHtml(customerName || "Viajero");
   const safeTitle = escapeHtml(retreatTitle);
+  const headerImage = escapeHtml(
+    `${baseUrl.replace(/\/$/, "")}/assets/emails/Header.svg`,
+  );
+  const heroBackground = escapeHtml(
+    `${baseUrl.replace(/\/$/, "")}/assets/emails/HeroBookingConfirm.svg`,
+  );
 
   return `
 <!DOCTYPE html>
@@ -58,16 +64,23 @@ export function BookingConfirmationEmail({
   <table width="100%" cellpadding="0" cellspacing="0" style="${s.outerWrap}">
     <tr>
       <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="${s.card}">
+        <table width="800" cellpadding="0" cellspacing="0" style="${s.card}">
           
           <tr>
-            <td style="${s.headerGreen}">
-              <h1 style="${s.headerTitle}">
-                ✓ Reserva Confirmada
+            <td style="padding: 0; background-color: #301e0e;">
+              <img src="${headerImage}" alt="" width="800" style="display: block; width: 100%; max-width: 800px; height: auto;" />
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 0; background-color: #301e0e;">
+              <img src="${heroBackground}" alt="" width="800" style="display: block; width: 100%; max-width: 800px; height: auto;" />
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 28px 30px 10px; text-align: center; background-color: #fffcf3;">
+              <h1 style="margin: 0; color: #301e0e; font-size: 34px; line-height: 1.15; font-weight: 600; font-family: 'Trebuchet MS', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                Reserva confirmada
               </h1>
-              <p style="${s.headerSubtitle}">
-                ¡Gracias por tu reserva!
-              </p>
             </td>
           </tr>
 
@@ -90,7 +103,7 @@ export function BookingConfirmationEmail({
                     
                     <table width="100%" cellpadding="8" cellspacing="0">
                       <tr>
-                        <td style="color: #6b7280; font-size: 14px; padding: 8px 0;">Habitación:</td>
+                        <td style="color: #583813; font-size: 14px; padding: 8px 0;">Habitación:</td>
                         <td style="color: #111; font-size: 14px; font-weight: 500; text-align: right; padding: 8px 0;">
                           ${roomQuantity}x ${escapeHtml(roomType)}
                         </td>
@@ -98,12 +111,12 @@ export function BookingConfirmationEmail({
                       ${extras.length > 0 ? `
                         <tr>
                           <td colspan="2" style="padding-top: 12px; padding-bottom: 4px;">
-                            <div style="border-top: 1px solid #e5e7eb;"></div>
+                            <div style="border-top: 1px solid #f3e6d4;"></div>
                           </td>
                         </tr>
                         ${extras.map(extra => `
                           <tr>
-                            <td style="color: #6b7280; font-size: 14px; padding: 4px 0;">
+                            <td style="color: #583813; font-size: 14px; padding: 4px 0;">
                               ${extra.quantity}x ${escapeHtml(extra.name)}
                             </td>
                             <td style="color: #111; font-size: 14px; text-align: right; padding: 4px 0;">Extra</td>
@@ -112,7 +125,7 @@ export function BookingConfirmationEmail({
                       ` : ''}
                       <tr>
                         <td colspan="2" style="padding-top: 12px; padding-bottom: 12px;">
-                          <div style="border-top: 2px solid #e5e7eb;"></div>
+                          <div style="border-top: 2px solid #f3e6d4;"></div>
                         </td>
                       </tr>
                       <tr>
@@ -123,13 +136,13 @@ export function BookingConfirmationEmail({
                       </tr>
                       <tr>
                         <td style="color: #111; font-size: 15px; font-weight: 600; padding: 8px 0;">Pagado ahora:</td>
-                        <td style="color: #10b981; font-size: 18px; font-weight: 700; text-align: right; padding: 8px 0;">
+                        <td style="color: #301e0e; font-size: 18px; font-weight: 700; text-align: right; padding: 8px 0;">
                           ${formatPrice(chargedAmount)}
                         </td>
                       </tr>
                       <tr>
-                        <td style="color: #6b7280; font-size: 14px; padding: 8px 0;">Pendiente:</td>
-                        <td style="color: #6b7280; font-size: 14px; font-weight: 600; text-align: right; padding: 8px 0;">
+                        <td style="color: #583813; font-size: 14px; padding: 8px 0;">Pendiente:</td>
+                        <td style="color: #583813; font-size: 14px; font-weight: 600; text-align: right; padding: 8px 0;">
                           ${formatPrice(pendingAmount)}
                         </td>
                       </tr>
@@ -166,7 +179,7 @@ export function BookingConfirmationEmail({
                 <tr>
                   <td align="center">
                     <a href="${escapeHtml(`${baseUrl}/retreats/${retreatSlug}`)}" 
-                       style="${s.ctaButton}">
+                       style="${s.ctaButton} background-color: #f9b3ac; color: #301e0e;">
                       Ver Detalles del Retiro
                     </a>
                   </td>
@@ -221,6 +234,12 @@ export function WaitlistJoinedEmail({
 }: WaitlistJoinedEmailProps) {
   const safeTitle = escapeHtml(retreatTitle);
   const retreatUrl = `${baseUrl.replace(/\/$/, "")}/retreats/${retreatSlug}`;
+  const headerImage = escapeHtml(
+    `${baseUrl.replace(/\/$/, "")}/assets/emails/Header.svg`,
+  );
+  const heroImage = escapeHtml(
+    `${baseUrl.replace(/\/$/, "")}/assets/emails/HeroBookingConfirm.svg`,
+  );
 
   const alternativesSection =
     alternativeRetreats.length === 0
@@ -232,7 +251,7 @@ export function WaitlistJoinedEmail({
                     <h2 style="${s.sectionHeading}">
                       Mira si estos otros retiros te gustan
                     </h2>
-                    <p style="margin: 0 0 20px 0; font-size: 14px; color: #6b7280; line-height: 1.6;">
+                    <p style="margin: 0 0 20px 0; font-size: 14px; color: #583813; line-height: 1.6;">
                       Tienen plazas disponibles ahora mismo.
                     </p>
                     ${alternativeRetreats
@@ -267,15 +286,22 @@ export function WaitlistJoinedEmail({
   <table width="100%" cellpadding="0" cellspacing="0" style="${s.outerWrap}">
     <tr>
       <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="${s.card}">
+        <table width="800" cellpadding="0" cellspacing="0" style="${s.card}">
           <tr>
-            <td style="${s.headerGreen}">
-              <h1 style="${s.headerTitle}">
+            <td style="padding: 0; background-color: #301e0e;">
+              <img src="${headerImage}" alt="" width="800" style="display: block; width: 100%; max-width: 800px; height: auto;" />
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 0; background-color: #301e0e;">
+              <img src="${heroImage}" alt="" width="800" style="display: block; width: 100%; max-width: 800px; height: auto;" />
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 28px 30px 10px; text-align: center; background-color: #fffcf3;">
+              <h1 style="margin: 0; color: #301e0e; font-size: 34px; line-height: 1.15; font-weight: 600; font-family: 'Trebuchet MS', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;">
                 Lista de espera
               </h1>
-              <p style="${s.headerSubtitle}">
-                Hemos recibido tu petición
-              </p>
             </td>
           </tr>
 
@@ -309,7 +335,7 @@ export function WaitlistJoinedEmail({
               <table width="100%" cellpadding="0" cellspacing="0" style="${s.ctaWrap}">
                 <tr>
                   <td align="center">
-                    <a href="${escapeHtml(retreatUrl)}" style="${s.ctaButton}">
+                    <a href="${escapeHtml(retreatUrl)}" style="${s.ctaButton} background-color: #f9b3ac; color: #301e0e;">
                       Ver la página del retiro
                     </a>
                   </td>
@@ -353,6 +379,12 @@ export function RetreatFullyPaidEmail({
   const safeName = escapeHtml(customerName || "Viajero");
   const safeTitle = escapeHtml(retreatTitle);
   const retreatUrl = `${baseUrl.replace(/\/$/, "")}/retreats/${retreatSlug}`;
+  const headerImage = escapeHtml(
+    `${baseUrl.replace(/\/$/, "")}/assets/emails/Header.svg`,
+  );
+  const heroImage = escapeHtml(
+    `${baseUrl.replace(/\/$/, "")}/assets/emails/HeroPayConfirm.svg`,
+  );
 
   return `
 <!DOCTYPE html>
@@ -366,15 +398,22 @@ export function RetreatFullyPaidEmail({
   <table width="100%" cellpadding="0" cellspacing="0" style="${s.outerWrap}">
     <tr>
       <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="${s.card}">
+        <table width="800" cellpadding="0" cellspacing="0" style="${s.card}">
           <tr>
-            <td style="${s.headerCelebration}">
-              <h1 style="${s.headerTitle}">
-                ¡Pago completado! 🎉
+            <td style="padding: 0; background-color: #301e0e;">
+              <img src="${headerImage}" alt="" width="800" style="display: block; width: 100%; max-width: 800px; height: auto;" />
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 0; background-color: #301e0e;">
+              <img src="${heroImage}" alt="" width="800" style="display: block; width: 100%; max-width: 800px; height: auto;" />
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 28px 30px 10px; text-align: center; background-color: #fffcf3;">
+              <h1 style="margin: 0; color: #301e0e; font-size: 34px; line-height: 1.15; font-weight: 600; font-family: 'Trebuchet MS', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                Pago confirmado
               </h1>
-              <p style="${s.headerSubtitle}">
-                Tu retiro está al corriente
-              </p>
             </td>
           </tr>
 
@@ -403,7 +442,7 @@ export function RetreatFullyPaidEmail({
               <table width="100%" cellpadding="0" cellspacing="0" style="${s.noticeBoxAmber}">
                 <tr>
                   <td style="${s.noticeBoxAmberInner}">
-                    <p style="margin: 0; font-size: 14px; color: #92400e; line-height: 1.5;">
+                    <p style="margin: 0; font-size: 14px; color: #301e0e; line-height: 1.6;">
                       <strong>Última hora</strong><br>
                       Cualquier aviso urgente del equipo (cambios puntuales, coordinación, etc.) te lo haremos llegar por el mismo canal, así que mantén un ojo a tu bandeja cerca de las fechas del retiro.
                     </p>
@@ -418,7 +457,7 @@ export function RetreatFullyPaidEmail({
               <table width="100%" cellpadding="0" cellspacing="0" style="${s.ctaWrap}">
                 <tr>
                   <td align="center">
-                    <a href="${escapeHtml(retreatUrl)}" style="${s.ctaButton}">
+                    <a href="${escapeHtml(retreatUrl)}" style="${s.ctaButton} background-color: #ffe799; color: #301e0e;">
                       Ver el retiro
                     </a>
                   </td>
@@ -473,6 +512,12 @@ export function BalanceInvoiceEmail({
   const amountLabel = escapeHtml(formatPrice(amountPendingCents));
   const safePayUrl = escapeHtml(payInvoiceUrl);
   const siteUrl = baseUrl.replace(/\/$/, "");
+  const headerImage = escapeHtml(
+    `${baseUrl.replace(/\/$/, "")}/assets/emails/Header.svg`,
+  );
+  const heroImage = escapeHtml(
+    `${baseUrl.replace(/\/$/, "")}/assets/emails/HeroPayConfirm.svg`,
+  );
 
   return `
 <!DOCTYPE html>
@@ -486,15 +531,22 @@ export function BalanceInvoiceEmail({
   <table width="100%" cellpadding="0" cellspacing="0" style="${s.outerWrap}">
     <tr>
       <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="${s.card}">
+        <table width="800" cellpadding="0" cellspacing="0" style="${s.card}">
           <tr>
-            <td style="${s.headerGreen}">
-              <h1 style="${s.headerTitle}">
+            <td style="padding: 0; background-color: #301e0e;">
+              <img src="${headerImage}" alt="" width="800" style="display: block; width: 100%; max-width: 800px; height: auto;" />
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 0; background-color: #301e0e;">
+              <img src="${heroImage}" alt="" width="800" style="display: block; width: 100%; max-width: 800px; height: auto;" />
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 28px 30px 10px; text-align: center; background-color: #fffcf3;">
+              <h1 style="margin: 0; color: #301e0e; font-size: 34px; line-height: 1.15; font-weight: 600; font-family: 'Trebuchet MS', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;">
                 Pendiente de pago
               </h1>
-              <p style="${s.headerSubtitle}">
-                ${safeTitle}
-              </p>
             </td>
           </tr>
 
