@@ -5,11 +5,19 @@ import { getResendFrom } from "@/lib/resend-from";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export function getEmailBaseUrl(): string {
-  return (
+  const configured =
+    process.env.EMAIL_ASSETS_BASE_URL ||
     process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    "http://localhost:3000"
-  ).replace(/\/$/, "");
+    process.env.NEXT_PUBLIC_BASE_URL;
+  const vercelHost =
+    process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+  const rawBaseUrl =
+    configured || (vercelHost ? `https://${vercelHost}` : "https://yayexperiences.com");
+  const normalizedBaseUrl = /^https?:\/\//i.test(rawBaseUrl)
+    ? rawBaseUrl
+    : `https://${rawBaseUrl}`;
+
+  return normalizedBaseUrl.replace(/\/$/, "");
 }
 
 /** Absolute URL for images/links in emails (supports relative paths). */
