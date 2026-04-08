@@ -100,7 +100,7 @@ export default async function Home() {
         </video>
 
         <div className="relative z-10 max-w-4xl mx-auto text-center space-y-8">
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-tight">
+          <h1 className="text-5xl md:text-7xl font-medium">
             Desconecta{" "}
             <HeroTextLoop
               words={[
@@ -110,21 +110,27 @@ export default async function Home() {
                 "de la prisa.",
               ]}
             />
-            <br /> Conecta contigo mismo.
           </h1>
-          <p className="text-xl md:text-2xl text-gray max-w-2xl mx-auto leading-relaxed">
+          <h1 className="text-5xl md:text-6xl font-medium tracking-tighter">
+            Conecta contigo mismo.
+          </h1>
+          <p className="text-xl md:text-2xl text-white max-w-2xl mx-auto leading-relaxed">
             Retiros modernos enfocados en bienestar práctico, movimiento y
             experiencias de calidad.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Button size="lg" href="#retreats">
+            <Button
+              size="lg"
+              href="#retreats"
+              className="bg-brand-accent-yellow! text-brand-main-dark! border border-brand-accent-yellow! hover:bg-[#ffdb66]! hover:text-brand-main-dark!"
+            >
               Ver Retiros
             </Button>
             <Button
               size="lg"
               variant="outline"
               href="/about"
-              className="text-white border-white hover:bg-white hover:text-black"
+              className="text-white! border-white! hover:bg-white! hover:border-white! hover:text-brand-main-dark!"
             >
               Sobre Nosotros
             </Button>
@@ -309,18 +315,18 @@ export default async function Home() {
       </section>
 
       {/* BLOCK 4: Para personas reales */}
-      <section className="py-20 bg-green text-white px-4 md:px-12 text-center">
+      <section className="py-20 bg-green text-brand-main-dark px-4 md:px-12 text-center">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold mb-8 tracking-tight">
             Para personas reales, con vidas reales
           </h2>
-          <p className="text-lg md:text-xl text-white/90 mb-12 leading-relaxed">
+          <p className="text-lg md:text-xl text-brand-main-dark/90 mb-12 leading-relaxed">
             Da igual si nunca has pisado una esterilla de yoga o si trabajas 10
             horas al día frente a un ordenador. Diseñamos retiros para gente
             normal que necesita parar, respirar y volver a casa con la sensación
             de &quot;por fin he descansado de verdad&quot;.
           </p>
-          <div className="inline-block border-2 border-white/30 px-8 py-4 rounded-full text-xl font-bold tracking-wide bg-white/10 backdrop-blur-sm rotate-1 hover:rotate-0 transition-transform">
+          <div className="inline-block border-2 border-brand-main-dark/30 px-8 py-4 rounded-full text-xl font-bold tracking-wide bg-white/10 backdrop-blur-sm rotate-1 hover:rotate-0 transition-transform">
             Sin dogmas. Sin dramas. Sin disfraces espirituales.
           </div>
         </div>

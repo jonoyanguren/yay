@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import {
-  Alegreya,
   Caveat,
   Geist_Mono,
   Plus_Jakarta_Sans,
@@ -21,11 +20,6 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-});
-
-const alegreya = Alegreya({
-  subsets: ["latin"],
-  weight: ["400", "500"],
 });
 
 const caveat = Caveat({
@@ -82,12 +76,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`${plusJakartaSans.className} ${plusJakartaSans.variable} ${geistMono.variable} ${caveat.variable} antialiased bg-sand text-black min-h-screen flex flex-col`}
-        style={
-          {
-            "--font-title-family": alegreya.style.fontFamily,
-          } as React.CSSProperties
-        }
+        className={`${plusJakartaSans.variable} ${geistMono.variable} ${caveat.variable} antialiased bg-sand text-black min-h-screen flex flex-col`}
       >
         {gtmId ? (
           <noscript>

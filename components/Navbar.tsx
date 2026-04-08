@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { FaBars, FaTimes } from "react-icons/fa";
@@ -27,10 +28,17 @@ export default function Navbar() {
       <nav className="w-full py-6 px-4 md:px-12 flex justify-between items-center text-black sticky top-0 z-50 backdrop-blur-sm bg-sand/90">
         <Link
           href="/"
-          className="text-2xl font-bold tracking-tighter"
+          className="inline-flex items-center"
           onClick={closeMenu}
         >
-          YaY Experiences
+          <Image
+            src="/assets/logo.svg"
+            alt="YaY Experiences"
+            width={160}
+            height={48}
+            className="h-8 md:h-10 w-auto"
+            priority
+          />
         </Link>
 
         {/* Desktop Menu */}

@@ -48,7 +48,7 @@ export default function RetreatHero({
   const contentScale = useTransform(
     scrollYProgress,
     [0, 0.88],
-    [1, isMobile ? 1.04 : 1.7],
+    [1, isMobile ? 1.02 : 1.28],
   );
   const contentY = useTransform(
     scrollYProgress,

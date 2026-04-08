@@ -45,8 +45,8 @@ export default function ArrivalOptionsSection({
             style={
               index === 0
                 ? {
-                    borderColor: "#4f73c3",
-                    backgroundColor: "#faf8f4",
+                    borderColor: "#583813",
+                    backgroundColor: "#fffbf1",
                   }
                 : undefined
             }

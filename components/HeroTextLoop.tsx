@@ -23,11 +23,11 @@ export default function HeroTextLoop({
 
   return (
     <span
-      className={`inline-grid relative overflow-hidden align-bottom ${className}`}
+      className={`font-title-medium inline-grid relative overflow-hidden ${className}`}
     >
       {/* Invisible element to reserve width for the widest word to prevent layout shift */}
       <span
-        className="invisible font-bold opacity-0 pointer-events-none select-none whitespace-nowrap"
+        className="invisible font-medium leading-tight opacity-0 pointer-events-none select-none whitespace-nowrap"
         aria-hidden="true"
       >
         {words.reduce((a, b) => (a.length > b.length ? a : b))}
@@ -43,7 +43,7 @@ export default function HeroTextLoop({
             y: { type: "spring", stiffness: 100, damping: 20 },
             opacity: { duration: 0.2 },
           }}
-          className="absolute inset-0 flex items-center whitespace-nowrap"
+          className="absolute inset-0 flex items-center leading-tight whitespace-nowrap"
         >
           {words[index]}
         </motion.span>

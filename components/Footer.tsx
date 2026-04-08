@@ -6,7 +6,18 @@ export default function Footer() {
     <footer className="bg-black text-white py-16 px-4 md:px-12">
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-12">
         <div className="col-span-1 md:col-span-2">
-          <h3 className="text-2xl font-bold mb-4">YaY Experiences</h3>
+          <Link
+            href="/"
+            className="inline-flex items-center mb-4"
+          >
+            <Image
+              src="/assets/logowhite.svg"
+              alt="YaY Experiences"
+              width={170}
+              height={52}
+              className="h-8 md:h-9 w-auto"
+            />
+          </Link>
           <p className="text-gray max-w-sm">
             Retiros modernos de desconexión. Sin misticismo, solo bienestar
             práctico, experiencias reales y buen diseño.
