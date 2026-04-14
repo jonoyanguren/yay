@@ -49,6 +49,7 @@ interface RetreatDetailsData {
   includes?: unknown;
   notIncludes?: unknown;
   bgColor?: string | null;
+  featuredInfo?: string | null;
   textHighlights?: unknown;
 }
 
@@ -138,6 +139,7 @@ export default function RetreatDetailsView({
   const imageUrl = retreat.images?.[0] || retreat.image || "/assets/placeholder.jpg";
   const galleryImages = retreat.images || [];
   const textHighlights = normalizeHighlights(retreat.textHighlights);
+  const featuredInfo = retreat.featuredInfo?.trim() || "";
 
   return (
     <div className="pb-24">
@@ -201,6 +203,16 @@ export default function RetreatDetailsView({
       )}
 
       {isPreview && <PreviewInfoCard slug={retreat.slug} />}
+
+      {featuredInfo && (
+        <RetreatSection>
+          <section className="rounded-2xl border border-amber-200 bg-amber-50 p-5 md:p-8 shadow-sm text-center">
+            <p className="text-lg md:text-2xl font-medium text-amber-900 leading-relaxed">
+              {featuredInfo}
+            </p>
+          </section>
+        </RetreatSection>
+      )}
 
       <RetreatSection>
         <ExperienceSection

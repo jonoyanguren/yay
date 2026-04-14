@@ -85,6 +85,7 @@ export async function POST(request: Request) {
         notIncludes: data.notIncludes || null,
         bgColor: data.bgColor || null,
         textHighlights: data.textHighlights || null,
+        featuredInfo: data.featuredInfo || null,
         roomTypes: roomTypesPayload.length > 0
           ? {
               create: roomTypesPayload.map(

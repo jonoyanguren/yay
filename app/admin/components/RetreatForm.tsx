@@ -133,6 +133,7 @@ export default function RetreatForm({
     accommodationTitle: retreat?.accommodationTitle || "",
     accommodationDescription: retreat?.accommodationDescription || "",
     bgColor: retreat?.bgColor || DEFAULT_RETREAT_BG_COLOR,
+    featuredInfo: retreat?.featuredInfo || "",
   });
   const [fullDescriptionHighlights, setFullDescriptionHighlights] = useState<
     string[]
@@ -802,6 +803,7 @@ export default function RetreatForm({
                 fullDescription: fullDescriptionHighlights,
               }
             : null,
+        featuredInfo: formData.featuredInfo.trim() || null,
         arrivalIntro: formData.arrivalIntro || null,
         bgColor: formData.bgColor || null,
         ...(!isEdit && {
@@ -1200,6 +1202,23 @@ export default function RetreatForm({
             )}
             <p className="text-xs text-slate-500 mt-1.5">
               Se mostrarán como badges. Puedes quitar cada uno con la x.
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-slate-700">
+              Información destacada del retiro
+            </label>
+            <textarea
+              name="featuredInfo"
+              value={formData.featuredInfo}
+              onChange={handleChange}
+              rows={3}
+              placeholder="Ej: Por 5 días de vacaciones festivos, con el puente consigues todo el retiro."
+              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+            />
+            <p className="text-xs text-slate-500 mt-1.5">
+              Se mostrará como bloque destacado en la página pública del retiro.
             </p>
           </div>
 

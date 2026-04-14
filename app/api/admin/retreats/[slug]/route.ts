@@ -116,6 +116,9 @@ export async function PATCH(
       ...(data.textHighlights !== undefined && {
         textHighlights: data.textHighlights,
       }),
+      ...(data.featuredInfo !== undefined && {
+        featuredInfo: data.featuredInfo,
+      }),
     };
 
     const existingRetreat = await prisma.retreat.findUnique({
