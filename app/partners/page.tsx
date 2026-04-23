@@ -22,7 +22,9 @@ const discountPartners: Partner[] = [
     description:
       "eSIM para viajar con internet desde que aterrizas. Menos fricción y más tranquilidad en cada retiro.",
     logo: holaflyLogo,
-    affiliateDiscount: "Descuento activo",
+    affiliateUrl:
+      "https://esim.holafly.com/es/?irclickid=XmKRNZ0kJxyZU23VlCTvfzhZUkuy09UyBw3TSY0&discount=YAYEXPERIENCES&utm_source=affiliate&utm_medium=Yay%20Experiences&utm_campaign=7213451&irgwc=1&afsrc=1&tw_source=impact&tw_campaign=7213451&tw_term=2006335",
+    affiliateDiscount: "5% de descuento",
   },
   {
     name: "Manduka",
@@ -30,7 +32,8 @@ const discountPartners: Partner[] = [
     description:
       "Esterillas de alta calidad para una práctica estable, cómoda y duradera en cada sesión.",
     logo: mandukaLogo,
-    affiliateDiscount: "Descuento activo",
+    affiliateUrl: "https://mandukaemea.myshopify.com/?rfsn=9023118.591a59",
+    affiliateDiscount: "10% de descuento",
   },
   {
     name: "IATI",
@@ -119,7 +122,7 @@ export default function PartnersPage() {
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center rounded-xl bg-black text-white px-5 py-2.5 text-sm font-medium hover:bg-black/85 transition-colors"
                   >
-                    Activar descuento IATI
+                    Activar descuento
                   </Link>
                 </div>
               )}
