@@ -47,6 +47,12 @@ export default function Navbar() {
             Home
           </Link>
           <Link
+            href="/partners"
+            className="hover:text-gray-dark transition-colors"
+          >
+            Partners
+          </Link>
+          <Link
             href="/about"
             className="hover:text-gray-dark transition-colors"
           >
@@ -86,6 +92,13 @@ export default function Navbar() {
             onClick={closeMenu}
           >
             Nosotros
+          </Link>
+          <Link
+            href="/partners"
+            className="text-2xl font-medium hover:text-gray-dark transition-colors"
+            onClick={closeMenu}
+          >
+            Partners
           </Link>
           <Link
             href="/contact"

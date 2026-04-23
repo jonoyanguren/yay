@@ -12,6 +12,10 @@ import {
 import { BiCoffee, BiMusic, BiCookie, BiTime } from "react-icons/bi";
 import { prisma } from "@/lib/prisma";
 import { getRetreatSpotsLeftMap } from "@/lib/retreat-capacity";
+import holaflyLogo from "@/assets/partners/holafly.png";
+import mandukaLogo from "@/assets/partners/manduka.png";
+import iatiLogo from "@/assets/partners/iati.png";
+import yogaAllianceLogo from "@/assets/partners/yogaalliance.png";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
@@ -212,6 +216,45 @@ export default async function Home() {
           {retreats.map((retreat) => (
             <RetreatCard key={retreat.id} retreat={retreat} />
           ))}
+        </div>
+      </section>
+
+      {/* Partners */}
+      <section className="px-4 md:px-12 max-w-7xl mx-auto w-full">
+        <div className="rounded-2xl border border-black/10 bg-white px-6 py-8 md:px-8 md:py-10">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+                Partners
+              </h2>
+              <p className="text-black/65 mt-2">
+                Marcas y certificaciones que respaldan nuestra experiencia.
+              </p>
+            </div>
+            <Button href="/partners" variant="outline" className="w-fit">
+              Ver todos los partners
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 items-center">
+            {[
+              { src: holaflyLogo, alt: "Logo Holafly" },
+              { src: mandukaLogo, alt: "Logo Manduka" },
+              { src: iatiLogo, alt: "Logo IATI Seguros" },
+              { src: yogaAllianceLogo, alt: "Logo Yoga Alliance" },
+            ].map((partner) => (
+              <div
+                key={partner.alt}
+                className="h-10 md:h-12 flex items-center justify-center"
+              >
+                <Image
+                  src={partner.src}
+                  alt={partner.alt}
+                  className="max-h-full w-auto object-contain"
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
