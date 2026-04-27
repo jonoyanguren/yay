@@ -214,7 +214,7 @@ export default function BookingForm({
               <div className="flex flex-col flex-1">
                 <div className="flex items-start justify-between gap-4">
                   <span className="font-semibold text-lg">{room.name}</span>
-                  <span className="text-xl font-semibold text-green text-right shrink-0">
+                  <span className="text-xl font-semibold text-brand-main-dark text-right shrink-0">
                     {formatPrice(room.price_cents)}
                   </span>
                 </div>
@@ -285,7 +285,7 @@ export default function BookingForm({
                           <span className="font-medium text-lg">
                             {extra.name}
                           </span>
-                          <span className="text-green font-semibold text-lg text-right shrink-0">
+                          <span className="text-brand-main-dark font-semibold text-lg text-right shrink-0">
                             +{formatPrice(extra.price_cents)}
                           </span>
                         </div>
@@ -365,7 +365,7 @@ export default function BookingForm({
                           <span className="font-medium text-lg">
                             {extra.name}
                           </span>
-                          <span className="text-green font-semibold text-lg text-right shrink-0">
+                          <span className="text-brand-main-dark font-semibold text-lg text-right shrink-0">
                             +{formatPrice(extra.price_cents)}
                           </span>
                         </div>
@@ -407,7 +407,7 @@ export default function BookingForm({
         <div className="space-y-3 mb-8">
           <div className="flex justify-between items-center">
             <span className="text-xl font-semibold">Total de la reserva</span>
-            <span className="text-3xl font-bold text-green">
+            <span className="text-3xl font-bold text-brand-main-dark">
               {formatPrice(bookingTotalCents)}
             </span>
           </div>
@@ -417,7 +417,7 @@ export default function BookingForm({
                 <span className="text-xl font-semibold">
                   A pagar ahora (reserva)
                 </span>
-                <span className="text-3xl font-bold text-green">
+                <span className="text-3xl font-bold text-brand-main-dark">
                   {formatPrice(totalCents)}
                 </span>
               </div>
