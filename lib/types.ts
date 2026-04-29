@@ -36,6 +36,7 @@ export type Retreat = {
   notIncludes?: string[] | null;
   bgColor?: string | null;
   featuredInfo?: string | null;
+  sortOrder?: number;
   textHighlights?: {
     fullDescription?: string[];
     arrivalIntro?: string[];

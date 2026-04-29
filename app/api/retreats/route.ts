@@ -9,7 +9,7 @@ export async function GET() {
   try {
     const retreats = await prisma.retreat.findMany({
       where: { published: true, hideFromWeb: false },
-      orderBy: { createdAt: "asc" },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
       select: {
         id: true,
         slug: true,

@@ -14,7 +14,11 @@ export async function GET(request: Request) {
 
   try {
     const retreats = await prisma.retreat.findMany({
-      orderBy: { createdAt: "desc" },
+      orderBy: [
+        { hideFromWeb: "asc" },
+        { sortOrder: "asc" },
+        { createdAt: "asc" },
+      ],
       include: {
         roomTypes: true,
         extraActivities: true,
@@ -52,6 +56,10 @@ export async function POST(request: Request) {
 
     const roomTypesPayload = Array.isArray(data.roomTypes) ? data.roomTypes : [];
 
+    const maxSortOrder = await prisma.retreat.aggregate({
+      _max: { sortOrder: true },
+    });
+
     const retreat = await prisma.retreat.create({
       data: {
         slug: data.slug,
@@ -86,6 +94,10 @@ export async function POST(request: Request) {
         bgColor: data.bgColor || null,
         textHighlights: data.textHighlights || null,
         featuredInfo: data.featuredInfo || null,
+        sortOrder:
+          data.sortOrder != null
+            ? Number(data.sortOrder) || 0
+            : (maxSortOrder._max.sortOrder ?? -1) + 1,
         roomTypes: roomTypesPayload.length > 0
           ? {
               create: roomTypesPayload.map(

@@ -15,6 +15,7 @@ interface Retreat {
   published: boolean;
   hideFromWeb?: boolean;
   forceSoldOut: boolean;
+  sortOrder: number;
   createdAt: string;
 }
 
@@ -185,6 +186,36 @@ export default function AdminPage() {
     await fetch("/api/admin/auth/logout", { method: "POST" });
     router.push("/admin/login");
   };
+
+  const persistRetreatOrder = async (ordered: Retreat[]) => {
+    const res = await fetch("/api/admin/retreats/reorder", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ retreatIds: ordered.map((retreat) => retreat.id) }),
+    });
+
+    if (!res.ok) {
+      throw new Error("No se pudo guardar el orden");
+    }
+  };
+
+  const handleMoveRetreat = async (index: number, direction: -1 | 1) => {
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= retreats.length) return;
+
+    const nextRetreats = [...retreats];
+    const [moved] = nextRetreats.splice(index, 1);
+    nextRetreats.splice(targetIndex, 0, moved);
+    setRetreats(nextRetreats);
+
+    try {
+      await persistRetreatOrder(nextRetreats);
+    } catch {
+      setRetreats(retreats);
+      showToast("error", "No se pudo guardar el nuevo orden.");
+    }
+  };
+
   const activeRetreat = retreats.find((retreat) => retreat.slug === openMenuSlug) ?? null;
 
   if (isLoading) {
@@ -262,6 +293,9 @@ export default function AdminPage() {
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
                 <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Orden
+                </th>
+                <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                   Title
                 </th>
                 <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
@@ -281,13 +315,42 @@ export default function AdminPage() {
             <tbody className="divide-y divide-slate-100">
               {retreats.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
                     No retreats yet. Create your first one!
                   </td>
                 </tr>
               ) : (
-                retreats.map((retreat) => (
+                retreats.map((retreat, index) => (
                   <tr key={retreat.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex min-w-8 justify-center rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">
+                          {index + 1}
+                        </span>
+                        <div className="flex flex-col gap-1">
+                          <button
+                            type="button"
+                            onClick={() => handleMoveRetreat(index, -1)}
+                            disabled={index === 0}
+                            className="rounded border border-slate-200 px-1.5 py-0.5 text-xs text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+                            aria-label={`Subir ${retreat.title}`}
+                            title="Subir"
+                          >
+                            ↑
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleMoveRetreat(index, 1)}
+                            disabled={index === retreats.length - 1}
+                            className="rounded border border-slate-200 px-1.5 py-0.5 text-xs text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+                            aria-label={`Bajar ${retreat.title}`}
+                            title="Bajar"
+                          >
+                            ↓
+                          </button>
+                        </div>
+                      </div>
+                    </td>
                     <td className="px-4 py-3">
                       <div className="font-semibold text-slate-900">{retreat.title}</div>
                       <div className="text-sm text-slate-500 mt-0.5">{retreat.slug}</div>

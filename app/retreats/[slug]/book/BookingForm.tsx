@@ -308,7 +308,7 @@ export default function BookingForm({
                             href={extra.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm text-green hover:underline mt-1 inline-block"
+                            className="text-sm text-brand-main-dark hover:underline mt-1 inline-block"
                             onClick={(e) => e.stopPropagation()}
                           >
                             🔗 Más información
@@ -388,7 +388,7 @@ export default function BookingForm({
                             href={extra.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm text-green hover:underline mt-1 inline-block"
+                            className="text-sm text-brand-main-dark hover:underline mt-1 inline-block"
                           >
                             🔗 Más información
                           </a>

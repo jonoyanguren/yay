@@ -119,6 +119,9 @@ export async function PATCH(
       ...(data.featuredInfo !== undefined && {
         featuredInfo: data.featuredInfo,
       }),
+      ...(data.sortOrder !== undefined && {
+        sortOrder: Number(data.sortOrder) || 0,
+      }),
     };
 
     const existingRetreat = await prisma.retreat.findUnique({
