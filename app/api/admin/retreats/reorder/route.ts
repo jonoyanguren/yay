@@ -15,7 +15,10 @@ export async function POST(request: Request) {
     const body = await request.json();
     const retreatIds = Array.isArray(body?.retreatIds) ? body.retreatIds : null;
 
-    if (!retreatIds || retreatIds.some((id) => typeof id !== "string")) {
+    if (
+      !retreatIds ||
+      retreatIds.some((id: unknown) => typeof id !== "string")
+    ) {
       return NextResponse.json(
         { error: "retreatIds inválido" },
         { status: 400 },
