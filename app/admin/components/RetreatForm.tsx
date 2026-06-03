@@ -130,6 +130,7 @@ export default function RetreatForm({
     hotelName: retreat?.hotelName || "",
     hotelUrl: retreat?.hotelUrl || "",
     videoUrl: retreat?.videoUrl || "",
+    pdfLink: retreat?.pdfLink || "",
     accommodationTitle: retreat?.accommodationTitle || "",
     accommodationDescription: retreat?.accommodationDescription || "",
     bgColor: retreat?.bgColor || DEFAULT_RETREAT_BG_COLOR,
@@ -791,6 +792,7 @@ export default function RetreatForm({
         hotelName: formData.hotelName || null,
         hotelUrl: formData.hotelUrl || null,
         videoUrl: formData.videoUrl || null,
+        pdfLink: formData.pdfLink.trim() || null,
         accommodationTitle: formData.accommodationTitle || null,
         accommodationDescription: formData.accommodationDescription || null,
         accommodationImages,
@@ -1276,6 +1278,23 @@ export default function RetreatForm({
               placeholder="YouTube, Vimeo o URL directa (.mp4, etc.)"
               className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-slate-700">
+              Enlace PDF del retiro
+            </label>
+            <input
+              type="url"
+              name="pdfLink"
+              value={formData.pdfLink}
+              onChange={handleChange}
+              placeholder="https://... (dossier / guía del retiro)"
+              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+            />
+            <p className="mt-1.5 text-xs text-slate-500">
+              Se muestra en el email de pago completado como bloque de descarga.
+            </p>
           </div>
 
           <div>

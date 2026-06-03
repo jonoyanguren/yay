@@ -215,7 +215,7 @@ export async function POST(request: NextRequest) {
       const booking = await prisma.booking.findUnique({
         where: { id: invBookingId },
         include: {
-          retreat: { select: { title: true, slug: true } },
+          retreat: { select: { title: true, slug: true, pdfLink: true } },
           roomSlots: {
             include: {
               retreatRoomType: { select: { name: true, priceCents: true } },
@@ -305,6 +305,7 @@ export async function POST(request: NextRequest) {
         customerName: booking.customerName || "Viajero",
         retreatTitle: booking.retreat.title,
         retreatSlug: booking.retreat.slug,
+        pdfLink: booking.retreat.pdfLink,
       });
 
       console.info("[stripe webhook] invoice.paid email result", {

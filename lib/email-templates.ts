@@ -9,6 +9,33 @@ function escapeHtml(text: string): string {
     .replace(/"/g, "&quot;");
 }
 
+/** Highlight block for retreat PDF / dossier download (transactional emails). */
+function retreatPdfDownloadSectionHtml(pdfLink: string | null | undefined): string {
+  const url = pdfLink?.trim();
+  if (!url) return "";
+
+  const safeUrl = escapeHtml(url);
+  return `
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 30px;">
+                <tr>
+                  <td style="padding: 36px 28px; text-align: center; background-color: #301e0e; border-radius: 16px; border: 1px solid #4a2f1a;">
+                    <p style="margin: 0 0 8px 0; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #ffe799; font-weight: 600; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                      Tu dossier está listo
+                    </p>
+                    <h2 style="margin: 0 0 14px 0; font-size: 26px; line-height: 1.2; color: #fffcf3; font-weight: 700; font-family: 'Trebuchet MS', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                      Descárgate toda la información
+                    </h2>
+                    <p style="margin: 0 auto 24px auto; max-width: 420px; font-size: 15px; line-height: 1.55; color: #fffcf3; opacity: 0.92;">
+                      Itinerario, alojamiento, qué llevar y consejos prácticos en un solo documento. Guárdalo en el móvil para tenerlo a mano durante el viaje.
+                    </p>
+                    <a href="${safeUrl}" style="display: inline-block; background-color: #ffe799; color: #301e0e; text-decoration: none; padding: 16px 36px; border-radius: 999px; font-weight: 700; font-size: 16px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-shadow: 0 4px 14px rgba(0,0,0,0.18);">
+                      Descargar dossier del retiro →
+                    </a>
+                  </td>
+                </tr>
+              </table>`;
+}
+
 interface BookingConfirmationEmailProps {
   customerName: string;
   retreatTitle: string;
@@ -367,6 +394,7 @@ interface RetreatFullyPaidEmailProps {
   customerName: string;
   retreatTitle: string;
   retreatSlug: string;
+  pdfLink?: string | null;
   baseUrl: string;
 }
 
@@ -374,6 +402,7 @@ export function RetreatFullyPaidEmail({
   customerName,
   retreatTitle,
   retreatSlug,
+  pdfLink,
   baseUrl,
 }: RetreatFullyPaidEmailProps) {
   const safeName = escapeHtml(customerName || "Viajero");
@@ -425,6 +454,8 @@ export function RetreatFullyPaidEmail({
               <p style="${s.paragraphLast}">
                 Hemos recibido el pago de tu factura: <strong>ya has completado el importe total</strong> de <strong>${safeTitle}</strong>. ¡Mil gracias por confiar en nosotros!
               </p>
+
+              ${retreatPdfDownloadSectionHtml(pdfLink)}
 
               <table width="100%" cellpadding="0" cellspacing="0" style="${s.infoBoxBlue}">
                 <tr>

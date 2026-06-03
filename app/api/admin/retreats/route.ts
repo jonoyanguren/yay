@@ -85,6 +85,7 @@ export async function POST(request: Request) {
         hotelName: data.hotelName || null,
         hotelUrl: data.hotelUrl || null,
         videoUrl: data.videoUrl || null,
+        pdfLink: data.pdfLink || null,
         accommodationTitle: data.accommodationTitle || null,
         accommodationDescription: data.accommodationDescription || null,
         accommodationImages: data.accommodationImages || [],

@@ -28,6 +28,7 @@ export type Retreat = {
   hotelName?: string | null;
   hotelUrl?: string | null;
   videoUrl?: string | null;
+  pdfLink?: string | null;
   accommodationTitle?: string | null;
   accommodationDescription?: string | null;
   accommodationImages?: string[];

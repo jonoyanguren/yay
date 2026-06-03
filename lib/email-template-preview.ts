@@ -65,6 +65,7 @@ export function renderEmailTemplateHtml(id: EmailTemplateId): string {
         customerName: "Alex (prueba)",
         retreatTitle: "Sahara Calm · vista previa",
         retreatSlug: "sahara-calm",
+        pdfLink: "https://yayexperiences.com/ejemplo-dossier-retiro.pdf",
         baseUrl: b,
       });
     case "balance_invoice":

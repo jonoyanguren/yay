@@ -100,6 +100,9 @@ export async function PATCH(
       ...(data.videoUrl !== undefined && {
         videoUrl: data.videoUrl,
       }),
+      ...(data.pdfLink !== undefined && {
+        pdfLink: data.pdfLink,
+      }),
       ...(data.accommodationTitle !== undefined && {
         accommodationTitle: data.accommodationTitle,
       }),

@@ -140,6 +140,7 @@ interface SendRetreatFullyPaidParams {
   customerName: string;
   retreatTitle: string;
   retreatSlug: string;
+  pdfLink?: string | null;
 }
 
 interface SendBalanceInvoiceEmailParams {
@@ -196,6 +197,7 @@ export async function sendRetreatFullyPaidEmail({
   customerName,
   retreatTitle,
   retreatSlug,
+  pdfLink,
 }: SendRetreatFullyPaidParams) {
   if (!process.env.RESEND_API_KEY) {
     console.error("RESEND_API_KEY not configured");
@@ -208,6 +210,7 @@ export async function sendRetreatFullyPaidEmail({
     customerName,
     retreatTitle,
     retreatSlug,
+    pdfLink,
     baseUrl: getEmailBaseUrl(),
   });
 

@@ -11,6 +11,7 @@ import ExperienceSection from "@/components/retreats/ExperienceSection";
 import FadeInOnView from "@/components/retreats/FadeInOnView";
 import ItinerarySection from "@/components/retreats/ItinerarySection";
 import RetreatHero from "@/components/retreats/RetreatHero";
+import RetreatPdfDownloadSection from "@/components/retreats/RetreatPdfDownloadSection";
 import RetreatSection from "@/components/retreats/RetreatSection";
 import ScrollToTopOnMount from "@/components/retreats/ScrollToTopOnMount";
 import RetreatStickyInfoBar from "@/components/retreats/RetreatStickyInfoBar";
@@ -42,6 +43,7 @@ interface RetreatDetailsData {
   hotelName?: string | null;
   hotelUrl?: string | null;
   videoUrl?: string | null;
+  pdfLink?: string | null;
   accommodationTitle?: string | null;
   accommodationDescription?: string | null;
   accommodationImages?: string[];
@@ -140,6 +142,7 @@ export default function RetreatDetailsView({
   const galleryImages = retreat.images || [];
   const textHighlights = normalizeHighlights(retreat.textHighlights);
   const featuredInfo = retreat.featuredInfo?.trim() || "";
+  const pdfLink = retreat.pdfLink?.trim() || "";
 
   return (
     <div className="pb-24">
@@ -239,6 +242,12 @@ export default function RetreatDetailsView({
       <RetreatSection>
         <ItinerarySection title="Itinerario día a día" days={dayByDay} />
       </RetreatSection>
+
+      {pdfLink && (
+        <RetreatSection>
+          <RetreatPdfDownloadSection pdfLink={pdfLink} />
+        </RetreatSection>
+      )}
 
       {activitiesImage && (
         <RetreatSection>

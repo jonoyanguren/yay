@@ -75,6 +75,7 @@ model Retreat {
   hotelName                String?  @map("hotel_name")
   hotelUrl                 String?  @map("hotel_url")
   videoUrl                 String?  @map("video_url")
+  pdfLink                  String?  @map("pdf_link")
   accommodationTitle       String?  @map("accommodation_title")
   accommodationDescription String?  @map("accommodation_description")
   accommodationImages      String[] @default([]) @map("accommodation_images")
