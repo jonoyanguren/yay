@@ -192,6 +192,57 @@ export async function sendBalanceInvoiceEmail({
   }
 }
 
+interface SendEventConfirmationParams {
+  to: string;
+  customerName: string;
+  eventTitle: string;
+  eventSlug: string;
+  eventDate: string;
+  eventLocation: string;
+  amountPaidCents: number;
+}
+
+export async function sendEventConfirmationEmail({
+  to,
+  customerName,
+  eventTitle,
+  eventSlug,
+  eventDate,
+  eventLocation,
+  amountPaidCents,
+}: SendEventConfirmationParams) {
+  if (!process.env.RESEND_API_KEY) {
+    console.error("RESEND_API_KEY not configured");
+    return { success: false, error: "Email service not configured" };
+  }
+
+  const { EventConfirmationEmail } = await import("./email-templates");
+
+  const html = EventConfirmationEmail({
+    customerName,
+    eventTitle,
+    eventSlug,
+    eventDate,
+    eventLocation,
+    amountPaidCents,
+    baseUrl: getEmailBaseUrl(),
+  });
+
+  try {
+    const data = await resend.emails.send({
+      from: getResendFrom(),
+      to: [to],
+      subject: `✓ Plaza confirmada: ${eventTitle}`,
+      html,
+    });
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error sending event confirmation email:", error);
+    return { success: false, error };
+  }
+}
+
 export async function sendRetreatFullyPaidEmail({
   to,
   customerName,

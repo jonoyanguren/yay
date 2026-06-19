@@ -8,6 +8,10 @@ export type AdminPermission =
   | "retreats:write"
   | "bookings:read"
   | "bookings:write"
+  | "events:read"
+  | "events:write"
+  | "event-registrations:read"
+  | "event-registrations:write"
   | "waitlist:read"
   | "waitlist:write"
   | "media:delete";
@@ -18,11 +22,24 @@ const rolePermissions: Record<AdminRole, AdminPermission[]> = {
     "retreats:write",
     "bookings:read",
     "bookings:write",
+    "events:read",
+    "events:write",
+    "event-registrations:read",
+    "event-registrations:write",
     "waitlist:read",
     "waitlist:write",
     "media:delete",
   ],
-  EDITOR: ["retreats:read", "retreats:write", "bookings:read", "waitlist:read"],
+  EDITOR: [
+    "retreats:read",
+    "retreats:write",
+    "bookings:read",
+    "events:read",
+    "events:write",
+    "event-registrations:read",
+    "event-registrations:write",
+    "waitlist:read",
+  ],
   SUPPORT: ["bookings:read", "bookings:write", "waitlist:read", "waitlist:write"],
 };
 

@@ -192,3 +192,46 @@ model WaitlistEntry {
   @@index([createdAt])
   @@map("waitlist_entries")
 }
+
+model Event {
+  id              String   @id @default(uuid())
+  slug            String   @unique
+  title           String
+  description     String   @default("")
+  fullDescription String   @default("") @map("full_description")
+  location        String   @default("")
+  date            String   @default("")
+  image           String   @default("")
+  images          String[] @default([])
+  priceCents      Int      @map("price_cents")
+  maxAttendees    Int      @map("max_attendees")
+  published       Boolean  @default(false)
+  hideFromWeb     Boolean  @default(false) @map("hide_from_web")
+  forceSoldOut    Boolean  @default(false) @map("force_sold_out")
+  sortOrder       Int      @default(0) @map("sort_order")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  registrations EventRegistration[]
+
+  @@map("events")
+}
+
+model EventRegistration {
+  id                     String   @id @default(uuid())
+  eventId                String   @map("event_id")
+  stripeSessionId        String?  @unique @map("stripe_session_id")
+  stripeCustomerId       String?  @map("stripe_customer_id")
+  stripeAmountTotalCents Int?     @map("stripe_amount_total_cents")
+  customerEmail          String   @map("customer_email")
+  customerName           String?  @map("customer_name")
+  customerPhone          String?  @map("customer_phone")
+  status                 String   @default("pending")
+  createdAt              DateTime @default(now()) @map("created_at")
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@index([eventId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("event_registrations")
+}

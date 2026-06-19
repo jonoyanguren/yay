@@ -10,6 +10,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const isRetreatDetail = /^\/retreats\/[^/]+$/.test(pathname);
+  const isEventDetail = /^\/events\/[^/]+$/.test(pathname);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -19,7 +20,7 @@ export default function Navbar() {
     setIsOpen(false);
   };
 
-  if (isRetreatDetail) {
+  if (isRetreatDetail || isEventDetail) {
     return null;
   }
 
@@ -45,6 +46,12 @@ export default function Navbar() {
         <div className="hidden md:flex gap-8 text-sm font-medium">
           <Link href="/" className="hover:text-gray-dark transition-colors">
             Home
+          </Link>
+          <Link
+            href="/events"
+            className="hover:text-gray-dark transition-colors"
+          >
+            Eventos
           </Link>
           <Link
             href="/partners"
@@ -85,6 +92,13 @@ export default function Navbar() {
             onClick={closeMenu}
           >
             Home
+          </Link>
+          <Link
+            href="/events"
+            className="text-2xl font-medium hover:text-gray-dark transition-colors"
+            onClick={closeMenu}
+          >
+            Eventos
           </Link>
           <Link
             href="/about"

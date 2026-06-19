@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Button from "@/components/ui/Button";
 import RetreatCard from "@/components/RetreatCard";
+import EventCard from "@/components/events/EventCard";
 import HeroTextLoop from "@/components/HeroTextLoop";
 import Image from "next/image";
 import {
@@ -12,6 +13,7 @@ import {
 import { BiCoffee, BiMusic, BiCookie, BiTime } from "react-icons/bi";
 import { prisma } from "@/lib/prisma";
 import { getRetreatSpotsLeftMap } from "@/lib/retreat-capacity";
+import { getEventSpotsLeftMap } from "@/lib/event-capacity";
 import holaflyLogo from "@/assets/partners/holafly.png";
 import mandukaLogo from "@/assets/partners/manduka.png";
 import iatiLogo from "@/assets/partners/iati.png";
@@ -66,10 +68,40 @@ async function getRetreats() {
   }
 }
 
+async function getEvents() {
+  try {
+    const events = await prisma.event.findMany({
+      where: { published: true, hideFromWeb: false },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        date: true,
+        location: true,
+        description: true,
+        image: true,
+        images: true,
+        published: true,
+        priceCents: true,
+      },
+    });
+    const spotsLeftByEvent = await getEventSpotsLeftMap(events.map((e) => e.id));
+
+    return events.map((e) => ({
+      ...e,
+      spotsLeft: spotsLeftByEvent.get(e.id) ?? 0,
+    }));
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    return [];
+  }
+}
+
 export const revalidate = 60;
 
 export default async function Home() {
-  const retreats = await getRetreats();
+  const [retreats, events] = await Promise.all([getRetreats(), getEvents()]);
   const localBusinessSchema = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -218,6 +250,34 @@ export default async function Home() {
           ))}
         </div>
       </section>
+
+      {events.length > 0 && (
+        <section id="events" className="px-4 md:px-12 max-w-7xl mx-auto w-full">
+          <div className="flex justify-between items-end mb-12">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-2">
+                Próximos Eventos
+              </h2>
+              <p className="text-black/60">
+                Jornadas de un día. Pago único y plazas limitadas.
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              href="/events"
+              className="hidden md:inline-flex"
+            >
+              Ver todos &rarr;
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {events.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Partners */}
       <section className="px-4 md:px-12 max-w-7xl mx-auto w-full">

@@ -1,6 +1,7 @@
 import {
   BalanceInvoiceEmail,
   BookingConfirmationEmail,
+  EventConfirmationEmail,
   RetreatFullyPaidEmail,
   WaitlistJoinedEmail,
 } from "@/lib/email-templates";
@@ -68,6 +69,16 @@ export function renderEmailTemplateHtml(id: EmailTemplateId): string {
         pdfLink: "https://yayexperiences.com/ejemplo-dossier-retiro.pdf",
         baseUrl: b,
       });
+    case "event_confirmation":
+      return EventConfirmationEmail({
+        customerName: "Alex (prueba)",
+        eventTitle: "Yoga & brunch · vista previa",
+        eventSlug: "yoga-brunch",
+        eventDate: "15 junio 2026",
+        eventLocation: "Madrid",
+        amountPaidCents: 45_000,
+        baseUrl: b,
+      });
     case "balance_invoice":
       return BalanceInvoiceEmail({
         customerName: "Alex (prueba)",
@@ -92,6 +103,8 @@ export function emailTemplateTestSubject(id: EmailTemplateId): string {
       return "[PRUEBA] Lista de espera: Retiro lleno · vista previa";
     case "retreat_fully_paid":
       return "[PRUEBA] ¡Listo! Pago completado: Sahara Calm · vista previa";
+    case "event_confirmation":
+      return "[PRUEBA] ✓ Plaza confirmada: Yoga & brunch · vista previa";
     case "balance_invoice":
       return "[PRUEBA] Pago pendiente — Sahara Calm · vista previa";
     default: {

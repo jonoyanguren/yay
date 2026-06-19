@@ -107,3 +107,35 @@ export type BookingExtraInsert = {
   retreatExtraActivityId: string;
   quantity: number;
 };
+
+export type EventRow = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  fullDescription: string;
+  location: string;
+  date: string;
+  image: string;
+  images: string[];
+  priceCents: number;
+  maxAttendees: number;
+  published: boolean;
+  hideFromWeb?: boolean;
+  forceSoldOut?: boolean;
+  sortOrder?: number;
+  createdAt?: string;
+};
+
+export type EventRegistrationRow = {
+  id: string;
+  eventId: string;
+  stripeSessionId: string | null;
+  stripeAmountTotalCents: number | null;
+  customerEmail: string;
+  customerName: string | null;
+  customerPhone: string | null;
+  status: string;
+  createdAt: string;
+  event?: Pick<EventRow, "id" | "slug" | "title" | "date">;
+};

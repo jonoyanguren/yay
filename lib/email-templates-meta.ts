@@ -3,6 +3,7 @@ export const EMAIL_TEMPLATE_IDS = [
   "waitlist_joined",
   "retreat_fully_paid",
   "balance_invoice",
+  "event_confirmation",
 ] as const;
 
 export type EmailTemplateId = (typeof EMAIL_TEMPLATE_IDS)[number];
@@ -12,6 +13,7 @@ export const EMAIL_TEMPLATE_LABELS: Record<EmailTemplateId, string> = {
   waitlist_joined: "Lista de espera",
   retreat_fully_paid: "Retiro pagado al completo",
   balance_invoice: "Factura de saldo (enlace de pago)",
+  event_confirmation: "Confirmación de evento",
 };
 
 export function isEmailTemplateId(s: string): s is EmailTemplateId {

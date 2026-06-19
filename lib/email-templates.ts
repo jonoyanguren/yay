@@ -634,3 +634,136 @@ export function BalanceInvoiceEmail({
 </html>
   `.trim();
 }
+
+interface EventConfirmationEmailProps {
+  customerName: string;
+  eventTitle: string;
+  eventSlug: string;
+  eventDate: string;
+  eventLocation: string;
+  amountPaidCents: number;
+  baseUrl: string;
+}
+
+export function EventConfirmationEmail({
+  customerName,
+  eventTitle,
+  eventSlug,
+  eventDate,
+  eventLocation,
+  amountPaidCents,
+  baseUrl,
+}: EventConfirmationEmailProps) {
+  const formatPrice = (cents: number) =>
+    new Intl.NumberFormat("es-ES", {
+      style: "currency",
+      currency: "EUR",
+    }).format(cents / 100);
+
+  const safeName = escapeHtml(customerName || "Participante");
+  const safeTitle = escapeHtml(eventTitle);
+  const safeDate = escapeHtml(eventDate || "Por confirmar");
+  const safeLocation = escapeHtml(eventLocation || "");
+  const eventUrl = `${baseUrl.replace(/\/$/, "")}/events/${eventSlug}`;
+  const headerImage = escapeHtml(
+    `${baseUrl.replace(/\/$/, "")}/assets/emails/Header.png`,
+  );
+  const heroImage = escapeHtml(
+    `${baseUrl.replace(/\/$/, "")}/assets/emails/HeroBookingConfirm.png`,
+  );
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirmación de evento</title>
+</head>
+<body style="${s.body}">
+  <table width="100%" cellpadding="0" cellspacing="0" style="${s.outerWrap}">
+    <tr>
+      <td align="center">
+        <table width="800" cellpadding="0" cellspacing="0" style="${s.card}">
+          <tr>
+            <td style="padding: 0; background-color: #301e0e;">
+              <img src="${headerImage}" alt="" width="800" style="display: block; width: 100%; max-width: 800px; height: auto;" />
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 0; background-color: #301e0e;">
+              <img src="${heroImage}" alt="" width="800" style="display: block; width: 100%; max-width: 800px; height: auto;" />
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 28px 30px 10px; text-align: center; background-color: #fffcf3;">
+              <h1 style="margin: 0; color: #301e0e; font-size: 34px; line-height: 1.15; font-weight: 600; font-family: 'Trebuchet MS', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                Plaza confirmada
+              </h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="${s.contentCell}">
+              <p style="${s.paragraph}">
+                Hola <strong>${safeName}</strong>,
+              </p>
+              <p style="${s.paragraphLast}">
+                Tu inscripción a <strong>${safeTitle}</strong> está confirmada. Hemos recibido el pago de <strong>${escapeHtml(formatPrice(amountPaidCents))}</strong>.
+              </p>
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="${s.sectionBox}">
+                <tr>
+                  <td style="${s.sectionBoxInner}">
+                    <h2 style="${s.sectionHeading}">Detalles del evento</h2>
+                    <table width="100%" cellpadding="8" cellspacing="0">
+                      <tr>
+                        <td style="color: #583813; font-size: 14px; padding: 8px 0;">Fecha:</td>
+                        <td style="color: #111; font-size: 14px; font-weight: 500; text-align: right; padding: 8px 0;">${safeDate}</td>
+                      </tr>
+                      ${eventLocation ? `
+                      <tr>
+                        <td style="color: #583813; font-size: 14px; padding: 8px 0;">Lugar:</td>
+                        <td style="color: #111; font-size: 14px; font-weight: 500; text-align: right; padding: 8px 0;">${safeLocation}</td>
+                      </tr>
+                      ` : ""}
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="${s.infoBoxBlue}">
+                <tr>
+                  <td style="${s.infoBoxBlueInner}">
+                    <p style="${s.infoBoxBlueText}">
+                      <strong>Próximos pasos</strong><br>
+                      Te enviaremos por email cualquier detalle práctico antes del evento. Si tienes dudas, responde a este correo.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="${s.ctaWrap}">
+                <tr>
+                  <td align="center">
+                    <a href="${escapeHtml(eventUrl)}" style="${s.ctaButton} background-color: #f9b3ac; color: #301e0e;">
+                      Ver el evento
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="${s.footer}">
+              <p style="${s.footerLine}">¡Nos vemos pronto!</p>
+              <p style="${s.footerMeta}">Evento · ${safeTitle}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim();
+}

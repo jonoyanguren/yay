@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { calculateBookingTotalCents } from "@/lib/booking-total-cents";
 import {
   sendBookingConfirmationEmail,
+  sendEventConfirmationEmail,
   sendRetreatFullyPaidEmail,
 } from "@/lib/email";
 import { sendMetaPurchaseEvent } from "@/lib/meta-conversions";
@@ -73,6 +74,68 @@ export async function POST(request: NextRequest) {
   ) {
     const session = event.data.object as Stripe.Checkout.Session;
     if (session.payment_status !== "paid") {
+      return NextResponse.json({ received: true });
+    }
+
+    if (session.metadata?.type === "event") {
+      const registrationId = session.metadata?.registrationId?.trim();
+      if (!registrationId) {
+        console.error(
+          "checkout.session.completed event missing metadata.registrationId",
+        );
+        return NextResponse.json({ received: true });
+      }
+
+      try {
+        const registration = await prisma.eventRegistration.findUnique({
+          where: { id: registrationId },
+          include: {
+            event: {
+              select: {
+                id: true,
+                title: true,
+                slug: true,
+                date: true,
+                location: true,
+                priceCents: true,
+              },
+            },
+          },
+        });
+
+        if (registration && registration.status !== "paid") {
+          const chargedAmount = session.amount_total ?? 0;
+
+          await prisma.eventRegistration.update({
+            where: { id: registrationId },
+            data: {
+              status: "paid",
+              stripeCustomerId: getCustomerId(session),
+              stripeAmountTotalCents: session.amount_total ?? null,
+            },
+          });
+
+          await sendMetaPurchaseEvent({
+            bookingId: registrationId,
+            retreatId: registration.eventId,
+            chargedAmountCents: chargedAmount,
+            customerEmail: registration.customerEmail,
+          });
+
+          await sendEventConfirmationEmail({
+            to: registration.customerEmail,
+            customerName: registration.customerName || "Participante",
+            eventTitle: registration.event.title,
+            eventSlug: registration.event.slug,
+            eventDate: registration.event.date,
+            eventLocation: registration.event.location,
+            amountPaidCents: chargedAmount || registration.event.priceCents,
+          });
+        }
+      } catch (error) {
+        console.error("Error updating event registration to paid:", error);
+      }
+
       return NextResponse.json({ received: true });
     }
 

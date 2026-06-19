@@ -29,6 +29,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.6,
     },
+    {
+      url: `${siteUrl}/events`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.85,
+    },
   ];
 
   const retreats = await prisma.retreat.findMany({
@@ -43,5 +49,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }));
 
-  return [...staticRoutes, ...retreatRoutes];
+  const dayEvents = await prisma.event.findMany({
+    where: { published: true, hideFromWeb: false },
+    select: { slug: true, createdAt: true },
+  });
+
+  const eventRoutes: MetadataRoute.Sitemap = dayEvents.map((event) => ({
+    url: `${siteUrl}/events/${event.slug}`,
+    lastModified: event.createdAt,
+    changeFrequency: "weekly",
+    priority: 0.8,
+  }));
+
+  return [...staticRoutes, ...retreatRoutes, ...eventRoutes];
 }

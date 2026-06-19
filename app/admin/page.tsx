@@ -261,6 +261,18 @@ export default function AdminPage() {
               📨 Waitlist
             </Link>
             <Link
+              href="/admin/events"
+              className="bg-amber-600 text-white px-3 py-2 rounded-lg hover:bg-amber-700 transition-colors font-medium text-xs md:text-sm"
+            >
+              📅 Eventos
+            </Link>
+            <Link
+              href="/admin/event-registrations"
+              className="bg-amber-800 text-white px-3 py-2 rounded-lg hover:bg-amber-900 transition-colors font-medium text-xs md:text-sm"
+            >
+              🎟 Inscripciones
+            </Link>
+            <Link
               href="/admin/email-templates"
               className="bg-slate-700 text-white px-3 py-2 rounded-lg hover:bg-slate-800 transition-colors font-medium text-xs md:text-sm"
             >
