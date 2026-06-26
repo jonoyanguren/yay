@@ -113,6 +113,7 @@ export async function POST(request: NextRequest) {
       eventId: event.id,
       customerPhone: phoneNormalized.slice(0, 500),
     },
+    allow_promotion_codes: true,
     success_url: `${baseUrl}/events/${slug}/book/thank-you?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}/events/${slug}/book`,
   });

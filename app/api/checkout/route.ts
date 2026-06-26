@@ -207,6 +207,7 @@ export async function POST(request: NextRequest) {
       estimatedTotalCents: String(estimatedTotalCents),
       customerPhone: phoneNormalized.slice(0, 500),
     },
+    allow_promotion_codes: true,
     success_url: `${baseUrl}/retreats/${slug}/book/thank-you?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}/retreats/${slug}/book`,
   });
